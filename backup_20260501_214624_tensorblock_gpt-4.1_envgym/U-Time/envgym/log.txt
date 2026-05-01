@@ -1,0 +1,22 @@
+=== Docker Execution Log - 20260501_185157 ===
+Dockerfile: envgym/envgym.dockerfile
+Image Name: envgym_test_1777661510
+
+=== Build Log ===
+Build Status: Failed
+Build Error:
+--------------------
+95 |     RUN if ! ls dist/*.whl 1>/dev/null 2>&1; then echo "=== dist/*.whl missing ==="; cat /tmp/pip_utime_build.log; exit 1; fi
+96 |
+97 | >>> RUN conda run -n u-sleep pip install dist/*.whl > /tmp/pip_utime_install.log 2>&1 || (cat /tmp/pip_utime_install.log && exit 1)
+98 |
+99 |     RUN echo "=== /tmp/pip_utime_install.log ===" && cat /tmp/pip_utime_install.log || true
+--------------------
+ERROR: failed to solve: process "/bin/sh -c conda run -n u-sleep pip install dist/*.whl > /tmp/pip_utime_install.log 2>&1 || (cat /tmp/pip_utime_install.log && exit 1)" did not complete successfully: exit code: 1
+
+=== Runtime Log ===  
+Runtime Status: Failed
+Runtime Error:
+
+
+=== Execution End ===

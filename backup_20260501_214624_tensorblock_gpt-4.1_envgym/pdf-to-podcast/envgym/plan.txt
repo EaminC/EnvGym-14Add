@@ -1,0 +1,298 @@
+=== ENVIRONMENT SETUP PLAN (ADJUSTED FOR x86_64 / NO GPU) ===
+
+**This version of the plan is tailored for x86_64 (amd64) CPU architecture with NO NVIDIA GPU present, using Ubuntu 20.04/22.04, and assumes ample CPU/RAM but no CUDA support. All GPU/NVIDIA-specific steps, images, volumes, and keys are removed or clarified as "skip/optional." All base images and Docker flags must be CPU-only. Docker version is 28.1.1, supporting BuildKit/Buildx/Compose.**
+
+---
+
+1. DOWNLOADS NEEDED (ADJUSTED):
+
+   - **Docker Engine**  
+     - Version: Latest stable (compatible with Ubuntu 20.04/22.04, amd64)
+     - Install guide: https://docs.docker.com/engine/install/ubuntu/
+
+   - **Docker Compose Plugin**  
+     - Version: 2.29.1 or higher
+     - Install guide: https://docs.docker.com/compose/install/linux/
+
+   - **NVIDIA Container Toolkit**  
+     - **SKIP** (Not needed on non-GPU machine)
+
+   - **NVIDIA NGC Account / API Key**
+     - **SKIP** (Not needed unless using NIM/AI Workbench features that do not require GPU; see below)
+
+   - **NVIDIA AI Workbench (Desktop App)**
+     - Optional; required only if following AI Workbench workflows (still compatible on CPU-only, but NIM and GPU features unavailable).
+
+   - **Git**
+     - Version: Latest stable
+
+   - **Python**
+     - Version: 3.9 or higher (prefer 3.11 for compatibility)
+     - Host/dev environment should match container base images.
+
+   - **[UV](https://github.com/astral-sh/uv) (Python package/dependency manager)**
+     - Version: Latest
+     - Install via: pip install uv
+
+   - **Make**
+     - Version: Latest stable
+
+   - **curl and wget**
+     - Both required; install via apt
+
+   - **build-essential**
+     - Required for Python package compilation
+
+   - **procps**
+     - Required for process monitoring in PDFModelService/PDFWorkerService
+
+   - **libgl1, libglib2.0-0**
+     - Required for ML/NLP model inference and OpenCV/GUI
+
+   - **pytorch/pytorch:2.4.0-cuda12.4-cudnn9-devel**
+     - **DO NOT USE** (This is a CUDA/GPU image. Use a CPU-only PyTorch image, e.g. pytorch/pytorch:2.4.0-cpu or python:3.11-slim as base, and install torch==2.4.0+cpu)
+     - Update all Dockerfiles to use CPU-only base images.
+
+   - **sox, libsox-fmt-all, libsox-fmt-mp3, libsndfile1-dev, ffmpeg**
+     - Required for audio I/O and processing in TTSService.
+
+   - **openssh-server**
+     - For remote/SSH access in TTSService; optional.
+
+   - **man, less, unzip, unar, aria2, tmux, vim, openssl, libssl-dev**
+     - Utilities/tools
+
+   - **WebSocket library (Python)**
+     - Example: websockets, fastapi[websockets], or starlette
+
+   - **API Keys to obtain:**
+     - **NO NVIDIA_API_KEY required unless NIM/AI Workbench integration is used for non-GPU features.**
+     - ELEVENLABS_API_KEY (for TTSService)
+     - SENDER_EMAIL_PASSWORD (if using email)
+
+   - **Python dependencies:**
+     - All as listed in requirements files per service
+     - **Ensure torch, torchvision, torchaudio CPU-only versions are specified in requirements (no +cu*, no CUDA).**
+
+   - **Docker images:**
+     - **DO NOT use nvcr.io/nim/meta/llama-3.1-8b-instruct:1.3.3 or any NIM-related images (GPU-only)**
+     - Use or build only CPU-compatible images:
+       - redis:latest
+       - minio/minio:latest
+       - jaegertracing/all-in-one:latest
+       - agent-service (build locally, base image must be CPU-only)
+       - pdf-conversion-service (build locally, base image must be CPU-only)
+       - tts-service (build locally, base image must be CPU-only)
+       - api-service, pdf-model-service, pdf-worker-service (build locally, base image must be CPU-only)
+
+   - **JupyterLab**
+     - For notebook use; ensure all extensions are compatible with Python version.
+
+   - **AI Workbench Example Projects**
+     - Optional; GPU/NIM features unavailable.
+
+   - **Mermaid Diagram Support**
+     - Optional; as previously described.
+
+---
+
+2. FILES TO CREATE (ADJUSTED):
+
+   - All file requirements remain, but:
+     - .env and variables.env do not need NVIDIA_API_KEY unless using AI Workbench for non-GPU features.
+     - Remove or comment out any GPU/NIM-specific environment variables.
+     - docker-compose.yaml and workbench/docker-compose.yaml **MUST NOT declare services with runtime: nvidia or use CUDA/GPU base images**.
+     - Remove any services or profiles related to local-nim, NIM, or GPU-accelerated services, or mark as optional/disabled by default.
+     - All Dockerfiles: use only CPU-compatible base images.
+     - Update WORKDIR in all Dockerfiles and scripts to /home/cc/EnvGym/data/20260501_153628_tensorblock_gpt-4.1/pdf-to-podcast or set appropriately (do not use /workspace unless required by external tools).
+
+---
+
+3. NECESSARY TEST CASES IN THE CODEBASE (ADJUSTED):
+
+   - All test cases remain, except:
+     - Remove or skip any tests specifically for GPU availability, GPU container builds, or NIM/local-nim.
+       - PDFService GPU Availability Test → **SKIP**
+       - TTSService GPU Availability Test → **SKIP**
+       - PDFService NIM/NVIDIA API Key tests → **SKIP**
+       - Any local-nim, NIM, or CUDA-specific tests → **SKIP**
+     - All other functionality (end-to-end flow, status update/WebSocket, storage, API endpoints, email, etc.) must be tested on CPU-only.
+
+---
+
+4. COMPLETE TODO LIST (ADJUSTED):
+
+   1. Verify OS compatibility (Ubuntu 20.04/22.04; x86_64/amd64 only).
+      - lsb_release -a
+
+   2. Install Docker Engine.
+
+   3. Install Docker Compose plugin.
+
+   4. **SKIP** all steps related to NVIDIA GPU drivers, NVIDIA Container Toolkit, nvidia-smi, or --gpus.
+
+   5. **SKIP** creation of nim_cache Docker volume (unless using NIM in the future).
+
+   6. **SKIP** NVIDIA NGC account and API key steps.
+
+   7. AI Workbench workflows are compatible, but:
+      - GPU/NIM features will not be available.
+      - Do not enable local-nim or any NIM-based features.
+      - Compose `local` profile (for local-nim) should be disabled or omitted.
+      - All services will operate in CPU-only mode.
+      - If AI Workbench secrets for NVIDIA_API_KEY are set, they will be ignored.
+
+   8. Install Git.
+
+   9. Install Python 3.9+ (prefer 3.11).
+
+   10. Install Make.
+
+   11. Install curl and wget.
+
+   12. Install build-essential.
+
+   13. Install procps.
+
+   14. Install libgl1 and libglib2.0-0.
+
+   15. Install sox, libsox-fmt-all, libsox-fmt-mp3, libsndfile1-dev, ffmpeg.
+
+   16. Install openssh-server (optional).
+
+   17. Install man, less, unzip, unar, aria2, tmux, vim, openssl, libssl-dev.
+
+   18. Install UV.
+
+   19. Obtain ELEVENLABS_API_KEY.
+
+   20. Obtain SENDER_EMAIL and SENDER_EMAIL_PASSWORD (if using email).
+
+   21. Clone the repository.
+       - **Set WORKDIR to /home/cc/EnvGym/data/20260501_153628_tensorblock_gpt-4.1/pdf-to-podcast in scripts/Dockerfiles as appropriate.**
+
+   22. Create .env file (no NVIDIA_API_KEY needed).
+
+   23. Create variables.env file.
+
+   24. Ensure requirements.txt exists and:
+       - **torch, torchvision, torchaudio must be CPU-only versions**
+       - Remove/replace any CUDA-specific dependencies.
+
+   25. Ensure tests/requirements-test.txt exists.
+
+   26. Ensure services/TTSService/requirements.txt exists and is CPU-only.
+
+   27. Ensure requirements.api.txt exists in services/PDFService/PDFModelService and is CPU-only.
+
+   28. Ensure requirements.worker.txt exists in services/PDFService/PDFModelService and is CPU-only.
+
+   29. Ensure frontend/shared/setup.py exists and is valid.
+
+   30. Install Python dependencies and set up virtual environment.
+
+   31. Ensure models.json exists.
+
+   32. Ensure services/AgentService/ directory contains required files and uses CPU-only base image.
+
+   33. Ensure services/APIService/ directory contains required files and uses CPU-only base image; implement WebSocket endpoint.
+
+   34. Ensure services/PDFService/ directory contains required files and uses CPU-only base image.
+
+   35. Ensure services/TTSService/ directory contains required files and uses CPU-only base image.
+
+   36. Ensure services/PDFService/PDFModelService/ directory contains required files and uses CPU-only base image.
+
+   37. Ensure frontend/shared/ directory exists and is valid.
+
+   38. (Optional) Place sample PDFs in samples/ directory.
+
+   39. Ensure data/minio/ directory exists for MinIO data persistence.
+
+   40. (Optional) Create notebooks/ directory for JupyterLab.
+
+   41. (Optional) Add gradio_demo.py or similar.
+
+   42. If using workbench/docker-compose.yaml:
+       - **Remove or comment out any local-nim/NIM/GPU/CUDA services and profiles.**
+       - Ensure all service images are CPU-only.
+       - No external nim_cache volume needed.
+       - .env should not require NVIDIA_API_KEY.
+       - Do not use runtime: nvidia or --gpus flags.
+
+   43. If using AI Workbench:
+       - Do NOT enable or attempt to use local-nim/NIM/GPU features.
+       - All Compose services will run CPU-only.
+       - Compose profiles for local-nim/NIM should be omitted or disabled.
+       - All other instructions remain valid.
+
+   44. Start all services using Docker Compose:
+       - docker compose up or make all-services
+       - docker compose -f workbench/docker-compose.yaml up (with GPU/NIM/local-nim services commented out or removed)
+
+   45. Verify MinIO and Jaeger UI health endpoints.
+
+   46. Verify Swagger API docs for all services.
+
+   47. Verify all containers build without error (CPU-only).
+
+   48. Test end-to-end pipeline (Python venv, test scripts, Jupyter notebook, AI Workbench notebook).
+
+   49. (Optional) Launch JupyterLab.
+
+   50. (Optional) Launch Gradio demo UI.
+
+   51. Check logs for errors.
+
+   52. (Optional) Customize models or endpoints.
+
+   53. (Optional) Enable and check Jaeger tracing.
+
+   54. Run code linting/formatting.
+
+   55. Run all tests (all GPU/NIM-related tests should be skipped).
+
+   56. Clean up environment.
+
+   57. Document any local changes.
+
+   58. **AgentService-specific steps:**
+       - Build/run as per README; ensure CPU-only images and dependencies.
+
+   59. **PDFService-specific steps:**
+       - Build/run as per README; ensure CPU-only images and dependencies.
+
+   60. **TTSService-specific steps:**
+       - Build/run as per README; ensure CPU-only images and dependencies.
+
+   61. **APIService-specific steps:**
+       - Build/run as per README; WebSocket endpoint must work.
+
+   62. **AI Workbench-specific verification:**
+       - All steps remain valid except local-nim/NIM/GPU Compose profile/feature is NOT available.
+       - If NIM or local-nim is required for a workflow, mark as "NOT SUPPORTED" in this environment.
+
+   **Verification methods:**
+   - All as before, with the following modifications:
+     - No GPU/NIM/NVIDIA-specific checks, flags, or health endpoints.
+     - All containers/services must use CPU-only images.
+     - All dependencies in requirements.txt and per-service requirements must be CPU-only.
+     - Any failing test or build step referencing CUDA, NGC API, or NVIDIA features must be disabled or removed.
+     - Compose files must not reference runtime: nvidia, --gpus, or local-nim/NIM services.
+     - Ensure all paths (WORKDIR, volumes) match /home/cc/EnvGym/data/20260501_153628_tensorblock_gpt-4.1/pdf-to-podcast as the project root.
+     - Service and pipeline health, WebSocket status updates, MinIO integration, and all API endpoints must function on CPU-only.
+
+---
+
+**SUMMARY OF KEY ADJUSTMENTS:**
+
+- Remove/disable ALL GPU, CUDA, NIM, local-nim, NVIDIA Container Toolkit, and NGC API related content.
+- Use CPU-only Docker base images (e.g. python:3.11-slim, pytorch/pytorch:2.4.0-cpu, etc.) everywhere.
+- All requirements and Dockerfiles must be CPU-only (no torch==*+cu*, no runtime: nvidia, no --gpus).
+- Compose files must NOT reference runtime: nvidia or GPU-specific profiles/services.
+- All test cases and instructions referencing GPU, NIM, or NVIDIA drivers are to be omitted/skipped.
+- All other instructions, paths, and verifications remain as in the original plan.
+
+---
+
+**This adjusted plan will ensure full pipeline compatibility and functionality in your CPU-only, x86_64, Ubuntu 20.04/22.04 environment, without any GPU or NVIDIA-specific requirements.**

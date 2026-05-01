@@ -1,0 +1,293 @@
+=== ENVIRONMENT SETUP PLAN (ADJUSTED FOR CPU-ONLY x86_64, NO GPU/CUDA) ===
+
+**IMPORTANT:**  
+- **NO NVIDIA GPU DETECTED.**  
+- **NO CUDA, cuDNN, NVIDIA pip/conda packages, or GPU-specific dependencies required.**  
+- **All images/packages must be CPU-only and compatible with x86_64 (amd64) architecture.**  
+- **Use only CPU-compatible PyTorch and libraries.**  
+- **Docker base images: use amd64-compatible tags.**  
+- **Working directory for Dockerfile: `/home/cc/EnvGym/data/20260501_153628_tensorblock_gpt-4.1/CellViT-plus-plus` (set WORKDIR accordingly).**
+
+---
+
+## 1. DOWNLOADS NEEDED (ADJUSTED):
+
+- **Anaconda/Miniconda**
+  - Latest x86_64 version compatible with Python 3.10.
+  - Miniconda image version: 23.10.0-1 (for viewer/SlideProvider Dockerfile).
+  - [https://www.anaconda.com/products/distribution](https://www.anaconda.com/products/distribution)
+  - **No GPU/CUDA-specific installers needed.**
+
+- **Python 3.10**
+  - [https://www.python.org/downloads/release/python-31014/](https://www.python.org/downloads/release/python-31014/)
+  - Used in viewer/SlideProvider Dockerfile and environment files.
+  - Use CPU-only builds.
+
+- **PyTorch**
+  - torch==2.2.1, torchvision==0.17.1, torchaudio==2.2.1
+  - **Install CPU-only versions** (do NOT use any cu* or CUDA versions).
+  - Install via:  
+    ```
+    pip install torch==2.2.1 torchvision==0.17.1 torchaudio==2.2.1
+    ```
+  - [https://pytorch.org/get-started/previous-versions/](https://pytorch.org/get-started/previous-versions/)
+  - **DO NOT set --extra-index-url for CUDA.**
+
+- **CUDA Toolkit, cuDNN, NVIDIA cu* Libraries**
+  - **DO NOT INSTALL. REMOVE FROM ALL ENV FILES, DOCKERFILES, AND INSTALLATION STEPS.**
+  - Remove `nvidia-cudnn-cu12`, `nvidia-cublas-cu12`, `cucim`, `cupy`, and any CUDA-specific dependencies from conda/pip environments.
+
+- **Docker & Docker Compose**
+  - Use latest stable (Docker 28.1.1 supports BuildKit and modern Compose features).
+  - [https://www.docker.com/products/docker-desktop/](https://www.docker.com/products/docker-desktop/)
+  - Compose version: 3.8+.
+  - **No --gpus flag or nvidia-docker extensions required.**
+
+- **Node.js & npm**
+  - Node.js 20.x (as specified).
+  - Use official node:20-alpine (amd64) for Viewer Dockerfile.
+  - [https://nodejs.org/en/download/](https://nodejs.org/en/download/)
+
+- **Frontend Build Tools & JS Libraries**
+  - As listed; no changes required.
+
+- **CellViT++ Model Checkpoints**
+  - Download as outlined.
+  - **If any model checkpoints are GPU/CUDA-specific, ensure CPU compatibility or retrain/convert if necessary.**
+
+- **Example/Test Datasets**
+  - Download as outlined.
+
+- **Optional: PathoPatcher**
+  - As specified.
+
+- **WandB**
+  - As specified.
+
+- **Additional Python Packages**
+  - All pip/conda requirements as listed, but:
+  - **REMOVE/REPLACE:**
+    - `cucim`, `cupy`, `cupy-core`, `nvidia-*`, and any CUDA/CU* dependencies.
+    - `openslide`, `gdal`, etc., are fine for CPU.
+
+- **Conda Packages**
+  - Remove all GPU/CU* packages (e.g., `cucim`, `cupy`, `cupy-core`, `nvidia-*`).
+  - Ensure all packages are CPU-only.
+  - Channels: conda-forge, bioconda, etc. (NO nvidia/rapidsai channels needed).
+  - **Check environment_full.yaml, environment_verbose.yaml, and viewer/SlideProvider/environment.yml for GPU/CUDA packages and REMOVE them.**
+
+- **JupyterLab & Extensions**
+  - As specified.
+
+- **Image/WSI Tools**
+  - As specified (CPU-only builds).
+
+- **System Dependencies**
+  - Use Ubuntu 20.04-compatible system packages for build tools and libraries.
+  - `libvips`, `libopenslide`, `gdal`, `zlib`, `libjpeg`, `libpng`, etc.
+  - Compiler toolchain (gcc, g++, binutils).
+  - System utilities (htop, tmux).
+  - For viewer/SlideProvider Dockerfile:  
+    - `build-essential`, `python3-dev`, `python3-pip`, `python3-setuptools`, `python3-wheel`, `gdal-bin`, `libgdal-dev`.
+  - For frontend and annotation tool: no change.
+
+- **Other Notable Tools**
+  - pytest, pre-commit, black, flake8, ruff, pip-tools, notebook, jupyter, jupyterlab extensions, as listed.
+
+- **Docker Images for Deployment**
+  - Use only `amd64` (x86_64) compatible images.
+  - **Specify platform as needed:** `--platform=linux/amd64`
+  - Remove any references to nvidia/cuda images if present.
+
+- **Docker Compose Network and Volume Requirements**
+  - As specified; no changes needed.
+
+- **Annotation Tool Environment Variables**
+  - As specified.
+
+- **Development Hot Reloading Requirements**
+  - As specified.
+
+- **Version Compatibility Requirements**
+  - As specified; ensure all packages are CPU-only.
+
+---
+
+## 2. FILES TO CREATE (ADJUSTED):
+
+- **Environment and Dependency Files**
+  - Update `requirements.txt`, `environment.yaml`, `environment_full.yaml`, `environment_verbose.yaml`, `viewer/SlideProvider/environment.yml`:
+    - **REMOVE**: `cucim`, `cupy`, `cupy-core`, `nvidia-cudnn-cu12`, `nvidia-cublas-cu12`, `nvidia-*`, or any GPU/CUDA-specific packages.
+    - **VERIFY**: No CUDA-related pip/conda dependencies.
+    - PyTorch should be set as CPU version (do not specify `+cu*` wheels, only generic ones).
+
+- **Dockerfiles**
+  - In all Dockerfiles:
+    - Use `FROM ubuntu:20.04` or other CPU-only base images.
+    - **Set**:
+      ```
+      WORKDIR /home/cc/EnvGym/data/20260501_153628_tensorblock_gpt-4.1/CellViT-plus-plus
+      ```
+    - **No `--gpus` flag in docker run or compose.**
+    - **No NVIDIA runtime or CUDA/cudnn libraries installed.**
+    - **Use only `amd64` images.**
+    - If using `docker build`, specify `--platform=linux/amd64` (if building on a non-amd64 system).
+
+- **.env, compose files, dataset configs, etc.**
+  - As specified.
+
+- **Documentation**
+  - Update instructions to:
+    - **Explicitly state this is a CPU-only deployment.**
+    - Mention that CUDA, cuDNN, NVIDIA, and GPU-related instructions are not needed.
+    - Note that PyTorch and all scientific libraries must be installed as CPU-only.
+    - Remove any references to GPU, CUDA, or NVIDIA setup.
+
+---
+
+## 3. NECESSARY TEST CASES IN THE CODEBASE (ADJUSTED):
+
+- **Environment Verification**
+  - All dependency import tests should pass **without CUDA or GPU**.
+  - PyTorch: test `torch.cuda.is_available()` returns `False`.
+  - **Test that code does not attempt to move tensors/models to GPU (i.e., `.to('cuda')` or `.cuda()`)**—or catch errors gracefully if attempted.
+
+- **Viewer UI (Frontend) Tests**
+  - As specified.
+
+- **SlideProvider (Backend) Tests**
+  - As specified; ensure no backend code assumes CUDA/GPU is present.
+
+- **Annotation Tool Tests**
+  - As specified.
+
+- **Docker Compose Network and Command Testing**
+  - As specified.
+
+- **Volume Mapping and Hot Reloading Tests**
+  - As specified.
+
+- **Container Verification**
+  - As specified.
+
+- **Documentation/Instruction Verification**
+  - As specified, with the following changes:
+    - **Remove all instructions for GPU/CUDA/NVIDIA setup.**
+    - **Explain that this environment is CPU-only.**
+    - **Document any performance limitations or functionality differences in CPU-only mode (e.g., model inference may be slower).**
+
+- **Test Code Updates**
+  - Add/Update test cases to verify:
+    - No CUDA device is detected.
+    - All workflows/containers run without GPU.
+    - Any model components that require GPU raise clear, user-friendly errors or fall back to CPU.
+
+---
+
+## 4. COMPLETE TODO LIST (ADJUSTED):
+
+1. **Install System Prerequisites**
+   - As outlined, but **do not install CUDA, NVIDIA drivers, cuDNN, nvidia-container-toolkit, or any GPU-related system packages.**
+   - Use only CPU libraries.
+
+2. **Clone Project Repository**
+   - As outlined.
+
+3. **Download Model Checkpoints**
+   - As outlined.
+   - **Check for CPU compatibility; if only GPU checkpoints exist, retrain or convert if needed.**
+
+4. **Download Example/Test Data**
+   - As outlined.
+
+5. **Prepare Annotation Tool Dataset**
+   - As outlined.
+
+6. **Create/Verify Environment Files**
+   - **Edit all environment YAML and requirements.txt files to REMOVE ALL GPU/CUDA/NVIDIA/`cu*` packages.**
+   - Ensure PyTorch entries are for **CPU-only**.
+
+7. **Create Conda Environment**
+   - Use CPU-only packages.
+   - Remove/skip any `cucim`, `cupy`, `nvidia-*`, or CUDA packages.
+
+8. **Activate Environment & Install Pip Requirements**
+   - As outlined.
+
+9. **Install PyTorch**
+   - **Install CPU-only:**  
+     ```
+     pip install torch==2.2.1 torchvision==0.17.1 torchaudio==2.2.1
+     ```
+   - **Do NOT set extra index for CUDA.**
+
+10. **Install/Verify NVIDIA pip Packages**
+    - **SKIP THIS STEP.**
+
+11. **Check and Resolve CUDA/CuPy/CuCIM/Openslide/GDAL Conflicts**
+    - **REMOVE CUDA/CuPy/CuCIM/NVIDIA-specific packages.**
+    - Only CPU packages remain.
+
+12. **Verify Environment**
+    - Ensure all packages import and work in CPU-only mode.
+
+13. **Handle Special Dependencies**
+    - As outlined.
+
+14. **Configure Docker Environment**
+    - Use only CPU-based images.
+    - **Set WORKDIR to `/home/cc/EnvGym/data/20260501_153628_tensorblock_gpt-4.1/CellViT-plus-plus` in all Dockerfiles.**
+    - Use `--platform=linux/amd64` for compatibility if building across architectures.
+
+15. **Configure Web-Based Viewer**
+    - As outlined.
+
+16. **Configure Annotation Tool**
+    - As outlined.
+
+17. **Test Core Functionality**
+    - **Test that all code runs on CPU.**
+    - Test that no GPU/CUDA is detected or required.
+    - Add/verify tests for `.cuda()`/`.to('cuda')` calls raising appropriate errors or being handled gracefully.
+
+18. **Test All Docker Workflows**
+    - As outlined; ensure no GPU configuration or runtime is required.
+
+19. **Run Additional Test Cases**
+    - Add/verify test:  
+      - `import torch; assert not torch.cuda.is_available()`
+      - All code paths work with CPU-only PyTorch.
+
+20. **Test & Configure Development Tools**
+    - As outlined.
+
+21. **Document Environment and Issues**
+    - Update docs:
+      - Remove all GPU/CUDA/NVIDIA setup instructions.
+      - Note that this is a CPU-only deployment.
+      - List any features that may be slower or limited (e.g., large-scale inference/training).
+
+22. **Final Verification**
+    - As outlined; ensure all services work in CPU-only mode.
+
+23. **Backup/Export Environment**
+    - As outlined.
+
+24. **(Optional) Clean Up**
+    - As outlined.
+
+---
+
+## SPECIAL NOTES & REMINDERS
+
+- **Remove ALL CUDA, cuDNN, NVIDIA, cucim, cupy, and other GPU-specific packages from all environments and Dockerfiles.**
+- **Test and document all CPU-only workflows.**
+- **Set WORKDIR in all Dockerfiles to `/home/cc/EnvGym/data/20260501_153628_tensorblock_gpt-4.1/CellViT-plus-plus`.**
+- **Use only amd64-compatible (x86_64) base images.**
+- **No need for nvidia-docker, --gpus flag, or nvidia-container-toolkit.**
+- **If any code hard-codes `.cuda()` or `.to('cuda')`, wrap in try/except or test for CUDA availability first.**
+- **Document any performance impacts or unsupported features in CPU-only mode.**
+
+---
+
+**END OF ADJUSTED PLAN**

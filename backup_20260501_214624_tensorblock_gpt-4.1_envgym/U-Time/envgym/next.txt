@@ -1,0 +1,17 @@
+current progress
+- Docker build proceeds through environment setup, dependency installation, and package build steps.
+- Conda environment is created and requirements.txt dependencies are installed.
+- Diagnostic steps verify presence of key files (README.md, HISTORY.rst, LICENSE.txt, utime/version.py), .git directory, MANIFEST.in, and setup.py parameters.
+- Wheel build step (`python setup.py sdist bdist_wheel`) is executed and the build log is output.
+- Check for existence of dist/*.whl is performed.
+- Docker build fails during `conda run -n u-sleep pip install dist/*.whl`, indicating either missing or problematic wheel file(s) from the previous build step.
+- No runtime steps are executed due to build failure.
+
+next step
+- Review `/tmp/pip_utime_build.log` and dist directory for wheel build errors or missing files; ensure the wheel file is properly generated.
+- Check that all files required for wheel building (README.md, HISTORY.rst, LICENSE.txt, utime/version.py, MANIFEST.in) are present and correctly referenced in setup.py.
+- Verify setup.py and MANIFEST.in are not omitting necessary files; adjust MANIFEST.in if needed to include all package, metadata, and version files.
+- Confirm setuptools-git is installed and functioning, as setup.py may depend on git metadata.
+- Add diagnostic steps to show detailed contents of dist directory and build log before attempting pip install.
+- If wheel file is missing, stop the build and display the relevant error log for troubleshooting; do not proceed to pip install.
+- After resolving wheel build issues, rerun the build to ensure dist/*.whl is present before attempting pip install.

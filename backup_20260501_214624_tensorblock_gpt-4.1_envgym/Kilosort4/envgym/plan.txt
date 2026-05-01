@@ -1,0 +1,293 @@
+=== ADJUSTED ENVIRONMENT SETUP PLAN ===
+
+**Hardware/OS Context:**
+- OS: Ubuntu 20.04 (or similar Debian-based, x86_64)
+- Architecture: x86_64 (amd64)  
+- GPU: No NVIDIA GPU detected (Matrox G200eW3 only; NOT CUDA-capable)
+- Docker: Supported, but no GPU build features (BuildKit, Buildx OK)
+- Paths: Linux, deep directory structure (`/home/cc/EnvGym/data/...`)
+
+**Key Adjustments:**
+- Remove all CUDA/NVIDIA GPU instructions and dependencies.
+- Use only CPU-optimized builds of PyTorch and related packages.
+- Ensure `faiss-cpu` (NOT `faiss-gpu`), and avoid any CUDA toolkit/driver install.
+- Make sure all environment files, test cases, and instructions reflect CPU-only setup.
+- Paths and scripts should use Linux conventions.
+- Keep Python versions as specified; documentation builds remain on Python 3.11.
+- Storage and RAM: If large datasets or notebooks, recommend checking available disk and memory before running heavy jobs (not part of plan unless specified).
+- Docker/development tools: All instructions compatible with Ubuntu 20.04 and Docker; avoid Windows/macOS-specific steps unless cross-platform testing.
+
+---
+
+**1. DOWNLOADS NEEDED:**
+- Anaconda (Python distribution):  
+  [https://www.anaconda.com/products/distribution]  
+  - Version: Python 3.9 (preferred), 3.10 (acceptable), 3.11 (required for docs build).
+- Python: 3.9 (main), 3.10 (acceptable), 3.11 (docs).
+- Kilosort package: Latest from PyPI (`kilosort[gui]`) or editable install from repo.
+- PyTorch (CPU version):  
+  - Install `pytorch` from `pytorch` channel—**do NOT install `pytorch-cuda` or CUDA toolkit**.
+  - Version: `torch>=1.6` required by Kilosort.
+- **DO NOT install CUDA toolkit or NVIDIA drivers.**
+- Jupyter Notebook (optional): `jupyter` or `notebook`.
+- Matplotlib (for plotting): `matplotlib`.
+- PyQt (GUI dependency):  
+  - Options: `pyqt6`, `pyqt6.sip` (default), or `pyqt5`, `pyqt5.sip` if `PyQt5` detected.
+  - Also: `pyqtgraph>=0.13.0`, `qtpy`.
+  - Alternative backends: `PySide2`, `PySide6` supported.
+- NumPy: `numpy>=1.20.0`.
+- SciPy: `scipy`.
+- scikit-learn: `scikit-learn`.
+- tqdm: `tqdm`.
+- numba: `numba`.
+- faiss-cpu: `faiss-cpu` (**not faiss-gpu**).
+- Git (for cloning repo): [https://git-scm.com/downloads].
+- Developer/test tools: `pytest`, `pytest-runner`, `setuptools-scm`, `py`, `pytest-cov`, `pytest-xvfb`, `tox`.
+- Documentation tools:
+  - sphinx>=3.0
+  - sphinxcontrib-apidoc
+  - nbsphinx
+  - myst_parser
+  - sphinx_rtd_theme
+  - pandoc
+- (Optional) Phy (in separate environment): [https://github.com/cortex-lab/phy]
+- Read the Docs requirements:
+  - Python 3.11
+  - Ubuntu 22.04
+  - Sphinx config at `docs/conf.py`
+  - PDF build support (e.g., `rst2pdf`, `latex` tools)
+  - MkDocs (optional)
+- Version compatibility: Python 3.9/3.10 (main), 3.11 (docs), linux/macOS/windows testing.
+- All dependencies compatible with Sphinx, PyTorch (CPU), Kilosort, GUI libraries, notebook integration.
+
+---
+
+**2. FILES TO CREATE:**
+- `environment.yml` (project root):  
+  - Channels: `defaults`, `conda-forge`, `pytorch`  
+  - Python: 3.9 or 3.10 (main env), 3.11 (docs env)
+  - Dependencies: All listed above—**PyTorch CPU only**, no CUDA/cuda-related packages.
+  - Example:
+    ```yaml
+    name: kilosort
+    channels:
+      - defaults
+      - conda-forge
+      - pytorch
+    dependencies:
+      - python=3.9
+      - numpy>=1.20.0
+      - scipy
+      - scikit-learn
+      - tqdm
+      - torch>=1.6
+      - numba
+      - faiss-cpu
+      - pyqtgraph>=0.13.0
+      - qtpy
+      - pyqt6
+      - pyqt6.sip
+      - matplotlib
+      - jupyter
+      - pytest
+      - pytest-runner
+      - setuptools-scm
+      - py
+      - pytest-cov
+      - pytest-xvfb
+      - tox
+      - sphinx>=3.0
+      - sphinxcontrib-apidoc
+      - nbsphinx
+      - myst_parser
+      - sphinx_rtd_theme
+      - pandoc
+      - pip
+      - pip:
+        - kilosort[gui]
+    ```
+  - (Optional) Separate `docs` and `phy` environments.
+- `.gitignore` (project root): Ignore Python, Jupyter, build, tox, coverage files.
+- `requirements.txt` (optional):  
+  - List all pip installable dependencies (no CUDA, CPU-only torch).
+- `tox.ini` (project root):  
+  - Test envs: Python 3.9/3.10 across linux, macOS, windows.
+  - Add docs/test envs for Python 3.11.
+- `pytest.ini` (project root):  
+  ```
+  [pytest]
+  filterwarnings =
+      ignore::DeprecationWarning
+  ```
+- `README_DEV.md` (optional): Developer instructions, emphasize CPU setup, no GPU/CUDA steps.
+- `setup.py` (ensure correct content).
+- `README.md`.
+- Documentation files:
+  - `docs/requirements.txt`: Include `nbsphinx`, `myst_parser`, `sphinx_rtd_theme`, other doc dependencies.
+  - `docs/` directory with Sphinx config.
+- `.readthedocs.yml` (project root):  
+  - Specifies Python 3.11, Ubuntu 22.04, Sphinx config, PDF output.
+  - Installs from `docs/requirements.txt`.
+  - **No CUDA or GPU dependencies.**
+- (Optional) `mkdocs.yml` (future Markdown docs builds).
+
+---
+
+**3. NECESSARY TEST CASES IN THE CODEBASE:**
+- Test Kilosort install/import (`import kilosort`).
+- Test core dependencies import (`numpy`, `scipy`, `sklearn`, `tqdm`, `numba`, `faiss`, etc.).
+- Test GUI launches successfully (`python -m kilosort`).
+- Test PyQt backend switching/detection.
+- Test matplotlib import/plotting in GUI.
+- Test example notebook runs (from `docs/source/tutorials`).
+- Test notebook rendering in Sphinx docs (`nbsphinx`, `myst_parser`).
+- **Test PyTorch detects NO GPU** (`torch.cuda.is_available()` returns False).
+- Test simple Kilosort run on test data.
+- Test integration with Phy output file generation.
+- Test error handling for missing/corrupt files.
+- Test probe configuration loading.
+- Test parameter setting/modification.
+- Test unit tests execution (`pytest` with/without `--runslow`, `--gpu`).
+- Test docs build (`sphinx-build`, nbsphinx, myst_parser, sphinx_rtd_theme).
+- Test faiss-cpu install/import.
+- Test tqdm progress bars.
+- Test coverage collection.
+- Test GUI launching under xvfb (Linux headless).
+- Test tox-based test execution across platforms/Python versions.
+- Test environment variable handling.
+- Test platform-specific dependencies/commands (Linux focus).
+- Test coverage files output.
+- Test DeprecationWarnings ignored per `pytest.ini`.
+- Test warning handling.
+- Test Sphinx theme rendering.
+- Test markdown/notebook integration in docs.
+- Test Read the Docs build:
+  - Docs build successfully on Ubuntu 22.04, Python 3.11.
+  - PDF builds/downloads.
+  - Sphinx config correct.
+  - All dependencies installed.
+  - **No GPU/CUDA dependencies are required or present.**
+- Test local docs reproducibility with Python 3.11.
+
+---
+
+**4. COMPLETE TODO LIST:**
+
+1. Download/install Anaconda (Python 3.9 or 3.10 for main env; Python 3.11 for docs env if needed).
+   - Verify: `conda --version`.
+2. Open terminal with `conda` in PATH (Linux).
+3. Remove old Kilosort env if exists:
+   - `conda env remove -n kilosort`
+   - Verify: `conda info --envs`.
+4. Create new environment:
+   - `conda create --name kilosort python=3.9`
+   - Verify: `conda env list`.
+5. Activate environment:
+   - `conda activate kilosort`
+   - Verify: prompt shows `(kilosort)`.
+6. Install main dependencies:
+   - `conda install numpy scipy scikit-learn tqdm numba matplotlib`
+   - `conda install pytorch -c pytorch`  
+     - **Do NOT install `pytorch-cuda`**.
+   - `pip install faiss-cpu`
+   - Verify: `import numpy, scipy, sklearn, tqdm, numba, faiss`.
+7. Install Kilosort and GUI dependencies:
+   - `pip install 'kilosort[gui]'`
+   - Or editable install:
+     - `git clone https://github.com/MouseLand/Kilosort.git`
+     - `cd Kilosort`
+     - `pip install -e .[gui]`
+   - Verify: `python -c "import kilosort"`.
+8. Confirm/adjust PyQt backend:
+   - If `PyQt5` detected, ensure `pyqt5` and `pyqt5.sip`; else default to `pyqt6` and `pyqt6.sip`.
+   - If using `PySide2`/`PySide6`, ensure no conflicting Qt packages.
+   - Verify: GUI launches, no Qt errors.
+9. **Skip GPU PyTorch uninstall—CPU version only.**
+10. **Skip NVIDIA driver install—no NVIDIA GPU present.**
+11. **Skip CUDA toolkit install—no CUDA hardware.**
+12. (Optional) Install Jupyter Notebook and Matplotlib:
+    - `conda install jupyter matplotlib`
+    - Or: `pip install notebook matplotlib`
+    - Verify: `jupyter notebook` launches, `import matplotlib` works.
+13. Install developer tools:
+    - `pip install pytest pytest-runner setuptools-scm py pytest-cov pytest-xvfb tox`
+    - Verify: `pytest --version`, `tox --version`.
+14. Install documentation tools:
+    - `pip install sphinx sphinxcontrib-apidoc nbsphinx myst_parser sphinx_rtd_theme pandoc`
+    - Or in docs env:
+      - `cd docs`
+      - `pip install -r requirements.txt`
+    - Verify: `sphinx-build --version`.
+15. Ensure `.readthedocs.yml` is present and correct:
+    - Specifies Python 3.11, Ubuntu 22.04, Sphinx config.
+    - PDF enabled.
+    - Installs from `docs/requirements.txt`.
+    - **No GPU/CUDA dependencies.**
+16. Ensure `tox.ini` is present:
+    - Review envs for Python 3.9/3.10, platform coverage (Linux focus).
+    - Add docs/test envs for Python 3.11.
+17. Ensure `pytest.ini` is present:
+    - Create/update with:
+      ```
+      [pytest]
+      filterwarnings =
+          ignore::DeprecationWarning
+      ```
+    - Verify: `pytest` suppresses DeprecationWarnings.
+18. Test basic GUI launch:
+    - `python -m kilosort`
+    - Verify: GUI window opens, no Qt errors.
+    - If error: Consult [issue 597](https://github.com/MouseLand/Kilosort/issues/597), [issue 613](https://github.com/MouseLand/Kilosort/issues/613).
+19. Run example notebooks:
+    - Launch Jupyter, run all cells.
+    - Verify: No errors, expected plots/output.
+20. Run unit tests:
+    - `pytest --runslow`
+    - `pytest --gpu --runslow` (**expect no GPU tests to run**; verify CPU fallback).
+    - Verify: All tests pass; DeprecationWarnings ignored.
+    - Check: Other warnings visible unless suppressed.
+21. Run tests via tox for all envs:
+    - `tox`
+    - Verify: Tests run for each Python version (3.9, 3.10) and platform (Linux); coverage reports generated.
+    - Check: Correct env variables (`CI`, `GITHUB_ACTIONS`, `DISPLAY`, etc.).
+22. (Optional) Install Phy in separate env:
+    - `conda create -n phy python=3.9`
+    - `conda activate phy`
+    - `pip install phy`
+    - Verify: `phy --help`.
+23. (Optional) Test Kilosort output compatibility with Phy:
+    - Run Kilosort, verify `params.py` and output files.
+    - Launch Phy: `phy template-gui params.py`
+    - Verify: Results load.
+24. Build/test docs:
+    - `sphinx-build docs docs/_build`
+    - Verify: No errors, check generated docs.
+    - Verify: Notebooks render, markdown (`myst_parser`), theme (`sphinx_rtd_theme`).
+25. Build/test docs in Read the Docs env:
+    - Trigger build/readthedocs.org or replicate locally with Python 3.11.
+    - Verify: Docs build successfully, including PDF.
+    - Sphinx config correct.
+    - All dependencies installed.
+    - **No GPU/CUDA dependencies present.**
+26. Document any custom steps/errors for team reference.
+27. If distributing, update/create:
+    - `environment.yml`, `requirements.txt`, `tox.ini`, `pytest.ini`, `docs/requirements.txt`, `.readthedocs.yml`, ensure `setup.py` reflects all dependencies.
+    - Verify: `conda env create -f environment.yml` reproduces env.
+    - Verify: `tox` runs tests and coverage.
+    - Verify: `pytest.ini` is included, warning filter works.
+    - Verify: `docs/requirements.txt` is up-to-date.
+    - Verify: `.readthedocs.yml` matches docs requirements.
+28. Backup config files and verify steps work on Ubuntu 20.04 (Linux focus; skip Windows/macOS unless cross-platform needed).
+29. (Optional) Maintain/add MkDocs config for future Markdown docs builds.
+
+---
+
+**NOTES:**
+- All GPU/CUDA/NVIDIA dependencies and instructions removed due to lack of compatible hardware.
+- PyTorch and all compute libraries must be CPU-only.
+- Linux paths and conventions are assumed throughout; verify deep directory structure does not cause errors.
+- If using Docker, all steps are compatible with Ubuntu:20.04 and similar x86_64 images.
+- If memory/storage is limited, recommend monitoring resource usage when running notebooks or spike sorting.
+- For cross-platform compatibility, add Windows/macOS testing only as needed.
+
+=== END OF ADJUSTED PLAN ===

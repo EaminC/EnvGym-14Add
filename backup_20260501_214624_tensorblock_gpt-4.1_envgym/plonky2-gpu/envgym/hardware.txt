@@ -1,0 +1,6 @@
+- Working Directory: /home/cc/EnvGym/data/20260501_153628_tensorblock_gpt-4.1/plonky2-gpu; project structure likely Python/data-science/ML-oriented, no special directory constraints.
+- Architecture: x86_64; recommended --platform=linux/amd64.
+- Base Image: Ubuntu 20.04, Debian, python:3.x, or similar; avoid CUDA/NVIDIA-specific tags.
+- GPU: No NVIDIA GPU; Matrox G200eW3 only; do not use CUDA or nvidia/cuda base images.
+- Instruction Notes: No GPU-specific instructions (no RUN nvidia-smi, no NVIDIA driver/cuda installs); use CPU-optimized libraries; multi-core build possible; ensure compatibility with Ubuntu 20.04.
+- Docker Version: 28.1.1; fully compatible with BuildKit, Docker Compose v2, but --gpus not applicable.

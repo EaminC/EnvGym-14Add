@@ -1,0 +1,135 @@
+=== ENVIRONMENT SETUP PLAN (ADJUSTED FOR NO GPU, UBUNTU 20.04, x86_64, CPU-ONLY) ===
+
+**NOTE:**  
+This plan is revised to reflect a system with NO NVIDIA GPU (Matrox G200eW3 only), running Ubuntu 20.04 (x86_64), with no CUDA/NVIDIA drivers available or permitted. All CUDA/GPU-specific dependencies, setup steps, and tests are REMOVED or made OPTIONAL (for future GPU support only). All crates and builds must target CPU execution only. Multi-core CPU builds are supported. Use only CPU-optimized libraries.
+
+---
+
+1. DOWNLOADS NEEDED:
+
+   - **NO NVIDIA GPU DRIVERS OR CUDA REQUIRED**
+     - **REMOVE:** NVIDIA GPU Drivers, CUDA Toolkit, cuDNN, NVIDIA Nsight, and all CUDA SDK Samples.
+     - **REMOVE:** Any base image or OS instructions requiring CUDA/NVIDIA.
+   - **CMake:** Version 3.18 or higher ([Download link](https://cmake.org/download/)). (For any C/C++ code NOT related to CUDA.)
+   - **Rust Toolchain:** Stable channel, latest version ([Install via Rustup](https://rustup.rs/)). Compatible with Ubuntu 20.04.
+   - **Git:** Latest stable ([Download link](https://git-scm.com/downloads)).
+   - **Python 3.8+** (for auxiliary scripts/build/test automation; optional but recommended; already included in most python:3.x images).
+   - **Build Essentials:**
+     - Ubuntu 20.04: `build-essential`, `pkg-config`, `libssl-dev`
+   - **C++ Compiler:** Ensure `gcc`/`g++` (preferably >=9, default for Ubuntu 20.04) is available for any native (non-CUDA) code.
+   - **VSCode** or other code editor (optional, not installed via Dockerfile unless needed).
+   - **Rust Crate Build Dependencies:** (As listed in the original plan; all CPU-only, no GPU-specific crates required.)
+     - `cc` crate version ^1.0.70
+     - `which` crate version ^4.0
+     - All other listed Rust workspace dependencies remain as specified.
+
+   **Important:**  
+   - Any crate named `plonky2_cuda`, `cuda`, or referencing CUDA must be either EXCLUDED from the workspace, set to build only with a feature flag (disabled by default), or have all CUDA code behind a feature flag that is OFF by default.  
+   - All build instructions, tests, and benchmarks must be able to complete successfully on a CPU-only system.
+
+2. FILES TO CREATE:
+
+   - **.env** (project root):  
+     - **NO CUDA PATHS.**  
+     - Only include relevant environment variables for the CPU build.
+   - **CMakeLists.txt**:  
+     - Only needed for C/C++ (non-CUDA) integrations.
+     - **REMOVE/COMMENT OUT any CUDA-specific configuration or targets.**
+   - **Cargo.toml** (project root):  
+     - **REMOVE** `plonky2_cuda`, `cuda`, or similar CUDA/GPU-specific crates from `[workspace]` members, unless they are strictly optional and conditionally built behind feature flags (disabled by default).
+     - **Ensure all workspace members and dependencies can build and test without CUDA or any NVIDIA-specific library present.**
+   - **plonky2_util**, **plonky2_u32**, **plonky2_waksman**, **starky**, **system_zero**:  
+     - All as previously detailed, but **NO dependencies on CUDA or GPU-specific functionality**.
+   - **All other sub-crate directories:**  
+     - As previously detailed; ensure no CUDA/GPU dependencies.
+   - **README.md**:  
+     - Update to clarify:
+       - This project is configured for CPU-only builds on x86_64 (Ubuntu 20.04).
+       - **All GPU/CUDA features are disabled**; do not attempt to enable or build CUDA-related crates or features.
+       - Document how to enable CUDA support (if ever needed) behind feature flags, but instruct users NOT to enable them unless hardware is available.
+       - Remove any mention of running `nvidia-smi` or using Docker images with CUDA.
+   - **.gitignore:** (unchanged)
+   - **(Optional) rust-toolchain.toml:** Pin Rust version for reproducibility.
+   - **(Optional) ci/** or `.github/workflows/`: Ensure CI does NOT attempt to build CUDA or GPU code unless on a capable runner and with feature flags enabled.
+
+3. NECESSARY TEST CASES IN THE CODEBASE:
+
+   - **REMOVE/DISABLE:**  
+     - All tests that require CUDA, NVIDIA GPUs, or GPU-accelerated features.
+     - Any test that requires `plonky2_cuda`, `cuda`, or similar.
+   - **KEEP/ADD:**  
+     - All CPU-only test cases as detailed in the original plan for workspace crates:
+       - STARK proof generation and verification
+       - system_zero VM/proof integration
+       - Feature and dependency propagation
+       - Benchmarks (CPU only)
+       - All `plonky2_util`, `plonky2_u32`, `plonky2_waksman` tests
+       - Unit/integration tests
+       - Error handling and dependency compatibility tests
+     - **Ensure all workspace tests pass with no CUDA or GPU present.**
+   - **Workspace-level testing via:**  
+     - `cargo test --workspace`
+     - `cargo bench --workspace` (for CPU-only benches)
+   - **Document:**  
+     - Any test that is skipped or disabled due to lack of GPU.
+
+4. COMPLETE TODO LIST:
+
+   1. **Install System Dependencies:**  
+      - `apt-get update && apt-get install -y build-essential pkg-config libssl-dev cmake git python3 python3-pip` (adjust as needed for Ubuntu 20.04)
+      - **NO NVIDIA drivers, CUDA, or cuDNN installs.**
+   2. **(SKIP) Install CUDA Toolkit and cuDNN:**  
+      - **DO NOT INSTALL CUDA OR cuDNN.**
+   3. **Install Build Tools:**  
+      - Only CPU/OS native tools (`build-essential`); no GPU/CUDA tools.
+   4. **Install Rust Toolchain:**  
+      - `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh`
+   5. **Clone the Repository:**  
+      - As previously listed.
+   6. **Create/Update Configuration Files and Directories:**  
+      - As previously listed, **removing any references to CUDA or GPU-specific files/configs.**
+      - **Ensure `Cargo.toml` does not include CUDA/GPU workspace members unless feature-gated and OFF.**
+   7. **Install Rust Crate Dependencies:**  
+      - `cargo fetch` or `cargo build` - all CPU-only crates and features.
+      - **Do not build or fetch CUDA/GPU crates or features.**
+      - **Verify that all crates build and test successfully on CPU-only (no `nvidia/cuda`, no `plonky2_cuda`, etc.).**
+   8. **Build the Project:**  
+      - `cargo build --release` (CPU only)
+      - All sub-crate build/test commands as previously listed, **excluding any CUDA-specific packages or features**.
+      - **If building on CI or in Docker, ensure `--platform=linux/amd64` is used if required by Docker Compose or BuildKit.**
+   9. **Write and Run Test Cases:**  
+      - All as previously listed, focusing exclusively on CPU paths.
+      - No CUDA/GPUs; ensure all tests are hardware-agnostic or CPU-only.
+   10. **Benchmark Example Case:**  
+       - All CPU-based benches only.
+       - **Do not attempt any CUDA or GPU microbenchmarks.**
+   11. **Error Handling Verification:**  
+       - Ensure all crates handle absence of GPU/CUDA gracefully (i.e., do not panic or error if CUDA is unavailable).
+       - Crates with optional CUDA/GPU features must not enable them by default.
+   12. **Documentation:**  
+       - Update `README.md` and crate docs to clarify:
+         - CUDA/GPU support is unavailable on this hardware/environment.
+         - All builds/tests use CPU-only code.
+         - How to add GPU/CUDA support in the future (e.g., by enabling feature flags and adding hardware).
+         - Any removed or skipped features due to hardware limitations.
+   13. **Cross-Platform Check:**  
+       - Test on Ubuntu 20.04 x86_64.
+       - No ARM/MacOS/Windows/GPU-specific code.
+       - Document limitations.
+   14. **(Optional) Set Up CI/CD:**  
+       - Ensure CI jobs do not attempt to build or test CUDA code.
+       - Only CPU-only jobs.
+   15. **Final Verification:**  
+       - Confirm all workspace members, **excluding any CUDA/GPU-specific crates**, are properly built, tested, and integrated, with all binaries, benches, and feature flags working as intended.
+       - Record versions and environment for reproducibility (especially note absence of GPU/CUDA).
+
+---
+
+**SUMMARY OF ADJUSTMENTS:**  
+- REMOVE all CUDA, cuDNN, NVIDIA driver, and GPU-specific setup steps, dependencies, and tests.
+- EXCLUDE or feature-gate any CUDA/GPU crates (`plonky2_cuda`, `cuda`, etc.) in the workspace.
+- All builds/tests must succeed on CPU-only, Ubuntu 20.04, x86_64.
+- Documentation and CI must explicitly state CUDA/GPU support is OFF.
+- All test cases, benchmarks, and builds must be CPU-only and not reference GPU-specific APIs.
+
+=== END ADJUSTED PLAN ===

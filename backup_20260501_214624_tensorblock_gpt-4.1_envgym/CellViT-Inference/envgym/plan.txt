@@ -1,0 +1,293 @@
+=== ADJUSTED ENVIRONMENT SETUP PLAN ===
+
+**Hardware Context:**  
+- CPU-only, x86_64 (amd64) architecture  
+- No NVIDIA GPU detected  
+- Docker 28.1.1 (modern, supports BuildKit/Compose)  
+- Working directory: `/home/cc/EnvGym/data/20260501_153628_tensorblock_gpt-4.1/CellViT-Inference`  
+- Use CPU-optimized Docker images (no CUDA/NVIDIA drivers/toolkit)  
+- Paths should match deep subdirectory structure  
+- Can leverage multi-core CPU optimizations  
+- Sufficient RAM/storage assumed, but monitor during large dataset processing
+
+---
+
+1. **DOWNLOADS NEEDED:**  
+   - **Python 3.9+** (3.9 or 3.10 recommended; minimum required is 3.9 per `pyproject.toml`)
+   - **pip (latest)**  
+     *(Required for local environment, not for Docker)*
+   - **CellViT-Inference package**: `cellvit==1.0.9` (from PyPI, or local build via `pyproject.toml`)  
+     *(Provided within Docker image)*
+   - **PyTorch**: `torch==2.2.2`, `torchvision==0.17.2`, `torchaudio==2.2.2`  
+     **Note:** Use CPU-only versions.  
+     - **Install via:**  
+       ```
+       pip install torch==2.2.2 torchvision==0.17.2 torchaudio==2.2.2
+       ```
+       *(Do NOT use CUDA wheels or specify CUDA index URL. No `--index-url https://download.pytorch.org/whl/cu121`.)*
+   - **CUDA Toolkit**: ***REMOVE***  
+     - *Not needed. Do not install CUDA Toolkit. Do not reference CUDA versions, drivers, or GPU passthrough.*
+   - **System Libraries** (for local install):  
+     - libvips  
+     - openslide  
+     - gcc/g++  
+     - libopencv-core-dev  
+     - libopencv-imgproc-dev  
+     - libsnappy-dev  
+     - libgeos-dev  
+     - llvm  
+     - libjpeg-dev  
+     - libpng-dev  
+     - libtiff-dev  
+     *(Required for local install; provided in Docker image)*
+   - **Python dependencies (from pyproject.toml):**  
+     *(Full list unchanged, all CPU-compatible)*
+     - colorama  
+     - colour  
+     - einops>=0.6.1  
+     - geojson>=2.0.0  
+     - natsort  
+     - numba>=0.58.0  
+     - numpy<2.0.0  
+     - opencv-python-headless==4.7.0.72  
+     - opt-einsum>=3.3.0  
+     - pandas  
+     - pathopatch>=1.0.9  
+     - pydantic>=1.10.16,<2.0  
+     - pydicom==2.4.4  
+     - ray[default]>=2.9.3  
+     - scikit-image>=0.19.3,<0.27  
+     - scipy>=1.8.0  
+     - Shapely>=1.8.5.post1,<=2.0.5  
+     - ujson==5.8.0  
+     - python-snappy  
+     - tqdm  
+     - psutil  
+     - pyaml  
+   - **Build tools for local install/development:**  
+     - setuptools  
+     - wheel  
+   - **Optional dependencies:**  
+     - CuPy ***REMOVE*** (Not relevant for CPU-only)  
+     - cuCIM ***REMOVE*** (Not relevant for CPU-only)  
+   - **Test Data:**  
+     - Download sample database via `cellvit-download-examples` (folders: x40_svs/, x20_svs/, BRACS/, Philips/)
+   - **Docker-related:**  
+     - Docker Engine (latest, Compose v2/plugin compatible)  
+     - Access to image: `ikimhoerst/cellvit:beta` or custom CPU-optimized build  
+     - `docker-compose.yaml`
+     - ***NVIDIA Container Toolkit: REMOVE***  
+       *(Not needed for CPU-only. Remove all references to NVIDIA Container Toolkit.)*
+   - **Host system requirements for Docker:**  
+     - Sufficient disk space for image/data volumes  
+     - ***NVIDIA driver: REMOVE***  
+       *(Not needed for CPU-only. Remove all references to NVIDIA drivers.)*
+   - **Requirements from example_config.yaml:**  
+     - Ensure Snappy installed for output compression  
+     - Ray installed and functional (parallel processing)  
+     - Ensure geojson support (verify version compatibility)  
+     - CSV handling via pandas  
+     - Logger/debug capability (logging module; ray[default] for debug mode)  
+     - System can access CPU/memory configuration (psutil, ray)  
+     - Support for single WSI and dataset processing modes (CLI/config)
+   - **Pre-commit and linting tools:**  
+     - pre-commit  
+     - Black (v23.1.0)  
+     - Ruff (v0.3.4)  
+     - pre-commit-hooks (v4.4.0)  
+     - conventional-pre-commit (v2.1.1)  
+     - Ensure git is installed and repository is initialized
+
+---
+
+2. **FILES TO CREATE:**  
+   - `docker-compose.yaml`  
+     - Adjust service to use CPU-only image (no `runtime: nvidia` or `deploy: resources: reservations: devices` needed)  
+     - Remove any references to GPU or CUDA in the compose file  
+     - Set `platform: linux/amd64` if cross-building or deploying on other hosts  
+     - Use correct `WORKDIR` or bind mount to `/home/cc/EnvGym/data/20260501_153628_tensorblock_gpt-4.1/CellViT-Inference`
+   - `requirements.txt` or `environment.yml` (for local installs, matching CPU-only dependencies)  
+   - `pyproject.toml` (ensure dependencies match and no GPU/CUDA-only packages)  
+   - `cellvit_config.yaml` (for inference settings; support all fields from example_config.yaml)  
+   - `.env` (for environment variables like CELLVIT_CACHE)  
+   - `example_config.yaml` (reference/example config file; document all fields)  
+   - `tests/test_installation.py`  
+   - `tests/test_inference.py`  
+   - `tests/test_cli_commands.py`  
+   - `README.md`  
+     - Update setup instructions to clarify CPU-only environment  
+     - Remove all GPU/CUDA/NVIDIA instructions  
+   - [Optional] `.dockerignore`  
+   - [Optional] `docker-compose.override.yaml`  
+   - [Optional] `docs/README-PyPI.md`  
+   - [Optional] `LICENSE`  
+   - `.pre-commit-config.yaml`  
+   - [Optional] `.gitignore`
+
+---
+
+3. **NECESSARY TEST CASES IN THE CODEBASE:**  
+   - Test successful import of cellvit and execution of `cellvit-check` inside container and local Python (if supported)
+   - Test that all dependencies in `pyproject.toml` are installed and compatible
+   - Test all CLI entry points:
+     - `cellvit-inference`
+     - `cellvit-check`
+     - `cellvit-download-examples`
+     - `cellvit-download-models`
+   - Test inference pipeline with minimal test data (single slide and batch mode) using mounted volumes in Docker
+   - Test CLI commands inside Docker container
+   - Verify caching directory creation and environment variable handling (CELLVIT_CACHE)
+   - Test error handling for missing dependencies, insufficient RAM/disk space (no GPU checks needed)
+   - Test installation of optional dependencies ***[CuPy, cuCIM tests REMOVE]***  
+     *(Do not test for CUDA/CuPy/cuCIM presence; skip GPU/AMP tests)*
+   - Test configuration file parsing and validation (all fields from example_config.yaml)
+   - Test compatibility on Windows, macOS, Linux for Docker-based workflow (CPU-only; clarify in tests)
+   - Test Docker Compose workflow:
+     - Successful `docker compose up`
+     - Correct volume mounting for input/output data and configs
+     - ***GPU visibility: REMOVE***  
+       *(No GPU inside container; test for CPU only)*
+     - Environment variables propagation via `.env` and/or `docker-compose.yaml`
+   - Test custom configuration and overriding defaults via environment variables and config files
+   - Test correct exclusion of `tests` from installed packages
+   - [New test scenarios from example_config.yaml] (all fields, as specified)
+     - Validate all fields (including batch_size, output_format, geojson, graph, compression, process_wsi, process_dataset, system, debug)
+     - Test switching between single WSI processing and dataset processing
+     - Test output compression (Snappy) and format options (GeoJSON, cell graph)
+     - Test error handling for missing required fields
+     - Test logging/debug mode activation and behavior
+     - Test resource allocation settings: cpu_count, ray_worker, ray_remote_cpus, memory
+     - Test inference with enforced AMP ***[Clarification: enforce_amp only for CPU, will NOT use GPU/AMP]***
+     - Test batch size adjustment and effect on inference speed/resource usage
+     - Test CSV file parsing for wsi_filelist
+     - Test correct handling of output directory and file formats
+     - Test CLI and API for configuration file input
+     - Test fallback/default values for all optional fields
+   - [Pre-commit and linting]
+     - All tests unchanged
+
+---
+
+4. **COMPLETE TODO LIST (ADJUSTED):**
+
+   1. Install Docker Engine (verify with `docker --version`)
+   2. ***NVIDIA driver: REMOVE***  
+      - Skip all NVIDIA driver, CUDA, or GPU-related instructions
+   3. ***NVIDIA Container Toolkit: REMOVE***  
+      - Skip all NVIDIA Container Toolkit steps
+   4. Download or create `docker-compose.yaml`  
+      - Ensure service uses CPU-only image (no GPU runtime/config)  
+      - Set `platform: linux/amd64` if needed  
+      - Mount `/home/cc/EnvGym/data/20260501_153628_tensorblock_gpt-4.1/CellViT-Inference` as working directory or volume
+   5. Prepare or download configuration files:
+      - `cellvit_config.yaml`
+      - `example_config.yaml`
+   6. Prepare or download test data folders (mount into container as needed)
+   7. Create `.env` file for environment variables (e.g., CELLVIT_CACHE)
+   8. Create/adjust `environment.yml`, `requirements.txt`, or use `pyproject.toml` for local install (ensure no GPU-specific packages)
+   9. Install Python 3.9+ and pip (verify versions)
+   10. Install build tools: `pip install setuptools wheel`
+   11. Install system libraries as specified, if running outside Docker
+   12. Install OpenSlide Python wrapper: `pip install openslide-python` or `conda install -c conda-forge openslide`
+   13. Install PyTorch (CPU-only):
+       ```
+       pip install torch==2.2.2 torchvision==0.17.2 torchaudio==2.2.2
+       ```
+       *(Do NOT use CUDA index URL. Do NOT specify CUDA version.)*
+   14. Install all dependencies via `pip install .` (from project root, uses `pyproject.toml`), or `pip install -r requirements.txt`
+   15. Install CellViT-Inference package: `pip install cellvit` (or build from source)
+   16. ***Optional dependencies: REMOVE CuPy/cuCIM***  
+       - Skip installation of CUDA-accelerated packages
+   17. Run Docker Compose to launch CellViT container:
+       - Adjust `/path/to/local/input` and `/path/to/local/output` to actual data directories
+       - Ensure test data/config files are available in mounted volumes
+       - Start service: `docker compose up -d` or `docker-compose up -d`
+       - Attach or exec into the container for CLI usage: `docker compose exec cellvit bash`
+   18. Verify CPU availability in container:
+       ```
+       python -c "import torch; print(torch.__version__); print(torch.cuda.is_available())"
+       ```
+       *(Expect `torch.cuda.is_available()` to be `False`; document this as normal.)*
+       or
+       ```
+       cellvit-check
+       ```
+   19. Download sample data:
+       - Inside the container: `cellvit-download-examples`
+       - Verify folders: x40_svs/, x20_svs/, BRACS/, Philips/ in the mounted input directory
+   20. Download models if needed:
+       - Inside the container: `cellvit-download-models`
+       - Verify models are cached in the appropriate directory
+   21. Set up or verify caching directory:
+       - Ensure CELLVIT_CACHE is set in `.env`, `docker-compose.yaml`, or container environment
+   22. Configure inference settings using config files:
+       - Set model (SAM or HIPT) and required taxonomy
+       - Choose processing mode: process_wsi (single slide) or process_dataset (batch/dataset mode)
+       - Specify output format, directory, compression, geojson, graph options
+       - Set inference parameters: batch_size (ignore GPU/enforce_amp for CPU-only)
+       - Configure system settings: cpu_count, ray_worker, ray_remote_cpus, memory
+       - Enable debug mode if needed (debug: true)
+       - Provide all required paths for WSI, dataset folders, or CSV filelist
+   23. Run inference:
+       - Inside the container: `cellvit-inference --config /home/cc/EnvGym/data/20260501_153628_tensorblock_gpt-4.1/CellViT-Inference/cellvit_config.yaml`
+       - Or, with custom config: `cellvit-inference --config /home/cc/EnvGym/data/20260501_153628_tensorblock_gpt-4.1/CellViT-Inference/example_config.yaml`
+   24. Create and run test scripts:
+       - `test_installation.py`: Verify all dependencies and correct versions
+       - `test_inference.py`: Run inference on sample data, check outputs
+       - `test_cli_commands.py`: Test CLI commands and error handling, including all entry points and config file input
+       - Ensure tests validate config parsing, required fields, optional fields, and fallback/defaults
+       - Test switching between process_wsi and process_dataset
+       - Test output format options and compression
+       - Validate debug mode and logging
+       - Test resource allocation settings
+       - Test CSV handling for wsi_filelist
+   25. Run all test scripts; verify outputs
+   26. Document Docker-based and (optionally) local setup steps and troubleshooting in `README.md`, including:
+       - How to modify volumes and environment variables in `docker-compose.yaml`
+       - **How to use/configure CPU-only support**; clarify that GPU/CUDA is not available
+       - Dependency management via `pyproject.toml` and/or `requirements.txt`
+       - Common Docker troubleshooting steps (remove NVIDIA/CUDA troubleshooting)
+       - How to use CLI inside the container
+       - How to build/install from source using `pyproject.toml`
+       - How to create/modify config files, with explanations for each field
+       - Example config file usage and field descriptions
+       - How to set up and use pre-commit:
+           - Install pre-commit: `pip install pre-commit`
+           - Install Black: `pip install black`
+           - Install Ruff: `pip install ruff`
+           - Run `pre-commit install` to activate hooks
+           - Run `pre-commit run --all-files` to lint/format all files
+           - Document conventional commit message requirements
+           - Reference `.pre-commit-config.yaml` and explain hook purposes
+   27. If using a virtual environment for local install, activate before any installations; verify with `which python`
+   28. Provide Docker install instructions for Windows, macOS, and Linux (CPU-only)
+   29. Handle errors:
+       - If dependencies are missing, provide instructions or error messages
+       - If hardware requirements (RAM/disk space) are not met, display warnings and suggest alternatives
+       - If Docker issues arise, provide troubleshooting steps
+       - If config file is missing required fields, provide validation errors
+       - If pre-commit hooks fail, provide instructions for fixing formatting, linting, or commit message errors
+   30. Verify installation and configuration:
+       - Run: `cellvit-check` inside the container
+       - Confirm all required libraries and optional dependencies are detected
+       - Confirm all CLI entry points respond correctly
+       - Confirm config file parsing for both config files
+       - Confirm correct operation of output formatting, compression, graph and geojson export, debug mode, and batch/dataset processing
+       - Confirm pre-commit hooks run on commit, and code passes Black/Ruff checks and commit message conventions
+   31. Clean up: stop and remove containers with `docker compose down`, remove unused images/volumes/caches if necessary
+   32. Final review: ensure all environment variables, config files, dependencies (including those in `pyproject.toml`), test cases, and pre-commit hooks are in place and working in the Docker workflow; ensure config file features and linting/formatting are documented, validated, and tested
+   33. Ready for use: Run basic inference with `cellvit-inference --config /home/cc/EnvGym/data/20260501_153628_tensorblock_gpt-4.1/CellViT-Inference/cellvit_config.yaml` or `example_config.yaml` inside the container and validate results; ensure code quality and commit conventions are maintained via pre-commit
+
+---
+
+**Summary of Adjustments:**  
+- All GPU/CUDA/NVIDIA-specific instructions, dependencies, and tests are removed  
+- All references to CUDA, cuCIM, CuPy, NVIDIA Toolkit, or NVIDIA driver are omitted  
+- Docker images and compose files must be CPU-only (amd64)  
+- Paths are set to `/home/cc/EnvGym/data/20260501_153628_tensorblock_gpt-4.1/CellViT-Inference`  
+- README and documentation must clarify CPU-only setup  
+- `torch.cuda.is_available()` expected to be `False`  
+- Resource allocation and parallel processing tests focus on CPU and RAM only  
+- All other steps remain, but are focused on CPU compatibility and efficiency
+
+**Ready for CPU-only environment.**

@@ -1,0 +1,6 @@
+- Working Directory: /home/cc/EnvGym/data/20260501_153628_tensorblock_gpt-4.1/CellViT-plus-plus (nested project directory, suggest using WORKDIR in Dockerfile)
+- Architecture: x86_64 (use --platform=linux/amd64)
+- Base Image: Use amd64-compatible images (e.g., ubuntu:20.04, python:3.10-slim), no CUDA or GPU-specific images required
+- GPU: No NVIDIA GPU detected (no CUDA support needed)
+- Instruction Notes: No GPU-related instructions (no --gpus flag, no nvidia-docker, no CUDA libraries), ensure base image matches Ubuntu 20.04 if OS compatibility required, set WORKDIR to /home/cc/EnvGym/data/20260501_153628_tensorblock_gpt-4.1/CellViT-plus-plus or relative project path as needed
+- Docker Version: 28.1.1 (BuildKit supported, use modern syntax/features, no native GPU build support required)

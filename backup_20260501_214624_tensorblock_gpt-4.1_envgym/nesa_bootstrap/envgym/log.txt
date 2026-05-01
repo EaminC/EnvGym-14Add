@@ -1,0 +1,29 @@
+=== Docker Execution Log - 20260501_185736 ===
+Dockerfile: envgym/envgym.dockerfile
+Image Name: envgym_test_1777661856
+
+=== Build Log ===
+Build Status: Failed
+Build Error:
+--------------------
+26 |     # Install gum (fixed version, robust extraction with direct move and cleanup)
+27 | >>> RUN set -ex && \
+28 | >>>     GUM_VERSION="v0.13.0" && \
+29 | >>>     ARCH=amd64 && \
+30 | >>>     GUM_FILENAME="gum_${GUM_VERSION#v}_linux_${ARCH}.tar.gz" && \
+31 | >>>     GUM_URL="https://github.com/charmbracelet/gum/releases/download/${GUM_VERSION}/${GUM_FILENAME}" && \
+32 | >>>     wget -O gum.tar.gz "$GUM_URL" && \
+33 | >>>     tar --wildcards --strip-components=1 -xzf gum.tar.gz '*/gum' && \
+34 | >>>     mv gum /usr/local/bin/gum && \
+35 | >>>     chmod +x /usr/local/bin/gum && \
+36 | >>>     /usr/local/bin/gum --version && \
+37 | >>>     rm -rf gum.tar.gz
+38 |
+--------------------
+
+=== Runtime Log ===  
+Runtime Status: Failed
+Runtime Error:
+
+
+=== Execution End ===

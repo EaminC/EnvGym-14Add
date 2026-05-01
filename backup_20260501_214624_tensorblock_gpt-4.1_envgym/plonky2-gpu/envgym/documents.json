@@ -1,0 +1,16 @@
+[
+  "README.md",
+  "Cargo.toml",
+  "cuda/Cargo.toml",
+  "ecdsa/Cargo.toml",
+  "evm/Cargo.toml",
+  "field/Cargo.toml",
+  "insertion/Cargo.toml",
+  "maybe_rayon/Cargo.toml",
+  "plonky2/Cargo.toml",
+  "starky/Cargo.toml",
+  "system_zero/Cargo.toml",
+  "u32/Cargo.toml",
+  "util/Cargo.toml",
+  "waksman/Cargo.toml"
+]

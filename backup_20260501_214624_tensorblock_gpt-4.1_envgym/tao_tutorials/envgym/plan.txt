@@ -1,0 +1,331 @@
+=== ADJUSTED ENVIRONMENT SETUP PLAN ===
+
+**Important Hardware Context:**
+- Architecture: x86_64 (amd64)  
+- No NVIDIA GPU detected (CPU-only; do not use CUDA/NVIDIA GPU-dependent containers or instructions)  
+- Large memory and CPU available  
+- Storage: Ensure at least 100 GB SSD free  
+- OS: Ubuntu 20.04 (host)  
+- Working directory: /home/cc/EnvGym/data/20260501_153628_tensorblock_gpt-4.1/tao_tutorials  
+- Docker: v28.1.1 (BuildKit/buildx supported, --gpus not available)  
+- Paths: Project is inside tao_tutorials, nested several levels deep  
+
+---
+
+**1. DOWNLOADS NEEDED:**
+
+- Ubuntu LTS 22.04 (or compatible Linux distribution).  
+  - **Adjustment:** Confirm compatibility with Ubuntu 20.04 as host; containers should be compatible with 20.04 kernel.
+
+- Python >=3.12.x (update for compatibility with PYTHON_VERSION=3.12; allow override to Python 3.11 as needed)  
+  - **No Change:** Python versions supported; ensure requirements.txt and requirements-pip.txt are compatible.
+
+- python-pip >21.06  
+  - **No Change**
+
+- **REMOVE GPU-DEPENDENT DOWNLOADS:**
+  - NVIDIA GPU driver >550.xx (skip, not needed)
+  - nvidia-container-toolkit >1.3.0-1 (skip)
+  - nvidia-container-runtime 3.4.0-1 (skip)
+  - nvidia-docker2 2.5.0-1 (skip)
+
+- Docker CE >19.03.5  
+  - **No Change:** Already v28.1.1
+
+- Docker-API 1.40  
+  - **No Change**
+
+- **TAO Toolkit containers:**  
+  - **Adjustment:**  
+    - Only use containers that support CPU execution.  
+    - If TAO containers are strictly GPU-based, note that they cannot be used.  
+    - If TAO supports CPU mode, ensure config.env, docker-compose.yml, and image tags are set for CPU usage.  
+    - For legacy/testing, only use containers that can run on CPU (e.g., PyTorch/tensorflow CPU images).
+
+  - **If TAO containers are GPU-only:**  
+    - Recommend switching to NVIDIA TAO Toolkit CPU-compatible containers (if available), or remove TAO containers and focus on Jupyter notebooks and local execution.  
+    - For model training/inference, use PyTorch or TensorFlow CPU images (e.g., pytorch/pytorch:latest, tensorflow/tensorflow:latest).
+
+- MongoDB Docker image (mongo:latest)  
+  - **No Change:** Compatible with x86_64
+
+- SeaweedFS Docker image (chrislusf/seaweedfs:latest)  
+  - **No Change:** Compatible with x86_64
+
+- NGINX Docker image (nginx:alpine)  
+  - **No Change:** Compatible with x86_64
+
+- TAO Tutorials repository: https://github.com/NVIDIA/tao_tutorials.git  
+  - **No Change**
+
+- Python dependencies for Jupyter notebooks and TAO Launcher Starter Kit (ensure compatibility with Python 3.12 and optionally 3.11):  
+  - **No Change:** All dependencies are CPU-compatible; confirm version constraints in requirements.txt and requirements-pip.txt.
+
+- (Optional) curl, postman, JQ, SSH tools, AWS CLI, s3cmd, git, tar, rsync, scp, Python requests module, unzip, gzip  
+  - **No Change:** All compatible with x86_64/Ubuntu 20.04/22.04
+
+- **No new downloads required for secrets.json**
+
+- **Version compatibility requirements:**  
+  - All pip dependencies must be compatible with Python 3.12 (and optionally 3.11).
+  - Strictly apply requirements-pip.txt constraints for notebook environments.
+
+---
+
+**2. FILES TO CREATE:**
+
+- .env (in project root):  
+  - **No Change**  
+  - Ensure variables reflect CPU-only mode (remove GPU-specific variables).
+
+- setup/tao-docker-compose/config.env:  
+  - **Adjustment:**  
+    - Remove GPU-related variables (e.g., NUM_GPU_PER_NODE, CUDA_VERSION).
+    - Set variables to indicate CPU mode (e.g., TAO_CPU_MODE=true if supported).
+    - Remove or comment out IMAGE_TAO_API/IMAGE_COSMOS_RL/IMAGE_TAO_PYTORCH/IMAGE_TAO_DEPLOY/IMAGE_TAO_DS tags if they reference GPU-only containers (or replace with CPU-compatible tags).
+
+- docker-compose.yml (in project root):  
+  - **Adjustment:**  
+    - Remove all --gpus and GPU-specific configs.
+    - Use only CPU-compatible service images.
+
+- setup/tao-docker-compose/docker-compose.yml:  
+  - **Adjustment:**  
+    - Remove all --gpus options and GPU-specific configs.
+    - Use CPU-compatible image tags.
+
+- config.json  
+  - **No Change**
+
+- requirements.txt (in notebooks/ or project root):  
+  - **No Change**
+
+- notebooks/tao_launcher_starter_kit/deps/requirements-pip.txt  
+  - **No Change**
+
+- test_environment.sh (in setup/):  
+  - **Adjustment:**  
+    - Remove tests for GPU availability, driver version, nvidia-smi, nvidia-container-toolkit, nvidia-docker2.
+    - Add/retain tests for CPU, memory, disk, Docker, MongoDB, SeaweedFS, NGINX, Python/pip, notebook dependencies.
+
+- README_CUSTOM.md  
+  - **Adjustment:**  
+    - Document that the environment is CPU-only; note that GPU-specific containers/tools and TAO GPU workflows are not supported.
+    - Provide instructions for running notebooks and services in CPU mode.
+
+- secrets.json  
+  - **No Change**
+
+- s3-config.json  
+  - **No Change**
+
+- nginx.conf, nginx_sites/default.conf  
+  - **No Change**
+
+- setup/tao-docker-compose/README.md  
+  - **Adjustment:**  
+    - Note CPU-only mode and removal of GPU-specific instructions.
+    - Document alternative workflows for model training/inference using PyTorch/TensorFlow CPU containers if TAO GPU containers are unavailable.
+
+- run.sh (in setup/tao-docker-compose/):  
+  - **Adjustment:**  
+    - Remove all --gpus and GPU-specific command-line options.
+    - Add/retain options for --python, --airgapped, --ptm, etc.
+
+- save-docker-images.sh, load-docker-images.sh  
+  - **No Change:**  
+    - Only save/load CPU-compatible images.
+
+- (Optional) pretrained_models.py, pointers to nvidia-tao-core repo  
+  - **Adjustment:**  
+    - If pretrained_models.py relies on GPU containers, note limitation; use CPU inference if possible.
+
+- (Optional) Custom CSV files, additional configs  
+  - **No Change**
+
+---
+
+**3. NECESSARY TEST CASES IN THE CODEBASE:**
+
+- **REMOVE GPU-RELATED TESTS:**
+  - Remove: Test GPU availability, driver version, NUM_GPU_PER_NODE, nvidia-smi output, nvidia-docker2/nvidia-container-toolkit integration, TAO container startup with GPU support.
+  - Remove: All test commands involving --gpus, nvidia/cuda images, or GPU-specific TAO containers.
+
+- Docker installation/version  
+  - **Retain**
+
+- TAO Toolkit container startup  
+  - **Adjustment:**  
+    - Only test containers that support CPU execution.
+    - If TAO containers are GPU-only, skip container startup tests and recommend notebook-based workflows.
+
+- Python environment setup, notebook execution, pip dependencies  
+  - **Retain**
+  - Ensure requirements.txt and requirements-pip.txt are installed without errors.
+  - Test notebook imports and basic functionality for dependencies.
+
+- REST API connectivity, disk space, network connectivity, MongoDB, SeaweedFS, NGINX  
+  - **Retain**
+
+- SeaweedFS S3 gateway identity/permission enforcement  
+  - **Retain**
+
+- Mounting/access of secrets.json, config.env, s3-config.json in containers  
+  - **Retain**
+
+- Volume mounting/data persistence, env vars injection, LOG_LEVEL  
+  - **Retain**
+
+- Model transfer/loading workflow for air-gapped environments  
+  - **Adjustment:**  
+    - Only test CPU mode workflows.
+
+- Docker image save/load scripts, run.sh management script  
+  - **Retain**
+
+- Admin key logic, SSH key mounting, airgapped deployment logic  
+  - **Retain**
+
+- SeaweedFS S3/Filer/Volume/Master ports, model registry path, LOG_LEVEL/debug logging  
+  - **Retain**
+
+- Custom CSV model download logic, Hugging Face model source, compressed/uncompressed Docker image archives, workspace creation/cloud metadata registration  
+  - **Retain**
+
+---
+
+**4. COMPLETE TODO LIST:**
+
+1. Prepare hardware:  
+   - Ensure system meets minimum specs (16 GB RAM, 8 cores, 100 GB SSD, x86_64 CPU).  
+   - **Adjustment:** Remove GPU RAM and GPU checks; verify CPU, memory, storage.  
+   - Verification: 'lscpu', 'free -h', 'df -h'
+
+2. Install/verify Ubuntu LTS 22.04.  
+   - **Adjustment:** Confirm compatibility with Ubuntu 20.04 host.
+
+3. **REMOVE GPU DRIVER INSTALLATION:**  
+   - Skip NVIDIA GPU driver installation and verification.
+
+4. Install Docker CE (>19.03.5).  
+   - Verification: 'docker --version'
+
+5. Install Docker-API 1.40.  
+   - Verification: 'docker info | grep API'
+
+6. **REMOVE GPU CONTAINER TOOL INSTALLATION:**  
+   - Skip nvidia-container-toolkit, nvidia-container-runtime, nvidia-docker2 installation and verification.
+
+7. Install Python >=3.12.x and python-pip (>21.06) (allow for Python 3.11 override if needed via config.env or run.sh).  
+   - Verification: 'python3 --version', 'pip3 --version'
+
+8. Clone TAO Tutorials repository.  
+   - Command: 'git clone https://github.com/NVIDIA/tao_tutorials.git'  
+   - Verification: 'ls tao_tutorials'
+
+9. Create and configure .env file with all relevant environment variables.  
+   - Verification: 'cat .env'
+
+10. Create setup/tao-docker-compose/config.env with provided variables.  
+    - **Adjustment:** Remove GPU variables, use CPU mode variables, update image tags for CPU-compatible containers.  
+    - Verification: 'cat setup/tao-docker-compose/config.env'
+
+11. Create docker-compose.yml in project root for TAO containers with CPU support.  
+    - **Adjustment:** Remove --gpus and GPU-specific configs.  
+    - Verification: 'docker-compose config'
+
+12. Copy/setup setup/tao-docker-compose/docker-compose.yml for multi-service orchestration.  
+    - **Adjustment:** Remove --gpus and GPU configs.  
+    - Verification: 'docker compose -f setup/tao-docker-compose/docker-compose.yml config'
+
+13. Create config.json for TAO launcher/notebook configuration.  
+    - Verification: 'cat config.json'
+
+14. Create requirements.txt in notebooks/ or project root; merge dependencies from requirements-pip.txt.  
+    - Verification: 'pip install -r requirements.txt'
+
+15. Install Jupyter and other Python dependencies.  
+    - Verification: 'jupyter notebook --version'
+
+16. Install or reference notebooks/tao_launcher_starter_kit/deps/requirements-pip.txt.  
+    - Command: 'pip install -r notebooks/tao_launcher_starter_kit/deps/requirements-pip.txt'  
+    - Verification: 'pip freeze | grep opencv', 'pip freeze | grep numpy', etc.
+
+17. Create and configure secrets.json for TAO API and related containers.  
+    - Verification: 'cat setup/tao-docker-compose/secrets.json'
+
+18. Create s3-config.json for SeaweedFS S3 gateway setup.  
+    - Verification: 'cat setup/tao-docker-compose/s3-config.json'
+
+19. Create nginx.conf and nginx_sites/default.conf for NGINX reverse proxy.  
+    - Verification: 'cat setup/tao-docker-compose/nginx.conf', 'cat setup/tao-docker-compose/nginx_sites/default.conf'
+
+20. Create test_environment.sh for automated environment validation.  
+    - **Adjustment:** Remove GPU/NVIDIA-specific tests; focus on CPU, disk, Docker, MongoDB, SeaweedFS, NGINX, Python/pip, notebook dependencies.  
+    - Verification: 'bash setup/test_environment.sh'
+
+21. Create/update setup/tao-docker-compose/README.md.  
+    - **Adjustment:**  
+      - Document CPU-only mode, removal of GPU-specific steps.  
+      - Provide alternative workflows for model training/inference using PyTorch/TensorFlow CPU containers/notebooks.  
+      - Explicit instructions for requirements.txt and requirements-pip.txt.
+
+22. Ensure run.sh is present, executable, and supports documented commands.  
+    - **Adjustment:** Remove --gpus and GPU-specific flags/options.
+
+23. If air-gapped deployment is required:  
+    - **Adjustment:** Only use CPU-compatible Docker images and models.  
+    - Follow same model/image transfer steps.
+
+24. Test Docker image save/load scripts.  
+    - Verification: 'ls saved-docker-images/', 'cat saved-docker-images/manifest.json', 'docker images | grep tao'
+
+25. Run test cases:  
+    - **REMOVE GPU-SPECIFIC TEST COMMANDS:**  
+      - Skip: 'nvidia-smi', NUM_GPU_PER_NODE, nvidia/cuda images, TAO container with GPU.  
+    - **Retain:**  
+      - Docker: 'docker run hello-world'  
+      - MongoDB: 'docker exec -it mongodb mongo --eval "db.stats()"'  
+      - SeaweedFS:  
+        - 'curl http://localhost:${SEAWEEDFS_MASTER_PORT:-9333}/cluster/status'  
+        - 'curl http://localhost:${SEAWEEDFS_FILER_PORT:-8888}'  
+        - 'curl http://localhost:${SEAWEEDFS_S3_PORT:-8333}'  
+        - 'curl http://localhost:${SEAWEEDFS_VOLUME_PORT:-8080}'  
+        - Test S3 actions with anonymous/admin access  
+      - NGINX: 'curl -I http://localhost:${NGINX_HTTP_PORT:-8090}', 'curl -I https://localhost:${NGINX_HTTPS_PORT:-8443}'  
+      - TAO API: 'curl -I ${HOSTBASEURL}/api/status'  
+      - Python: 'python3 -c "import numpy; import pandas; print('ok')"'  
+      - Notebooks: Open and execute notebook in Jupyter (Python 3.12/3.11).  
+      - REST API: Send test request via curl/postman to TAO API (HOSTBASEURL).  
+      - Volumes: Check MongoDB/SeaweedFS data persistence  
+      - Secrets: Check secrets.json is mounted and contains keys  
+      - Env vars: 'docker compose exec <service> printenv | grep VAR'  
+      - LOG_LEVEL: Verify debug logs  
+      - Admin key logic, airgapped mode test, PTM_PULL logic test (if enabled)
+
+26. Ensure 100 GB SSD free space.  
+    - Verification: 'df -h'
+
+27. Document all custom setup steps, new service configurations, config.env usage, s3-config.json details, container versions, secrets.json content and usage, air-gapped workflows, image save/load procedures, run.sh usage, troubleshooting, and explicit instructions for pip dependency installation from requirements.txt and requirements-pip.txt in README_CUSTOM.md and setup/tao-docker-compose/README.md.  
+    - Verification: 'cat README_CUSTOM.md', 'cat setup/tao-docker-compose/README.md'
+
+28. (Optional) Set up error handling/logging in test_environment.sh and notebooks.  
+    - Verification: Review logs/output.
+
+29. Final verification: All tests pass, containers start, notebooks execute, TAO CLI/API and supporting services functional; config.env, secrets.json, s3-config.json, and pip dependencies are correctly applied in orchestration. Air-gapped and non-air-gapped workflows functional; Docker images manageable via scripts.  
+    - Verification: Summarize results in README_CUSTOM.md, setup/tao-docker-compose/README.md, and/or logs.
+
+---
+
+**Additional Notes for CPU-Only Environment:**
+
+- All GPU/NVIDIA-specific steps, downloads, images, variables, and test cases are removed or replaced.
+- Only use CPU-compatible Docker images and workflows.
+- If TAO toolkit does not support CPU mode, use PyTorch/TensorFlow CPU containers for model-related workflows.
+- Document limitations and alternatives in all READMEs and scripts.
+- Ensure all paths (e.g., /home/cc/EnvGym/data/20260501_153628_tensorblock_gpt-4.1/tao_tutorials) are correct and updated in configs, scripts, and documentation.
+
+---
+
+**Summary:**  
+This adjusted plan removes all GPU/NVIDIA-specific components, focuses on CPU-only workflows, and ensures compatibility with x86_64 architecture, Ubuntu 20.04/22.04, and available development tools. All documentation and configuration files must reflect CPU-only operation and provide clear instructions for users in this environment.

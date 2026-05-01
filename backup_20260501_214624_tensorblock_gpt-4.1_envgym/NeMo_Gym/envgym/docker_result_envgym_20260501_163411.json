@@ -1,0 +1,15 @@
+{
+  "timestamp": "20260501_163411",
+  "dockerfile_path": "envgym/envgym.dockerfile",
+  "image_name": "envgym_test_1777653251",
+  "build": {
+    "success": false,
+    "stdout": "",
+    "stderr": "#0 building with \"default\" instance using docker driver\n\n#1 [internal] load build definition from envgym.dockerfile\n#1 transferring dockerfile: 2.19kB done\n#1 DONE 0.0s\n\n#2 [internal] load metadata for docker.io/library/python:3.12-slim\n#2 DONE 0.1s\n\n#3 [internal] load .dockerignore\n#3 transferring context: 226B done\n#3 DONE 0.0s\n\n#4 [ 1/13] FROM docker.io/library/python:3.12-slim@sha256:46cb7cc2877e60fbd5e21a9ae6115c30ace7a077b9f8772da879e4590c18c2e3\n#4 resolve docker.io/library/python:3.12-slim@sha256:46cb7cc2877e60fbd5e21a9ae6115c30ace7a077b9f8772da879e4590c18c2e3 done\n#4 sha256:3fc9d9ab5045181fbd49d1d30a2dbad144172d4c3c141f70117ddb0b918d8357 0B / 248B 0.1s\n#4 sha256:46cb7cc2877e60fbd5e21a9ae6115c30ace7a077b9f8772da879e4590c18c2e3 10.37kB / 10.37kB done\n#4 sha256:4386a385d81dba9f72ed72a6fe4237755d7f5440c84b417650f38336bbc43117 1.75kB / 1.75kB done\n#4 sha256:7bf61a5ec2a4631b240bc8cf83404e2dd37fb06a4b4bbd34b2c36906a5fb4aee 5.66kB / 5.66kB done\n#4 sha256:cb8c0a9140ac107575972113eb5fd2e6c3cdddc592371a5ac31c4623dcb13d5d 1.29MB / 1.29MB 0.1s\n#4 sha256:4d873bcef452ab1c054b9a0f25ace04a446c558a7b925aed2fc5bc21533e0f65 0B / 12.10MB 0.1s\n#4 sha256:3fc9d9ab5045181fbd49d1d30a2dbad144172d4c3c141f70117ddb0b918d8357 248B / 248B 0.1s done\n#4 sha256:cb8c0a9140ac107575972113eb5fd2e6c3cdddc592371a5ac31c4623dcb13d5d 1.29MB / 1.29MB 0.1s done\n#4 extracting sha256:cb8c0a9140ac107575972113eb5fd2e6c3cdddc592371a5ac31c4623dcb13d5d\n#4 ...\n\n#5 [internal] load build context\n#5 transferring context: 205.22kB 0.1s done\n#5 DONE 0.1s\n\n#6 [ 4/13] RUN pip install --upgrade pip &&     pip install 'uv>=0.9.30'\n#6 CACHED\n\n#7 [ 5/13] COPY .python-version ./\n#7 CACHED\n\n#8 [ 2/13] WORKDIR /workspace\n#8 CACHED\n\n#9 [ 3/13] RUN apt-get update &&     apt-get install -y --no-install-recommends         git         curl         build-essential         ca-certificates         libssl-dev         libffi-dev         openssh-client         gcc         make         pkg-config         libsndfile1         ffmpeg         unzip         vim         less         tzdata         && rm -rf /var/lib/apt/lists/*\n#9 CACHED\n\n#10 [ 6/13] COPY requirements.txt requirements.txt\n#10 ERROR: failed to calculate checksum of ref 0b9611b8-8327-44ba-b8b3-8100abfef644::rqwpzgios0hp3hysqj8tjshtq: \"/requirements.txt\": not found\n------\n > [ 6/13] COPY requirements.txt requirements.txt:\n------\nenvgym.dockerfile:43\n--------------------\n  41 |     \n  42 |     # (Optional) Pre-copy requirements for layer caching, if requirements file exists\n  43 | >>> COPY requirements.txt requirements.txt\n  44 |     COPY pyproject.toml pyproject.toml\n  45 |     \n--------------------\nERROR: failed to solve: failed to compute cache key: failed to calculate checksum of ref 0b9611b8-8327-44ba-b8b3-8100abfef644::rqwpzgios0hp3hysqj8tjshtq: \"/requirements.txt\": not found\n"
+  },
+  "run": {
+    "success": false,
+    "stdout": "",
+    "stderr": ""
+  }
+}

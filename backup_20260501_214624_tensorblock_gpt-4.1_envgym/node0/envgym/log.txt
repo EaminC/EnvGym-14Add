@@ -1,0 +1,22 @@
+=== Docker Execution Log - 20260501_180911 ===
+Dockerfile: envgym/envgym.dockerfile
+Image Name: envgym_test_1777658950
+
+=== Build Log ===
+Build Status: Failed
+Build Error:
+--------------------
+44 |     # Removed: RUN /opt/conda/bin/conda search python
+45 |
+46 | >>> RUN /opt/conda/bin/conda create -y -n node0 python=3.11.4
+47 |
+48 |     RUN /opt/conda/bin/conda env list && /opt/conda/bin/conda info --envs
+--------------------
+ERROR: failed to solve: process "/bin/sh -c /opt/conda/bin/conda create -y -n node0 python=3.11.4" did not complete successfully: exit code: 1
+
+=== Runtime Log ===  
+Runtime Status: Failed
+Runtime Error:
+
+
+=== Execution End ===

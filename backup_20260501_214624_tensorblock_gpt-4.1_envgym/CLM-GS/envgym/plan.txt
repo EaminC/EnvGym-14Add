@@ -1,0 +1,248 @@
+=== ADJUSTED ENVIRONMENT SETUP PLAN (CPU-ONLY, x86_64, UBUNTU 20.04, NO NVIDIA GPU) ===
+
+**Key Adjustments:**  
+- No CUDA Toolkit, NVIDIA drivers, or CUDA-specific packages/kernels required  
+- PyTorch must be installed with CPU-only support  
+- All GPU/offload strategies and CUDA kernel builds must be disabled/skipped  
+- Submodules relying on CUDA kernels (e.g., `clm_kernels`, `gsplat`, etc.) must be checked for CPU fallback or replaced/skipped  
+- Disk and RAM requirements remain; model scales may be limited due to CPU constraints  
+- Docker and OS (Ubuntu 20.04) are compatible; standard x86_64 instructions apply  
+- Paths and directories unchanged, but ensure no GPU-specific scripts/flags are used  
+
+---
+
+1. DOWNLOADS NEEDED:  
+   - Conda (Anaconda or Miniconda)  
+   - Python 3.10 (via Conda environment)  
+   - PyTorch 2.6.0 (CPU-only)  
+   - torchvision 0.21.0, torchaudio 2.6.0 (CPU-only)  
+   - pip (latest version)  
+   - Python packages:  
+     - tqdm  
+     - plyfile  
+     - psutil  
+     - numba  
+     - opencv-python  
+     - scipy  
+     - matplotlib  
+     - pandas  
+     - imageio  
+     - imageio-ffmpeg  
+     - requests  
+     - tabulate  
+   - Submodules (to be installed locally via pip):  
+     - clm_kernels (from submodules/clm_kernels) — **Ensure CPU compatibility; skip CUDA kernel build, use CPU fallback if available**  
+     - cpu-adam (from submodules/cpu-adam) — CPU-based Adam optimizer  
+     - fast-tsp (from submodules/fast-tsp)  
+     - gsplat (from submodules/gsplat) — **Ensure CPU fallback; skip CUDA-specific rendering kernels**  
+     - simple-knn (from submodules/simple-knn)  
+   - Datasets:  
+     - Mip360 Dataset (https://jonbarron.info/mipnerf360/) — COLMAP format  
+     - Rubble 4K Dataset (https://huggingface.co/datasets/HexuZhao/mega_nerf_rubble_colmap/tree/main) — COLMAP format  
+     - (Optional) MatrixCity BigCity Dataset (see project page) — non-COLMAP format  
+     - MatrixCity BigCity Aerial dataset (from https://huggingface.co/datasets/BoDai/MatrixCity/tree/main/big_city)  
+     - MatrixCity BigCity Aerial initial point cloud and pose files  
+   - Black formatter (`pip install black`)  
+   - (Optional) Fast, large-capacity local disk (≥500GB recommended for MatrixCity BigCity, ≥50GB for mip360, ≥20GB for Rubble 4K at 28M scale)  
+   - (NEW) Shell scripts and reference documentation for experiments  
+   - **Omit all CUDA development tools, Nsight, CUDA profiling tools**  
+
+---
+
+2. FILES TO CREATE:  
+   - `environment.yml`: Conda environment specification (**remove CUDA toolkit dependency; specify CPU-only PyTorch**)  
+   - `requirements.txt`: Python package requirements for pip (**add note: CPU-only environment; skip CUDA-related dependencies**)  
+   - `.env`: Environment variables; **omit CUDA-specific env vars**  
+   - `config/local_paths.yaml`: Dataset and decoded images paths configuration  
+   - `LICENSE.txt`: License terms  
+   - `test/test_environment.py`: Python script to verify environment (**remove CUDA checks; test CPU-only PyTorch and package imports**)  
+   - `test/test_training.py`: Script to run minimal training command (dry-run; test CPU-only strategies, skip offload/`--clm_offload`/`--naive_offload`/`--no_offload` if GPU required)  
+   - `README_environment.md`: Step-by-step setup guide with troubleshooting (**add CPU-only notes, warn that GPU strategies are unavailable**)  
+   - Strategy README files: Reference for users (**update to clarify CPU-only limitations**)  
+   - Experiment shell scripts and guides: Ensure presence, **update scripts to exclude GPU/offload flags**  
+   - (Optional) Focused test scripts for CPU-only pipeline  
+   - (Optional) `release_scripts/log2csv.py`: Experiment logs aggregation as described  
+
+---
+
+3. NECESSARY TEST CASES IN THE CODEBASE:  
+   - Environment Validation:  
+     - Test PyTorch version and CPU support  
+     - Test all required Python packages are importable  
+     - Test import and basic functionality of clm_kernels (**CPU fallback only**)  
+   - Submodule Installation:  
+     - Test import and functionality of clm_kernels, cpu-adam, fast-tsp, gsplat, simple-knn (**skip CUDA kernel loading**)  
+     - Test gsplat rendering kernels for baseline (**CPU fallback only**)  
+   - Dataset Preparation:  
+     - Test dataset download, decode, and path configuration  
+     - Verify correct folder structure for all datasets  
+     - Verify images, pose files, and point cloud files are readable  
+     - Test decoding process for all datasets, including re-use of already-decoded images  
+   - Training Pipeline:  
+     - Run `train.py` in CPU-only mode  
+     - For Rubble 4K and Mip360:  
+       - Test sequential training for supported scales (**expect slow performance; may need to skip 28M scale on CPU**)  
+       - Test disk/memory usage and validate OOM handling  
+       - Verify experiment results (if feasible)  
+     - For MatrixCity BigCity:  
+       - **Clarify that 102M scale likely infeasible on CPU; recommend 25M or smaller**  
+       - Test decoding of JPEG images to raw format  
+       - Test training on supported scale, with densification disabled if memory-limited  
+       - Test disk space warnings  
+     - For all strategies:  
+       - Test optimizer state placement, memory usage, and error/warning messages  
+       - Validate correct operation of gsplat, clm_kernels (CPU), and data transfers  
+   - Experiment Log Aggregation:  
+     - Test that `release_scripts/log2csv.py` successfully parses output logs  
+   - Error Handling:  
+     - Test for OOM errors, disk space warnings, and missing/corrupted files  
+     - Test recovery and re-run of decoding if interrupted or corrupted  
+     - For offload strategies, **skip tests unless CPU fallback supported**  
+   - Command Line Flags:  
+     - **Skip all GPU/offload flags (`--clm_offload`, `--naive_offload`, `--no_offload`) unless CPU fallback available**  
+     - Test CLI error reporting for invalid flag or incompatible dataset structure  
+   - License Compliance:  
+     - Confirm LICENSE.txt presence and terms are acknowledged  
+
+---
+
+4. COMPLETE TODO LIST:  
+
+   1. Install Conda (Anaconda or Miniconda) and create environment:  
+      - Download and install Conda if not already present  
+      - Run: `conda create -n clm_gs python=3.10`  
+      - Activate: `conda activate clm_gs`  
+      - Verification: `conda info --envs` shows `clm_gs` active  
+
+   2. **Omit CUDA Toolkit and NVIDIA driver installation**  
+      - **Skip all CUDA and GPU driver steps**  
+      - Verification: Not applicable  
+
+   3. Clone repository with submodules:  
+      - Run: `git clone git@github.com:nyu-systems/CLM-GS.git --recursive`  
+      - Verification: Check submodules present in `submodules/`  
+
+   4. Install PyTorch, torchvision, torchaudio (CPU-only):  
+      - Run:  
+        ```
+        pip install torch==2.6.0+cpu torchvision==0.21.0+cpu torchaudio==2.6.0+cpu --index-url https://download.pytorch.org/whl/cpu
+        ```
+      - Verification:  
+        ```
+        python -c "import torch; print(torch.__version__); print(torch.cuda.is_available())"
+        ```
+        (should show 2.6.0 and False)  
+
+   5. Install additional Python packages:  
+      - Run:  
+        ```
+        pip install tqdm plyfile psutil numba opencv-python scipy matplotlib pandas imageio imageio-ffmpeg requests tabulate
+        ```
+      - Verification:  
+        ```
+        python -c "import tqdm, plyfile, psutil, numba, cv2, scipy, matplotlib, pandas, imageio, requests, tabulate"
+        ```  
+
+   6. Install submodules locally:  
+      - For each submodule:  
+        - Run:  
+          ```
+          pip install --no-build-isolation submodules/<submodule>
+          ```
+        - For `clm_kernels`, **ensure CPU fallback and skip CUDA kernel build**  
+        - For `gsplat`, **ensure CPU fallback and skip CUDA-specific rendering kernels**  
+      - Verification:  
+        ```
+        python -c "import clm_kernels, cpu_adam, fast_tsp, gsplat, simple_knn"
+        ```
+      - For `clm_kernels` and `gsplat`, verify that CPU versions are importable and functional  
+      - **If any submodule does not support CPU-only, document and skip its usage**  
+
+   7. Create configuration files:  
+      - `environment.yml` and `requirements.txt` in project root (**no CUDA dependencies**)  
+      - `.env` (**omit CUDA-specific variables**)  
+      - `config/local_paths.yaml` for data locations and cache paths  
+      - Verification: Files exist and are readable  
+
+   8. Download and prepare datasets:  
+      - Follow original steps for Mip360, Rubble 4K, MatrixCity BigCity  
+      - Verification: Dataset folders present, images and pose files readable for all scenes  
+      - Ensure enough disk space (≥500GB for MatrixCity BigCity, ≥50GB for Mip360, ≥20GB for Rubble 4K)  
+
+   9. Decode images/prepare dataset cache:  
+      - Run dataset decoding via training script or shell scripts (**CPU-only**)  
+      - For Rubble 4K and Mip360, ensure decoded images are stored on fast local disk  
+      - Verification: Decoded image folder with expected files and sizes  
+
+   10. Compile and verify training pipeline:  
+       - For COLMAP datasets (Mip360, Rubble 4K):  
+         - For Mip360, use:  
+           - `bash release_scripts/mip360.sh /path/to/360_v2 cpu`  
+         - For Rubble 4K, use:  
+           - `bash release_scripts/rubble4k.sh /path/to/rubble-colmap cpu <scale>`  
+         - **Update shell scripts to exclude CUDA/GPU/offload flags; only CPU-based training**  
+         - Results to `output/mip360/` and `output/rubble/`  
+         - Aggregate results: `python release_scripts/log2csv.py output/mip360` and `output/rubble`  
+         - Verification: Each scene runs successfully in CPU mode; disk/memory usage and PSNR may be lower/slower  
+         - **If 28M scale OOMs on CPU, document and recommend using 10M or smaller**  
+       - For other COLMAP datasets:  
+         - `python train.py -s <dataset> --bsz 1` (CPU-only)  
+       - For MatrixCity BigCity, use:  
+         - `bash release_scripts/bigcity.sh /path/to/matrixcity/big_city/aerial/pose/all_blocks cpu <scale>`  
+         - **Recommend only 25M scale or smaller on CPU; warn that 102M scale is infeasible**  
+         - Results to `output/bigcity/`  
+         - Disk space usage monitored  
+       - **Skip all GPU/offload strategies unless CPU fallback is supported**  
+
+   11. Run environment and training test scripts:  
+       - `python test/test_environment.py`: Checks PyTorch (CPU), packages, submodules, Mip360, Rubble 4K, and MatrixCity data support  
+       - `python test/test_training.py`: Runs dry training, reports success/failure for CPU-only strategies  
+       - Verification: All CPU-only tests pass, output confirms environment readiness  
+
+   12. Aggregate experiment results:  
+       - After experiments, run:  
+         - `python release_scripts/log2csv.py output/bigcity`  
+         - `python release_scripts/log2csv.py output/mip360`  
+         - `python release_scripts/log2csv.py output/rubble`  
+       - Verification: CSV summaries generated with PSNR, memory, and timing metrics  
+
+   13. Format codebase:  
+       - Run: `pip install black`  
+       - Run: `black .`  
+       - Verification: No formatting errors, code conforms to Black style  
+
+   14. Verify license compliance:  
+       - Check `LICENSE.txt` presence and content  
+       - Verification: License terms match Gaussian-Splatting License  
+
+   15. Document setup and troubleshooting:  
+       - Update `README_environment.md` with all steps, including:  
+         - MatrixCity BigCity setup and folder structure, non-COLMAP notes  
+         - Rubble 4K setup, shell script usage, disk space/memory/preallocation notes, scale/parameter guidance, and OOM handling  
+         - Mip360 setup, shell script usage, and memory/disk space notes  
+         - Disk space requirements for decoded images and outputs  
+         - Reference to `release_scripts/bigcity_README.md` for MatrixCity, `release_scripts/rubble4k_README.md` for Rubble 4K, and `release_scripts/mip360_README.md` for Mip360 experiments  
+         - Error handling for disk space, OOM, and file misconfiguration  
+         - Reference relevant strategy README files  
+         - **Add clear warning that GPU/offload strategies and CUDA-specific functionality are unavailable; only CPU training supported**  
+         - Document expected performance limitations on CPU, recommend smaller scales  
+         - Document any submodules or features skipped due to lack of GPU/CUDA  
+
+   16. Optional: Test on another OS (Windows/Linux/Mac) for compatibility  
+       - Run all steps, note any OS-specific issues  
+       - Verification: Environment works on supported OS, document any caveats or fixes  
+
+   17. Final verification:  
+       - Summarize environment status, software versions, and test results  
+       - Share verification logs/output for reproducibility  
+
+---
+
+**NOTES:**  
+- All CUDA/GPU-specific instructions, dependencies, and tests are omitted or replaced with CPU-only alternatives  
+- Training pipeline and scripts must be updated to reflect CPU-only operation  
+- Document performance limitations and recommend smaller dataset/model scales for CPU environments  
+- Ensure all shell scripts and CLI flags are compatible with CPU-only operation  
+- If any submodule or package is strictly CUDA/GPU-dependent and has no CPU fallback, document and skip its installation/use  
+
+=== END OF ADJUSTED PLAN ===

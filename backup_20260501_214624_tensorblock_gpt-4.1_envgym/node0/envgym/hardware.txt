@@ -1,0 +1,6 @@
+- Working Directory: /home/cc/EnvGym/data/20260501_153628_tensorblock_gpt-4.1/node0; project context likely CPU-bound, no GPU workloads; deep path, may require context trimming.
+- Architecture: x86_64; recommended --platform=linux/amd64
+- Base Image: Use amd64-compatible images (e.g., ubuntu:20.04, python:3.x-slim, debian:buster)
+- GPU: No NVIDIA GPU detected; do not use CUDA or nvidia/cuda base images
+- Instruction Notes: No GPU-specific instructions (e.g., no RUN apt install nvidia*); ensure all tools compatible with Ubuntu 20.04 userland; set WORKDIR as needed for deep path context
+- Docker Version: 28.1.1; BuildKit supported; --gpus flag not effective due to absent NVIDIA GPU

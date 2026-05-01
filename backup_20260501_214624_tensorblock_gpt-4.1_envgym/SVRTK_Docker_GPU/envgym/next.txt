@@ -1,0 +1,8 @@
+current progress
+- Attempted to build the Docker image using the Dockerfile with `FROM pytorch/pytorch:1.9.0-cpu`.
+- Build failed at the first step because `pytorch/pytorch:1.9.0-cpu` image does not exist on Docker Hub.
+- No further build or runtime steps were executed due to this failure.
+
+next step
+- Modify the Dockerfile to use the correct base image: change `FROM pytorch/pytorch:1.9.0-cpu` to `FROM pytorch/pytorch:1.9.0-cpu-devel`.
+- Re-run the Docker build to verify that the base image is found and that subsequent build steps proceed.

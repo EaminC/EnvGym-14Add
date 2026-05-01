@@ -1,0 +1,21 @@
+[
+  "README.md",
+  "Dockerfile",
+  "requirements.txt",
+  "environment.yaml",
+  "environment_full.yaml",
+  "environment_verbose.yaml",
+  "docker-compose.yaml",
+  "viewer/SlideProvider/Dockerfile",
+  "viewer/SlideProvider/requirements.txt",
+  "viewer/SlideProvider/environment.yml",
+  "viewer/Viewer/Dockerfile",
+  "viewer/Viewer/package.json",
+  "viewer/Viewer/package-lock.json",
+  "viewer/Viewer/vite.config.js",
+  "viewer/docker-compose.yaml",
+  "viewer/docker-compose-deploy.yaml",
+  "viewer/docker-compose-develop.yaml",
+  "annotation_tool/docker-compose.yaml",
+  "annotation_tool/.env"
+]

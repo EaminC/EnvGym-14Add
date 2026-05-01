@@ -1,0 +1,20 @@
+current progress
+
+- The Docker build and runtime both succeeded, with no CUDA/NVIDIA drivers or GPU-specific dependencies installed.
+- The Dockerfile installs all required system dependencies for CPU-only builds on Ubuntu 20.04 (build-essential, cmake, git, python3, etc.).
+- Rust toolchain is installed, and the environment is set up for CPU-only development.
+- The repository is copied into the Docker image, and the working directory is set.
+- The Dockerfile explicitly removes CUDA/GPU-specific files, and uses `sed` to remove CUDA/plonky2_cuda dependencies and features from all Cargo.toml files, Cargo.lock, and .cargo configs.
+- CUDA/GPU code references are scrubbed from source files.
+- Cargo.lock is regenerated, dependencies are fetched, and workspace checks/builds/tests are run in both debug and release modes.
+- All build and test steps are configured to fail gracefully and provide diagnostic output if errors occur.
+- The container entrypoint is bash, allowing for interactive use or further commands.
+
+next step
+
+- Double-check that all CUDA/GPU references are fully removed from documentation files such as README.md and from any CI configuration (e.g., .github/workflows or ci/).
+- Ensure the README.md clearly documents that the build is CPU-only, CUDA/GPU support is unavailable, and instructions for CPU-only use are up to date.
+- Optionally, pin the Rust toolchain version with a `rust-toolchain.toml` file for reproducibility.
+- Optionally, add or update CI configuration to guarantee that no CUDA/GPU jobs run, and that all builds/tests are CPU-only.
+- Verify that all test cases and benchmarks are CPU-only, and update documentation to reflect any skipped or removed GPU-related tests.
+- Perform a final review to ensure all plan requirements (file structure, environment, and documentation) are satisfied for a CPU-only, Ubuntu 20.04, x86_64 build.

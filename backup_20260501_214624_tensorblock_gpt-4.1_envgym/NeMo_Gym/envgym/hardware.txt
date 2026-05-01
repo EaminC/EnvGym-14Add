@@ -1,0 +1,6 @@
+- Working Directory: /home/cc/EnvGym/data/20260501_153628_tensorblock_gpt-4.1/NeMo_Gym; subfolder in a data-named, time-stamped project directory; likely deep in a larger project structure
+- Architecture: x86_64; recommended --platform=linux/amd64
+- Base Image: Use amd64-compatible images (e.g., ubuntu:20.04, python:3.10-slim, pytorch/pytorch:latest); no CUDA base needed
+- GPU: NVIDIA GPU not available; do not use CUDA or nvidia/cuda base images
+- Instruction Notes: No GPU-specific instructions (e.g., no RUN apt install cuda-toolkit, no ENV NVIDIA_REQUIRE_CUDA); large memory/CPU count available for parallel builds if multi-stage; set WORKDIR to project path if context requires
+- Docker Version: 28.1.1; BuildKit supported; --gpus flag supported but not usable due to lack of NVIDIA GPU

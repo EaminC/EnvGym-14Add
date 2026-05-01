@@ -1,0 +1,6 @@
+- Working Directory: /home/cc/EnvGym/data/20260501_153628_tensorblock_gpt-4.1/U-Time; project is in a subdirectory, context likely includes code/data in U-Time
+- Architecture: x86_64; recommended --platform=linux/amd64
+- Base Image: Use amd64-compatible base images (e.g., ubuntu:20.04, python:3.10-slim); no GPU-specific images required
+- GPU: NVIDIA GPU not available; integrated Matrox G200eW3, no CUDA; do not use CUDA base images or GPU instructions
+- Instruction Notes: No need for GPU-specific RUN/ENV instructions; use standard instructions for CPU builds; ensure COPY/WORKDIR point to U-Time as context
+- Docker Version: 28.1.1; supports BuildKit features, multi-stage builds, compose v2; --gpus not applicable

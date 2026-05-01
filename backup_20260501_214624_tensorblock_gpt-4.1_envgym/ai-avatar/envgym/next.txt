@@ -1,0 +1,24 @@
+current progress
+
+- Docker build and runtime both succeeded.
+- Base image is python:3.10-slim (correct Python version).
+- All required system dependencies and git are installed.
+- WORKDIR is set to /workspace (matches plan).
+- Fooocus repository is cloned into /workspace.
+- Pip is upgraded to 23.0, and packaging is installed.
+- Python venv is created at /opt/venv and activated via PATH.
+- Pip in venv is upgraded to 23.0.
+- PyTorch CPU-only and all other pinned Python packages are installed as specified.
+- SHELL is set to bash by default.
+- ENTRYPOINT launches interactive bash at repo root.
+- No CUDA, ROCm, or GPU-specific steps are present.
+
+next step
+
+- Add logic to handle model downloads: either run Fooocus once in the Dockerfile (not recommended for image size) or provide instructions/entrypoint for model download on first container start.
+- Copy or generate requirements_versions.txt and environment.yaml into the image for reproducibility (uncomment or add COPY instructions before dependency install).
+- (Optional) Add swap configuration logic if running on low-memory hosts or document swapfile setup in run instructions.
+- (Optional) Add support for authentication and localization by copying example files (auth-example.json, language/*.json) if needed.
+- (Optional) Change ENTRYPOINT to launch Fooocus directly (e.g., ["python", "entry_with_update.py"]) or provide a CMD for easier usage.
+- (Optional) Implement test case automation in the image (e.g., add a test script or healthcheck).
+- (Optional) Clean up build dependencies for a smaller image if build-essential and headers are no longer needed.

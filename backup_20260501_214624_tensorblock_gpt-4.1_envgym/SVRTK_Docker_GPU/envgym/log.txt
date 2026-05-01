@@ -1,0 +1,20 @@
+=== Docker Execution Log - 20260501_180219 ===
+Dockerfile: envgym/envgym.dockerfile
+Image Name: envgym_test_1777658539
+
+=== Build Log ===
+Build Status: Failed
+Build Error:
+--------------------
+1 | >>> FROM pytorch/pytorch:1.9.0-cpu
+2 |
+3 |     # Set non-interactive mode for apt
+--------------------
+ERROR: failed to solve: pytorch/pytorch:1.9.0-cpu: failed to resolve source metadata for docker.io/pytorch/pytorch:1.9.0-cpu: docker.io/pytorch/pytorch:1.9.0-cpu: not found
+
+=== Runtime Log ===  
+Runtime Status: Failed
+Runtime Error:
+
+
+=== Execution End ===

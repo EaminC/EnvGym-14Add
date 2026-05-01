@@ -1,0 +1,216 @@
+=== ENVIRONMENT SETUP PLAN (ADJUSTED FOR x86_64 CPU, NO GPU, CPU-ONLY UBUNTU ENV, DEEP PROJECT DIR) ===
+
+**Summary of Key Adjustments:**
+- All references to CUDA, GPU acceleration, or NVIDIA GPU-specific steps are removed/disabled.
+- All Docker instructions use amd64/x86_64-compatible base images. No nvidia/cuda base images are used.
+- All instructions assume CPU-only operation; any optional GPU flags (e.g., --gpus) are omitted.
+- OS-level instructions and dependencies are targeted to Ubuntu 20.04+ (x86_64) and compatible with macOS/WSL2/Windows (CPU-only).
+- Emphasize large disk requirement for LiveCodeBench-X and large benchmarks.
+- All file paths and scripts must respect deep working directory structure (`/home/cc/EnvGym/data/20260501_153628_tensorblock_gpt-4.1/NeMo_Gym`).
+- All instructions and test cases are reviewed for feasibility on CPU-only x86_64.
+- If any tool or benchmark has an explicit GPU requirement, note that only CPU operation is possible and results may be slower.
+
+---
+
+1. DOWNLOADS NEEDED:
+
+   - **Git**: For cloning repositories.  
+     - Version: Latest stable, x86_64/amd64  
+     - Install: `sudo apt install git` (Ubuntu) or use system package manager.
+
+   - **Python**: Version 3.12 (required by `.python-version`)  
+     - Must be x86_64 build, compatible with Ubuntu 20.04+/macOS/WSL2/Windows.  
+     - For Docker, base image should be `python:3.12-slim` or `ubuntu:20.04` with Python 3.12 installed (NOT CUDA or nvidia/cuda images).
+
+   - **UV (Python package manager)**: Latest version (`>=0.9.30`)  
+     - Install as before, works on x86_64/amd64.
+
+   - **All Python/Pip Dependencies**:  
+     - All libraries listed in the plan are compatible with Python 3.12 and CPU-only operation.  
+     - For `mlflow`, `uvicorn`, `uvloop`, `datasets`, `ray`, etc: Only CPU features will be used.  
+     - For `ray`, use CPU scheduler (no `--num-gpus`/`--use-gpu` flags).
+
+   - **Docker**:  
+     - Use x86_64/amd64 base images (e.g., `python:3.12-slim`, `ubuntu:20.04`).  
+     - Do not use any `nvidia/cuda` or `pytorch/pytorch` GPU image.  
+     - No `--gpus` flags in `docker run` or `docker build`.  
+     - All Dockerfiles should begin with `FROM python:3.12-slim` or similar.  
+     - Add `--platform=linux/amd64` to `docker build` if running on multi-arch builder.
+
+   - **NeMo Skills Sandbox**:  
+     - Docker build is supported, but image must be built for CPU (`python:3.12`, `ubuntu:20.04`, etc).  
+     - If upstream Dockerfile refers to CUDA or NVIDIA drivers, you must edit it to use CPU-only base and remove GPU-specific instructions.  
+     - Example:  
+       ```dockerfile
+       FROM python:3.12-slim
+       # ... rest of Dockerfile ...
+       # (No CUDA install, no NVIDIA driver steps)
+       ```
+
+   - **All Benchmarks**:  
+     - All benchmarks can run in CPU-only mode, but may be slower (especially for large models like vLLM).
+     - vLLM, large model serving, and code generation will run in CPU mode only.
+     - For any model serving, ensure that server is launched with CPU-only backend or CPU-compatible weights.
+     - For asr_with_pc, code_gen, judge servers, etc: Ensure they are run in CPU mode.
+
+   - **Storage Space**:  
+     - LiveCodeBench-X and other large benchmarks may require 20+ GB free disk space in the working directory/subfolders.
+     - Ensure `/home/cc/EnvGym/data/20260501_153628_tensorblock_gpt-4.1/NeMo_Gym` has sufficient disk space for large data files and outputs.
+
+   - **Other OS Tools**:  
+     - All instructions use CPU-only tools, compatible with Ubuntu 20.04+.
+     - No GPU drivers or CUDA dependencies are required/installed.
+
+2. FILES TO CREATE:
+
+   - All file locations are relative to `/home/cc/EnvGym/data/20260501_153628_tensorblock_gpt-4.1/NeMo_Gym`.
+   - No files or scripts should assume `/home/cc` is writable by root or Docker (unless explicitly bind-mounting).
+   - All large data files (e.g., LiveCodeBench-X JSONLs) are stored under this structure; verify sufficient disk space.
+
+   - All other file instructions unchanged.
+
+3. NECESSARY TEST CASES IN THE CODEBASE:
+
+   - **All tests related to GPU acceleration should be disabled or skipped.**
+   - All tests must pass on CPU-only environment.  
+   - Test suite should include explicit check that GPU is not required (e.g., `torch.cuda.is_available()` is False, `--gpus` not required).
+   - Any tests that check CUDA, NCCL, or GPU-specific logic should be skipped or marked as expected to fail on CPU-only.
+
+   - **Model server startup:**  
+     - All tests must start model servers in CPU mode.  
+     - vLLM or other model APIs must be started with CPU backend or CPU-compatible weights/config.
+     - If a test/benchmark would fail due to lack of GPU, it must emit a clear message indicating "This task requires a GPU to run efficiently. On CPU, it will be slow or may not be feasible for large models." but must not hard-fail.
+
+   - All other test cases as previously specified.
+
+4. COMPLETE TODO LIST (ADJUSTED):
+
+   1. **Install Git**  
+      - As before; ensure it's x86_64-compatible.
+
+   2. **Install Python 3.12**  
+      - Use x86_64/amd64 build.  
+      - For Docker, use `python:3.12-slim` or `ubuntu:20.04` and install Python 3.12 (no CUDA).
+
+   3. **Clone the NeMo Gym Repository**  
+      - All paths are within `/home/cc/EnvGym/data/20260501_153628_tensorblock_gpt-4.1/NeMo_Gym`.
+
+   4. **Ensure .python-version File Exists and is Correct**  
+      - As before.
+
+   5. **Install UV Package Manager**
+      - As before.
+
+   6. **Create Python Virtual Environment**
+      - As before.
+
+   7. **Install Project Dependencies**
+      - As before; all dependencies are CPU-only compatible.
+
+   8. **Verify Python Build System Tools**
+      - As before.
+
+   9. **Install and Configure Pre-commit**
+      - As before.
+
+   10. **Verify Pre-commit Hook Dependencies**
+       - As before.
+
+   11. **Create env.yaml with API Credentials**
+       - As before.
+
+   12. **(Optional) Download Example Data/Datasets**
+       - As before; ensure sufficient disk space.
+
+   13. **Ensure codecov.yml Exists and is Configured**
+       - As before.
+
+   14. **Start Resource Servers**
+       - All resource servers (code_gen, asr_with_pc, judge, etc.) must be started in CPU mode.
+       - For any Docker containers, ensure no `--gpus` flag and no device passthroughs.
+
+   15. **IFBench: Pre-Install IFBench Repo for Offline/Restricted Environments**
+       - As before.
+
+   16. **NeMo Skills Sandbox: Build and Run (IOI/CCC BENCHMARKS)**
+       - **IMPORTANT:**  
+         - Edit Dockerfile to ensure CPU-only base.  
+         - Remove any references to CUDA, `nvidia/cuda`, or GPU libraries.  
+         - Use `FROM python:3.12-slim` or `FROM ubuntu:20.04` and install Python 3.12.  
+         - If upstream Dockerfile includes any GPU-specific logic, remove it.
+       - Build as before, in CPU mode.
+
+   17. **IMO AnswerBench: Prepare Data**
+       - As before.
+
+   18. **IOI: Prepare Data**
+       - As before.
+
+   19. **LabBench2 VLM: Prepare Data**
+       - As before.
+
+   20. **LibriSpeech-PC: Prepare Benchmark Data**
+       - As before.
+
+   21. **LiveCodeBench-X: Prepare Benchmark Data (NEW)**
+       - As before; ensure sufficient disk space (20+ GB).
+
+   22. **Start Resource Servers**
+       - For all resource servers, ensure:
+         - No `--gpus` flag.
+         - CPU-only model weights/config.
+         - If using vLLM, run in CPU mode (may be slow for large models).
+         - If server fails due to lack of GPU, document that only small-scale testing is possible on CPU.
+       - All other instructions unchanged.
+
+   23. **Start Agent Client**
+       - As before.
+
+   24. **Collect Example Rollouts**
+       - As before.
+
+   25. **Configure and Run IFBench Benchmark**
+       - As before.
+
+   26. **Configure and Run IMO AnswerBench Benchmark**
+       - As before.
+
+   27. **Configure and Run IOI Benchmark**
+       - As before.
+
+   28. **Configure and Run LabBench2 VLM Benchmark**
+       - As before.
+
+   29. **Configure and Run LibriSpeech-PC Benchmark**
+       - As before.
+
+   30. **Configure and Run LiveCodeBench-X Benchmark (NEW)**
+       - As before.
+
+   31-43. **All Other Steps**
+       - All steps remain as previously specified, with the following global adjustments:
+         - All Docker builds must use x86_64/amd64 base images (e.g., `python:3.12-slim`, `ubuntu:20.04`).
+         - No CUDA/GPU/NVIDIA-specific instructions or flags.
+         - All scripts, servers, and agents must be launched with CPU-only settings.
+         - Ensure sufficient disk space for all benchmarks, especially LiveCodeBench-X and LibriSpeech-PC.
+         - All scripts must work with deep working directory.
+
+   **Verification Methods (Adjusted):**
+   - After each main step, verify the system is running in CPU-only mode:
+     - `nvidia-smi` should not be present/used.
+     - `torch.cuda.is_available()` should return `False`.
+     - No Docker containers use `--gpus`.
+   - All CLI commands and scripts must succeed without a GPU present.
+   - For large model servers (e.g., vLLM), test with small models or small batch sizes if performance is inadequate on CPU.
+   - For LiveCodeBench-X and other large data steps, verify available disk space before launching.
+   - All error messages related to GPU/CUDA absence must be clear and actionable (e.g., "This feature requires a GPU; only CPU is available.").
+   - All result files and artifacts are generated in `/home/cc/EnvGym/data/20260501_153628_tensorblock_gpt-4.1/NeMo_Gym` or subfolders.
+
+---
+
+**In summary:**  
+All instructions, builds, and benchmarks are now CPU/x86_64/amd64 only, with no GPU or CUDA support. All Docker images and system tools must be compatible with Ubuntu 20.04+ and x86_64, and all scripts must be run in the specified deep project directory. Large disk space is required for data-heavy benchmarks. All steps and test cases are otherwise unchanged except for the removal of GPU/CUDA-specific logic.
+
+---
+
+**If any future step or dependency requires a GPU or CUDA, it MUST be skipped or adapted to CPU-only, or an alternative CPU-compatible workflow must be used.**

@@ -1,0 +1,23 @@
+[
+  "README.md",
+  "docker-compose.yaml",
+  "requirements.txt",
+  "variables.env",
+  "services/AgentService/Dockerfile",
+  "services/APIService/Dockerfile",
+  "services/PDFService/Dockerfile",
+  "services/PDFService/PDFModelService/Dockerfile.api",
+  "services/PDFService/PDFModelService/Dockerfile.worker",
+  "services/PDFService/PDFModelService/requirements.api.txt",
+  "services/PDFService/PDFModelService/requirements.worker.txt",
+  "services/TTSService/Dockerfile",
+  "tests/requirements-test.txt",
+  "frontend/shared/setup.py",
+  "shared/setup.py",
+  "workbench/docker-compose.yaml",
+  "services/AgentService/README.md",
+  "services/PDFService/README.md",
+  "services/TTSService/README.md",
+  "workbench/README.md",
+  "docs/README.md"
+]

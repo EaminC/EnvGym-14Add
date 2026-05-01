@@ -1,0 +1,22 @@
+current progress
+
+- Dockerfile is fully CPU-only, Python 3.10-slim base, and installs all required system libraries and Python dependencies as per the plan.
+- All CUDA/GPU/NVIDIA-specific packages, references, and tools are omitted.
+- Pre-commit, Black, Ruff, and other code quality tools are installed.
+- PyTorch, torchvision, and torchaudio (CPU-only) are installed.
+- CellViT-Inference (`cellvit==1.0.9`) is installed.
+- All additional Python dependencies are installed in batches for better error visibility.
+- `WORKDIR` is set to `/CellViT-Inference`, and the project is copied into the image.
+- If `pyproject.toml` exists, it is installed as a package.
+- Git repo is initialized if not present.
+- The Docker image builds and runs successfully, with no runtime errors reported in the latest run.
+
+next step
+
+- Adjust the `WORKDIR` to `/home/cc/EnvGym/data/20260501_153628_tensorblock_gpt-4.1/CellViT-Inference` to match the plan and ensure path consistency.
+- Ensure that the `COPY . .` command places the code in the correct directory (adjust if necessary after changing `WORKDIR`).
+- Remove any unnecessary sample ENTRYPOINT (consider using `ENTRYPOINT ["bash"]` or a specific command if required for your workflow).
+- (Optional) Clean up with a `.dockerignore` to avoid copying unnecessary files (tests, caches, .git, etc.).
+- Review and ensure all config/test/example files are present in the build context or mounted via Docker Compose as described in the plan.
+- Rebuild the Docker image and re-run the container to verify that the path and file changes are correct.
+- Update documentation/README to reflect any directory path changes made in the Dockerfile.

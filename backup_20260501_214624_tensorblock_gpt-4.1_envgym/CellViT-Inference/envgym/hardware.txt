@@ -1,0 +1,6 @@
+- Working Directory: /home/cc/EnvGym/data/20260501_153628_tensorblock_gpt-4.1/CellViT-Inference; deep subdirectory, likely Python or ML project
+- Architecture: x86_64; recommended --platform=linux/amd64
+- Base Image: Use standard amd64-based images (e.g., ubuntu:20.04, python:3.x-slim)
+- GPU: No NVIDIA GPU detected; use CPU-only images (do not use CUDA or nvidia/cuda base images)
+- Instruction Notes: No GPU-specific instructions (no RUN nvidia-smi, no CUDA installs); can leverage multi-core CPU optimizations; WORKDIR should match /home/cc/EnvGym/data/20260501_153628_tensorblock_gpt-4.1/CellViT-Inference or a relative path as appropriate
+- Docker Version: 28.1.1; supports BuildKit and modern Compose; no native --gpus support required

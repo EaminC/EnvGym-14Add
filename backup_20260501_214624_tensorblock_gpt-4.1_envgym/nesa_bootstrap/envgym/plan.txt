@@ -1,0 +1,129 @@
+=== ADJUSTED ENVIRONMENT SETUP PLAN (CPU-ONLY, x86_64, No GPU) ===
+
+1. DOWNLOADS NEEDED:
+
+   - Docker (version 28.1.1 already available, meets requirements; minimum as per [Docker docs](https://docs.docker.com/get-docker/))
+   - Curl (latest stable, or system package manager version)
+   - Gum (latest release, [gum repo](https://github.com/charmbracelet/gum))
+   - jq (latest stable, or system package manager version)
+   - Python 3 (minimum 3.7) and pip3 (for Python libraries)
+   - **(REMOVED)** Nvidia drivers & CUDA toolkit (not required; no NVIDIA GPU)
+   - **(REMOVED)** Nvidia Container Toolkit (not required; no NVIDIA GPU)
+   - WSL2 (for Windows, if not on native Linux/macOS)
+   - **(REMOVED)** Rosetta 2 (not required; x86_64 architecture)
+   - Nesa bootstrap script: https://raw.githubusercontent.com/nesaorg/bootstrap/master/bootstrap.sh
+   - (Optional) Hugging Face API key (user to obtain from https://huggingface.co/settings/tokens)
+   - (Optional) NES testnet tokens (user to obtain from https://beta.nesa.ai/faucet)
+
+2. FILES TO CREATE:
+
+   - `~/.nesa/env/base.env`
+     - Content: Node moniker, referral code, public IP, other node identity info.
+   - `~/.nesa/env/orchestrator.env`
+     - Content: secp256k1 private key (imported or generated), node ID, Hugging Face API key.
+   - `~/.nesa/logs/bootstrap.log`
+     - Content: All bootstrap script activity, session logs.
+   - (On first run, these files are auto-generated/updated by the bootstrap script. User can edit if needed for "advanced setup.")
+
+3. NECESSARY TEST CASES IN THE CODEBASE:
+
+   - System Prerequisite Checks:
+     - Test for Docker, curl, gum, jq, Python3, and OS compatibility.
+     - **(REMOVED)** NVIDIA checks (no GPU; fallback to CPU-only mode always)
+   - Wallet Management:
+     - Generate new secp256k1 wallet and verify keypair format.
+     - Import existing private key and validate correctness.
+     - Store private key securely and verify file permissions.
+   - NES Balance & Deposit:
+     - Query NES wallet balance (offline and online/testnet scenarios).
+     - Validate deposit transaction and minimum requirement enforcement.
+     - Handle faucet requests (testnet).
+   - On-Chain Registration:
+     - Register node/miner and verify automatic retry logic.
+     - Check node registration status.
+   - Node Lifecycle Management:
+     - Start, stop, pause, resume node containers.
+     - Node deletion cleans up all containers, configs, and data.
+   - GPU/CPU Detection:
+     - **(MODIFIED)** Always fallback to CPU-only mode; skip GPU/NVIDIA setup.
+     - Validate node runs on CPU; ensure Docker images do not include CUDA/nvidia dependencies.
+   - Logging & Dashboard:
+     - Log all activities to ~/.nesa/logs/bootstrap.log.
+     - Live log streaming and status dashboard access.
+   - Auto-Update Mechanism:
+     - Test automatic update pull and container restart.
+   - Configuration Edge Cases:
+     - Re-running bootstrap script with existing configuration.
+     - Editing config files directly and auto-detection by script.
+
+4. COMPLETE TODO LIST:
+
+   1. Update the OS and install all necessary package managers (apt, yum, brew, choco as appropriate).
+      - Verify: Run `lsb_release -a` or `uname -a` to confirm OS.
+      - **(RECOMMENDED)** Ensure OS is compatible with x86_64 Docker images (e.g., Ubuntu 20.04, Debian Bullseye).
+   2. Docker install step: **Skip if Docker 28.1.1 is already present and functional.**
+      - Verify: `docker --version` is 28.1.1, `docker info` shows BuildKit and compose support.
+   3. Install curl, gum, jq, and Python3/pip3.
+      - Verify: `curl --version`, `gum --version`, `jq --version`, `python3 --version`
+   4. **(REMOVED)** NVIDIA GPU steps:
+      - Skip installation of NVIDIA drivers, CUDA toolkit, and Nvidia Container Toolkit.
+      - **(MODIFIED VERIFY)** Confirm `nvidia-smi` is NOT required, and no Docker images use `--gpus` flag.
+   5. **(REMOVED)** Apple Silicon (ARM64) steps:
+      - Skip Rosetta 2 installation and ARM64-specific instructions.
+   6. For Windows:
+      - Install WSL2 and a compatible Linux distribution.
+      - Verify: `wsl --list --online` and `wsl uname -a`
+   7. Download the Nesa bootstrap script:
+      - `curl -O https://raw.githubusercontent.com/nesaorg/bootstrap/master/bootstrap.sh`
+      - Make executable: `chmod +x bootstrap.sh`
+      - Verify: Script present and executable.
+   8. Run the bootstrap script:
+      - `bash bootstrap.sh` or `bash <(curl -s https://raw.githubusercontent.com/nesaorg/bootstrap/master/bootstrap.sh)`
+      - Follow prompts for node name, referral code, Hugging Face API key, wallet setup.
+      - Verify: No errors in script output.
+   9. Generate or import a secp256k1 wallet/private key as prompted.
+      - Save private key securely.
+      - Verify: `~/.nesa/env/orchestrator.env` contains the correct key.
+   10. Obtain NES tokens (from faucet for testnet).
+       - Verify: Script can query and display NES balance.
+   11. Complete on-chain registration and deposit step.
+       - Verify: Registration confirmed and deposit status OK.
+   12. Start the Nesa node (containers start automatically if previous steps succeeded).
+       - Verify: `docker ps` shows containers running.
+       - **(MODIFIED)** Ensure containers are running CPU-compatible images only (e.g., ubuntu:20.04, python:3.10-slim).
+       - **(RECOMMENDED)** Use `--platform=linux/amd64` if building/pulling images explicitly.
+   13. Access node status dashboard and live logs via script menu.
+       - Verify: No errors, accurate status, and logs appear.
+   14. Test node lifecycle (start, stop, pause, resume) and deletion.
+       - Verify: Containers respond accordingly; deletion removes all config/data.
+   15. (Optional) Edit config files in `~/.nesa/env/` and re-run script to confirm detection of changes.
+       - Verify: Script skips wizard and loads existing configuration.
+   16. Add user to Docker group (if permission errors occur):
+       - `sudo usermod -aG docker $USER && newgrp docker`
+       - Verify: Able to run `docker` commands without sudo.
+   17. (If errors): Consult logs in `~/.nesa/logs/bootstrap.log` and follow troubleshooting steps.
+       - Verify: Errors documented, able to resolve with guide.
+   18. (Optional) Join Discord and explore GitBook documentation for further support.
+       - Verify: Able to access resources and ask community questions.
+
+5. ADDITIONAL COMPATIBILITY NOTES:
+
+   - All Docker images and containers must specify or default to `--platform=linux/amd64` to ensure x86_64 compatibility.
+   - Do not use any CUDA, nvidia/cuda, or GPU-specific base images or instructions.
+   - Ensure memory and storage requirements are met (large RAM available—no explicit limits needed).
+   - Working directory is `/home/cc/EnvGym/data/20260501_153628_tensorblock_gpt-4.1/nesa_bootstrap`; confirm script and containers use correct paths and do not assume root or home directory only.
+   - extfs/overlay2 storage driver is supported and compatible; confirm Docker uses overlay2 if possible.
+   - All instructions and scripts should be compatible with Linux (Ubuntu/Debian recommended), macOS (Intel), and Windows with WSL2.
+   - Validate base images used in Dockerfiles: ubuntu:20.04, python:3.10-slim, debian:bullseye (amd64 variants only).
+
+6. SUMMARY OF CHANGES:
+
+   - All GPU/NVIDIA/CUDA-related steps, checks, and downloads have been removed.
+   - Rosetta/ARM-specific steps removed (system is x86_64).
+   - All Docker images and instructions are confirmed as compatible with x86_64.
+   - Ensure fallback and detection logic always defaults to CPU-only mode.
+   - Storage and memory notes confirm no special limits or requirements.
+   - Path and directory notes added for deep working directory compatibility.
+   - Docker version and features are confirmed as fully supported.
+
+--- END OF ADJUSTED PLAN ---

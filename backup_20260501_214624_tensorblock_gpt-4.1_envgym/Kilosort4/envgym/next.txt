@@ -1,0 +1,22 @@
+current progress
+
+- Docker build and runtime successfully completed using the specified Dockerfile.
+- Dockerfile is based on Ubuntu 20.04 and installs all necessary system dependencies, including GUI and LaTeX tools.
+- Miniconda (Python 3.9) is installed and used for environment management.
+- Repository content is copied into the container.
+- Conda environment is created from `environment.yml` if present; otherwise, a default `kilosort` env with Python 3.9 is created.
+- GUI dependencies (`pyqt`, `pyqtgraph`, `qtpy`) are installed.
+- Pip is upgraded; environment state is listed.
+- Editable install of Kilosort with `[gui]` extras attempted; fallback to normal install if it fails.
+- Documentation requirements are installed from `docs/requirements.txt` if present.
+- Entrypoint is set to bash at the repository root.
+- No CUDA/NVIDIA/GPU dependencies are present; all steps are CPU-only and Ubuntu 20.04 compatible.
+
+next step
+
+- Review and ensure the Dockerfile installs only CPU-optimized builds for all dependencies (especially PyTorch and faiss), explicitly avoiding any CUDA-related packages.
+- Add a step to verify CPU-only PyTorch install, e.g., `/opt/conda/bin/conda run -n kilosort python -c "import torch; assert not torch.cuda.is_available()"`.
+- Remove or update any ambiguous `pyqt` install to specify `pyqt6` or `pyqt5` based on project requirements, avoiding unnecessary Qt conflicts.
+- Optionally add explicit installs for other listed dependencies (e.g., `faiss-cpu`, `numba`, `scikit-learn`, `tqdm`, `matplotlib`) if not fully covered in `environment.yml`.
+- Ensure `.readthedocs.yml`, `tox.ini`, `pytest.ini`, and other config files are present and copied to `/workspace`.
+- (Optional) Add test execution steps (e.g., `pytest`, `tox`, docs build) as part of Docker build or as a post-build script for verification.

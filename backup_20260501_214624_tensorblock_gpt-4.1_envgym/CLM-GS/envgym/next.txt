@@ -1,0 +1,21 @@
+current progress
+
+- Ubuntu 20.04 base image and all required system dependencies are installed.
+- Miniconda is installed and added to PATH.
+- Git repository (and submodules if present in context) is copied into the container.
+- Conda environment "clm_gs" is optionally created from environment.yml if present.
+- CPU-only PyTorch, torchvision, and torchaudio are correctly installed via pip.
+- Submodules `clm_kernels` and `gsplat` are installed with CPU fallback (installation warnings for non-pip-installable submodules are documented/skipped).
+- Black formatter is installed.
+- Directories for datasets and output are created.
+- Entrypoint set to bash with proper conda environment activation.
+
+next step
+
+- Ensure `environment.yml` and `requirements.txt` are present and correctly configured for CPU-only (no CUDA deps) before building.
+- Add pip installation of all required Python packages (tqdm, plyfile, psutil, numba, opencv-python, scipy, matplotlib, pandas, imageio, imageio-ffmpeg, requests, tabulate) after conda environment activation and before/after PyTorch install.
+- Confirm all submodules that are pip-installable (with setup.py/pyproject.toml) are installed; for those that are not, document in README and ensure their absence does not break the build.
+- Add verification RUN steps: test basic imports for torch and all required packages/submodules; optionally add a build-time check script.
+- (Optional) Copy or generate minimal config files (`.env`, `config/local_paths.yaml`, etc.) if needed for container usage.
+- Update or add comments to clarify that CUDA, GPU, and offload packages/flags are omitted for CPU-only compliance.
+- Finalize/verify the Dockerfile by running container and executing `python test/test_environment.py` and `python test/test_training.py` as a validation step (manual or in CI).

@@ -1,0 +1,23 @@
+current progress
+
+- The Docker image builds successfully with the `python:3.12-slim` base, confirming CPU-only configuration (no CUDA/NVIDIA dependencies).
+- All system dependencies required for the project (git, build tools, audio libs, etc.) are installed.
+- UV package manager is installed and project dependencies are installed via `uv pip install`.
+- `.python-version` and `pyproject.toml` are copied and displayed for diagnostics.
+- The repository and all code are copied into the image.
+- Python virtual environment is created and activated, with environment variables set.
+- Pre-commit is installed and repository is installed in editable mode.
+- Workspace permissions are liberalized.
+- Docker build and runtime logs indicate no errors; image runs successfully.
+
+next step
+
+- Review and remove any unused or redundant RUN commands for efficiency.
+- Ensure that the Dockerfile does not copy or install any files/scripts that assume GPU presence (double-check for remnants).
+- Verify that all project scripts and dependencies installed in the image are CPU-only and do not require CUDA or GPU.
+- Add explicit verification steps (e.g., `python -c "import torch; print(torch.cuda.is_available())"` should output `False`) to the Dockerfile for runtime diagnostics.
+- Confirm that all entrypoints and resource servers started from this image default to CPU mode.
+- Test starting all major services (code_gen, asr_with_pc, judge, vLLM, etc.) within the container to ensure CPU-only operation and document any performance caveats.
+- Ensure sufficient disk space is available in `/workspace` for large benchmark data if running benchmarks in the container.
+- If additional environment variables (e.g., for model server CPU config) are needed, add them to the Dockerfile.
+- Prepare the Dockerfile for any upcoming benchmark/data preparation steps by ensuring required tools and dependencies are present.

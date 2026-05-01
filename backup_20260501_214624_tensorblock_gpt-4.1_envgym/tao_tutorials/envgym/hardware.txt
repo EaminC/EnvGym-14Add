@@ -1,0 +1,6 @@
+- Working Directory: /home/cc/EnvGym/data/20260501_153628_tensorblock_gpt-4.1/tao_tutorials; project appears to be under tao_tutorials, nested several levels deep.
+- Architecture: x86_64; recommended --platform=linux/amd64
+- Base Image: Use amd64-based images, e.g., ubuntu:20.04, python:3.10-slim, pytorch/pytorch:latest, tensorflow/tensorflow:latest
+- GPU: No NVIDIA GPU detected; do not use CUDA base images or GPU-specific instructions
+- Instruction Notes: No GPU-specific Dockerfile instructions (e.g., no RUN apt-get install cuda, no FROM nvidia/cuda); large memory/CPU available for multi-stage builds or parallel builds; base images must be compatible with Ubuntu 20.04 host kernel if host mounting is used
+- Docker Version: 28.1.1; BuildKit and buildx supported; --gpus not available due to lack of NVIDIA GPU

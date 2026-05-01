@@ -1,0 +1,101 @@
+=== Docker Execution Log - 20260501_180911 ===
+Dockerfile: envgym/envgym.dockerfile
+Image Name: envgym_test_1777658950
+
+=== Build Log ===
+Build Status: Failed
+Build Output:
+
+
+Build Error:
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from envgym.dockerfile
+#1 transferring dockerfile: 1.83kB done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/ubuntu:20.04
+#2 DONE 0.1s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [ 1/15] FROM docker.io/library/ubuntu:20.04@sha256:8feb4d8ca5354def3d8fce243717141ce31e2c428701f6682bd2fafe15388214
+#4 DONE 0.0s
+
+#5 [ 5/15] RUN /opt/conda/bin/conda list
+#5 CACHED
+
+#6 [ 2/15] RUN apt-get update &&     apt-get install -y --no-install-recommends         ca-certificates         locales         git         jq         wget         curl         lsof         rsync         build-essential         openssh-client         vim         netcat         &&     locale-gen en_US.UTF-8 &&     update-locale LANG=en_US.UTF-8 &&     rm -rf /var/lib/apt/lists/*
+#6 CACHED
+
+#7 [ 3/15] RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /tmp/miniconda.sh &&     bash /tmp/miniconda.sh -b -p /opt/conda &&     rm /tmp/miniconda.sh &&     /opt/conda/bin/conda clean -afy
+#7 CACHED
+
+#8 [ 6/15] RUN /opt/conda/bin/conda config --add channels conda-forge
+#8 CACHED
+
+#9 [ 7/15] RUN /opt/conda/bin/conda update conda -y || true && /opt/conda/bin/conda clean -afy
+#9 CACHED
+
+#10 [ 4/15] RUN /opt/conda/bin/conda info
+#10 CACHED
+
+#11 [ 8/15] RUN /opt/conda/bin/conda init bash
+#11 CACHED
+
+#12 [internal] load build context
+#12 transferring context: 499.02kB 0.0s done
+#12 DONE 0.0s
+
+#13 [ 9/15] RUN /opt/conda/bin/conda create -y -n node0 python=3.11.4
+#13 0.587 
+#13 0.587 CondaToSNonInteractiveError: Terms of Service have not been accepted for the following channels. Please accept or remove them before proceeding:
+#13 0.587     - https://repo.anaconda.com/pkgs/main
+#13 0.587     - https://repo.anaconda.com/pkgs/r
+#13 0.587 
+#13 0.587 To accept these channels' Terms of Service, run the following commands:
+#13 0.587     conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main
+#13 0.587     conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r
+#13 0.587 
+#13 0.587 For information on safely removing channels from your conda configuration,
+#13 0.587 please see the official documentation:
+#13 0.587 
+#13 0.587     https://www.anaconda.com/docs/tools/working-with-conda/channels
+#13 0.587 
+#13 ERROR: process "/bin/sh -c /opt/conda/bin/conda create -y -n node0 python=3.11.4" did not complete successfully: exit code: 1
+------
+ > [ 9/15] RUN /opt/conda/bin/conda create -y -n node0 python=3.11.4:
+0.587 
+0.587 To accept these channels' Terms of Service, run the following commands:
+0.587     conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main
+0.587     conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r
+0.587 
+0.587 For information on safely removing channels from your conda configuration,
+0.587 please see the official documentation:
+0.587 
+0.587     https://www.anaconda.com/docs/tools/working-with-conda/channels
+0.587 
+------
+envgym.dockerfile:46
+--------------------
+  44 |     # Removed: RUN /opt/conda/bin/conda search python
+  45 |     
+  46 | >>> RUN /opt/conda/bin/conda create -y -n node0 python=3.11.4
+  47 |     
+  48 |     RUN /opt/conda/bin/conda env list && /opt/conda/bin/conda info --envs
+--------------------
+ERROR: failed to solve: process "/bin/sh -c /opt/conda/bin/conda create -y -n node0 python=3.11.4" did not complete successfully: exit code: 1
+
+
+=== Runtime Log ===  
+Runtime Status: Failed
+Runtime Output:
+
+
+Runtime Error:
+
+
+=== Execution End ===
+

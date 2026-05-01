@@ -1,0 +1,6 @@
+- Working Directory: /home/cc/EnvGym/data/20260501_153628_tensorblock_gpt-4.1/CLM-GS (likely Python/data science project, subdirectory in a larger environment)
+- Architecture: x86_64 (use --platform=linux/amd64)
+- Base Image: ubuntu:20.04, python:3.x-slim, or other amd64-compatible images (no CUDA variant needed)
+- GPU: No NVIDIA GPU present; use CPU-only images; no CUDA base image required
+- Instruction Notes: No GPU-specific instructions (no RUN nvidia* or CUDA installs); standard linux/amd64 instructions; large memory/CPU support for parallel builds if needed
+- Docker Version: 28.1.1 (BuildKit supported, --gpus not applicable, modern multi-stage builds supported)

@@ -1,0 +1,9 @@
+[
+  "README.md",
+  "setup/tao-docker-compose/docker-compose.yml",
+  "setup/tao-docker-compose/config.env",
+  "setup/tao-docker-compose/s3-config.json",
+  "setup/tao-docker-compose/secrets.json",
+  "setup/tao-docker-compose/README.md",
+  "notebooks/tao_launcher_starter_kit/deps/requirements-pip.txt"
+]

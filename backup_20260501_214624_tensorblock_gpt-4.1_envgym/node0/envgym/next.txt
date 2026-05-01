@@ -1,0 +1,23 @@
+current progress
+
+- Dockerfile is updated for CPU-only, Ubuntu 20.04, with no CUDA/nvidia instructions.
+- All required apt packages for CPU environment are installed.
+- Miniconda is installed to /opt/conda.
+- Conda channels and initialization steps are configured.
+- Attempted to create conda env "node0" with python=3.11.4, but build failed at this step.
+- No further steps (pip install, dependency installation, etc.) were executed due to failure.
+- Docker image build status: Failed (at conda create env step).
+- No runtime/container execution occurred.
+
+next step
+
+- Investigate and resolve conda environment creation failure:
+  - Check Miniconda installation integrity and ensure /opt/conda/bin/conda exists and is executable.
+  - Add `RUN /opt/conda/bin/conda update -n base conda -y` before env creation for latest conda functionality.
+  - Specify python version as `python=3.11` instead of `python=3.11.4` for broader compatibility.
+  - Add `RUN /opt/conda/bin/conda clean -afy` after env creation to reduce layer size.
+- Modify the Dockerfile:
+  - Replace `RUN /opt/conda/bin/conda create -y -n node0 python=3.11.4` with `RUN /opt/conda/bin/conda create -y -n node0 python=3.11`
+  - Confirm the env is listed with `RUN /opt/conda/bin/conda env list`
+- Rebuild the Docker image and verify successful conda env creation before proceeding to pip and project install steps.
+- If build succeeds, continue with dependency installation and testing as outlined in the plan.

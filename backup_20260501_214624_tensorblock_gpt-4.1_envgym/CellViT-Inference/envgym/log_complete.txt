@@ -1,0 +1,452 @@
+=== Docker Execution Log - 20260501_173322 ===
+Dockerfile: envgym/envgym.dockerfile
+Image Name: envgym_test_1777656755
+
+=== Build Log ===
+Build Status: Success
+Build Output:
+
+
+Build Error:
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from envgym.dockerfile
+#1 transferring dockerfile: 1.77kB done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/python:3.10-slim
+#2 DONE 0.1s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [ 1/21] FROM docker.io/library/python:3.10-slim@sha256:cdbf8193cee2e31639ea8ea85ffdd8fa5cce98ee9abfde96ea5f329490048831
+#4 DONE 0.0s
+
+#5 [ 5/21] RUN pip install     torch==2.2.2     torchvision==0.17.2     torchaudio==2.2.2
+#5 CACHED
+
+#6 [ 2/21] RUN apt-get update && apt-get install -y --no-install-recommends     build-essential     git     libvips-dev     openslide-tools     libopencv-core-dev     libopencv-imgproc-dev     libsnappy-dev     libgeos-dev     llvm     libjpeg-dev     libpng-dev     libtiff-dev     curl     ca-certificates     && rm -rf /var/lib/apt/lists/*
+#6 CACHED
+
+#7 [ 3/21] RUN python -m pip install --upgrade pip setuptools wheel
+#7 CACHED
+
+#8 [ 4/21] RUN pip install     pre-commit     black==23.1.0     ruff==0.3.4     pre-commit-hooks==4.4.0     conventional-pre-commit==2.1.1
+#8 CACHED
+
+#9 [ 6/21] RUN pip install cellvit==1.0.9
+#9 CACHED
+
+#10 [ 7/21] RUN pip install colorama colour natsort tqdm psutil pyaml ujson==5.8.0
+#10 CACHED
+
+#11 [internal] load build context
+#11 transferring context: 350.23kB 0.0s done
+#11 DONE 0.0s
+
+#12 [ 8/21] RUN pip install "einops>=0.6.1" "geojson>=2.0.0" "opt-einsum>=3.3.0" pandas
+#12 0.464 Requirement already satisfied: einops>=0.6.1 in ./usr/local/lib/python3.10/site-packages (0.8.2)
+#12 0.465 Requirement already satisfied: geojson>=2.0.0 in ./usr/local/lib/python3.10/site-packages (3.2.0)
+#12 0.465 Requirement already satisfied: opt-einsum>=3.3.0 in ./usr/local/lib/python3.10/site-packages (3.4.0)
+#12 0.465 Requirement already satisfied: pandas in ./usr/local/lib/python3.10/site-packages (2.3.3)
+#12 0.488 Requirement already satisfied: numpy>=1.22.4 in ./usr/local/lib/python3.10/site-packages (from pandas) (1.26.4)
+#12 0.488 Requirement already satisfied: python-dateutil>=2.8.2 in ./usr/local/lib/python3.10/site-packages (from pandas) (2.9.0.post0)
+#12 0.489 Requirement already satisfied: pytz>=2020.1 in ./usr/local/lib/python3.10/site-packages (from pandas) (2026.1.post1)
+#12 0.489 Requirement already satisfied: tzdata>=2022.7 in ./usr/local/lib/python3.10/site-packages (from pandas) (2026.2)
+#12 0.491 Requirement already satisfied: six>=1.5 in ./usr/local/lib/python3.10/site-packages (from python-dateutil>=2.8.2->pandas) (1.17.0)
+#12 0.727 WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.
+#12 DONE 0.8s
+
+#13 [ 9/21] RUN pip install "numpy<2.0.0"
+#13 0.543 Requirement already satisfied: numpy<2.0.0 in ./usr/local/lib/python3.10/site-packages (1.26.4)
+#13 0.800 WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.
+#13 DONE 0.9s
+
+#14 [10/21] RUN pip install "numba>=0.58.0"
+#14 0.576 Requirement already satisfied: numba>=0.58.0 in ./usr/local/lib/python3.10/site-packages (0.65.1)
+#14 0.577 Requirement already satisfied: llvmlite<0.48,>=0.47.0dev0 in ./usr/local/lib/python3.10/site-packages (from numba>=0.58.0) (0.47.0)
+#14 0.577 Requirement already satisfied: numpy>=1.22 in ./usr/local/lib/python3.10/site-packages (from numba>=0.58.0) (1.26.4)
+#14 0.833 WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.
+#14 DONE 0.9s
+
+#15 [11/21] RUN pip install opencv-python-headless==4.7.0.72
+#15 0.596 Requirement already satisfied: opencv-python-headless==4.7.0.72 in ./usr/local/lib/python3.10/site-packages (4.7.0.72)
+#15 0.598 Requirement already satisfied: numpy>=1.21.2 in ./usr/local/lib/python3.10/site-packages (from opencv-python-headless==4.7.0.72) (1.26.4)
+#15 0.853 WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.
+#15 DONE 0.9s
+
+#16 [12/21] RUN pip install "pathopatch>=1.0.9"
+#16 0.600 Requirement already satisfied: pathopatch>=1.0.9 in ./usr/local/lib/python3.10/site-packages (1.0.10)
+#16 0.602 Requirement already satisfied: Pillow>=9.5.0 in ./usr/local/lib/python3.10/site-packages (from pathopatch>=1.0.9) (10.4.0)
+#16 0.603 Requirement already satisfied: PyYAML in ./usr/local/lib/python3.10/site-packages (from pathopatch>=1.0.9) (6.0.3)
+#16 0.603 Requirement already satisfied: Shapely<=2.0.5,>=1.8.5.post1 in ./usr/local/lib/python3.10/site-packages (from pathopatch>=1.0.9) (2.0.5)
+#16 0.604 Requirement already satisfied: colorama in ./usr/local/lib/python3.10/site-packages (from pathopatch>=1.0.9) (0.4.6)
+#16 0.604 Requirement already satisfied: future in ./usr/local/lib/python3.10/site-packages (from pathopatch>=1.0.9) (1.0.0)
+#16 0.604 Requirement already satisfied: geojson>=3.0.0 in ./usr/local/lib/python3.10/site-packages (from pathopatch>=1.0.9) (3.2.0)
+#16 0.605 Requirement already satisfied: matplotlib in ./usr/local/lib/python3.10/site-packages (from pathopatch>=1.0.9) (3.10.9)
+#16 0.605 Requirement already satisfied: natsort in ./usr/local/lib/python3.10/site-packages (from pathopatch>=1.0.9) (8.4.0)
+#16 0.606 Requirement already satisfied: numpy<2.0.0 in ./usr/local/lib/python3.10/site-packages (from pathopatch>=1.0.9) (1.26.4)
+#16 0.606 Requirement already satisfied: opencv_python_headless in ./usr/local/lib/python3.10/site-packages (from pathopatch>=1.0.9) (4.7.0.72)
+#16 0.606 Requirement already satisfied: openslide_python in ./usr/local/lib/python3.10/site-packages (from pathopatch>=1.0.9) (1.4.3)
+#16 0.607 Requirement already satisfied: pandas in ./usr/local/lib/python3.10/site-packages (from pathopatch>=1.0.9) (2.3.3)
+#16 0.607 Requirement already satisfied: pydantic<2.0,>=1.10.16 in ./usr/local/lib/python3.10/site-packages (from pathopatch>=1.0.9) (1.10.26)
+#16 0.607 Requirement already satisfied: rasterio in ./usr/local/lib/python3.10/site-packages (from pathopatch>=1.0.9) (1.4.4)
+#16 0.608 Requirement already satisfied: requests in ./usr/local/lib/python3.10/site-packages (from pathopatch>=1.0.9) (2.33.1)
+#16 0.608 Requirement already satisfied: scikit-image<0.27 in ./usr/local/lib/python3.10/site-packages (from pathopatch>=1.0.9) (0.25.2)
+#16 0.609 Requirement already satisfied: setuptools<=65.6.3 in ./usr/local/lib/python3.10/site-packages (from pathopatch>=1.0.9) (65.6.3)
+#16 0.609 Requirement already satisfied: tqdm in ./usr/local/lib/python3.10/site-packages (from pathopatch>=1.0.9) (4.67.3)
+#16 0.610 Requirement already satisfied: torchvision in ./usr/local/lib/python3.10/site-packages (from pathopatch>=1.0.9) (0.17.2)
+#16 0.610 Requirement already satisfied: torch in ./usr/local/lib/python3.10/site-packages (from pathopatch>=1.0.9) (2.2.2)
+#16 0.610 Requirement already satisfied: wsidicom in ./usr/local/lib/python3.10/site-packages (from pathopatch>=1.0.9) (0.20.6)
+#16 0.611 Requirement already satisfied: wsidicomizer in ./usr/local/lib/python3.10/site-packages (from pathopatch>=1.0.9) (0.14.2)
+#16 0.611 Requirement already satisfied: pydicom==2.4.4 in ./usr/local/lib/python3.10/site-packages (from pathopatch>=1.0.9) (2.4.4)
+#16 0.617 Requirement already satisfied: typing-extensions>=4.2.0 in ./usr/local/lib/python3.10/site-packages (from pydantic<2.0,>=1.10.16->pathopatch>=1.0.9) (4.15.0)
+#16 0.624 Requirement already satisfied: scipy>=1.11.4 in ./usr/local/lib/python3.10/site-packages (from scikit-image<0.27->pathopatch>=1.0.9) (1.15.3)
+#16 0.624 Requirement already satisfied: networkx>=3.0 in ./usr/local/lib/python3.10/site-packages (from scikit-image<0.27->pathopatch>=1.0.9) (3.4.2)
+#16 0.625 Requirement already satisfied: imageio!=2.35.0,>=2.33 in ./usr/local/lib/python3.10/site-packages (from scikit-image<0.27->pathopatch>=1.0.9) (2.37.3)
+#16 0.625 Requirement already satisfied: tifffile>=2022.8.12 in ./usr/local/lib/python3.10/site-packages (from scikit-image<0.27->pathopatch>=1.0.9) (2025.5.10)
+#16 0.626 Requirement already satisfied: packaging>=21 in ./usr/local/lib/python3.10/site-packages (from scikit-image<0.27->pathopatch>=1.0.9) (26.2)
+#16 0.626 Requirement already satisfied: lazy-loader>=0.4 in ./usr/local/lib/python3.10/site-packages (from scikit-image<0.27->pathopatch>=1.0.9) (0.5)
+#16 0.673 Requirement already satisfied: contourpy>=1.0.1 in ./usr/local/lib/python3.10/site-packages (from matplotlib->pathopatch>=1.0.9) (1.3.2)
+#16 0.674 Requirement already satisfied: cycler>=0.10 in ./usr/local/lib/python3.10/site-packages (from matplotlib->pathopatch>=1.0.9) (0.12.1)
+#16 0.674 Requirement already satisfied: fonttools>=4.22.0 in ./usr/local/lib/python3.10/site-packages (from matplotlib->pathopatch>=1.0.9) (4.62.1)
+#16 0.675 Requirement already satisfied: kiwisolver>=1.3.1 in ./usr/local/lib/python3.10/site-packages (from matplotlib->pathopatch>=1.0.9) (1.5.0)
+#16 0.675 Requirement already satisfied: pyparsing>=3 in ./usr/local/lib/python3.10/site-packages (from matplotlib->pathopatch>=1.0.9) (3.3.2)
+#16 0.676 Requirement already satisfied: python-dateutil>=2.7 in ./usr/local/lib/python3.10/site-packages (from matplotlib->pathopatch>=1.0.9) (2.9.0.post0)
+#16 0.689 Requirement already satisfied: six>=1.5 in ./usr/local/lib/python3.10/site-packages (from python-dateutil>=2.7->matplotlib->pathopatch>=1.0.9) (1.17.0)
+#16 0.713 Requirement already satisfied: pytz>=2020.1 in ./usr/local/lib/python3.10/site-packages (from pandas->pathopatch>=1.0.9) (2026.1.post1)
+#16 0.714 Requirement already satisfied: tzdata>=2022.7 in ./usr/local/lib/python3.10/site-packages (from pandas->pathopatch>=1.0.9) (2026.2)
+#16 0.720 Requirement already satisfied: affine in ./usr/local/lib/python3.10/site-packages (from rasterio->pathopatch>=1.0.9) (2.4.0)
+#16 0.720 Requirement already satisfied: attrs in ./usr/local/lib/python3.10/site-packages (from rasterio->pathopatch>=1.0.9) (26.1.0)
+#16 0.721 Requirement already satisfied: certifi in ./usr/local/lib/python3.10/site-packages (from rasterio->pathopatch>=1.0.9) (2026.4.22)
+#16 0.721 Requirement already satisfied: click!=8.2.*,>=4.0 in ./usr/local/lib/python3.10/site-packages (from rasterio->pathopatch>=1.0.9) (8.3.3)
+#16 0.722 Requirement already satisfied: cligj>=0.5 in ./usr/local/lib/python3.10/site-packages (from rasterio->pathopatch>=1.0.9) (0.7.2)
+#16 0.722 Requirement already satisfied: click-plugins in ./usr/local/lib/python3.10/site-packages (from rasterio->pathopatch>=1.0.9) (1.1.1.2)
+#16 0.730 Requirement already satisfied: charset_normalizer<4,>=2 in ./usr/local/lib/python3.10/site-packages (from requests->pathopatch>=1.0.9) (3.4.7)
+#16 0.730 Requirement already satisfied: idna<4,>=2.5 in ./usr/local/lib/python3.10/site-packages (from requests->pathopatch>=1.0.9) (3.13)
+#16 0.731 Requirement already satisfied: urllib3<3,>=1.26 in ./usr/local/lib/python3.10/site-packages (from requests->pathopatch>=1.0.9) (2.6.3)
+#16 0.738 Requirement already satisfied: filelock in ./usr/local/lib/python3.10/site-packages (from torch->pathopatch>=1.0.9) (3.29.0)
+#16 0.738 Requirement already satisfied: sympy in ./usr/local/lib/python3.10/site-packages (from torch->pathopatch>=1.0.9) (1.14.0)
+#16 0.739 Requirement already satisfied: jinja2 in ./usr/local/lib/python3.10/site-packages (from torch->pathopatch>=1.0.9) (3.1.6)
+#16 0.739 Requirement already satisfied: fsspec in ./usr/local/lib/python3.10/site-packages (from torch->pathopatch>=1.0.9) (2024.12.0)
+#16 0.740 Requirement already satisfied: nvidia-cuda-nvrtc-cu12==12.1.105 in ./usr/local/lib/python3.10/site-packages (from torch->pathopatch>=1.0.9) (12.1.105)
+#16 0.740 Requirement already satisfied: nvidia-cuda-runtime-cu12==12.1.105 in ./usr/local/lib/python3.10/site-packages (from torch->pathopatch>=1.0.9) (12.1.105)
+#16 0.741 Requirement already satisfied: nvidia-cuda-cupti-cu12==12.1.105 in ./usr/local/lib/python3.10/site-packages (from torch->pathopatch>=1.0.9) (12.1.105)
+#16 0.742 Requirement already satisfied: nvidia-cudnn-cu12==8.9.2.26 in ./usr/local/lib/python3.10/site-packages (from torch->pathopatch>=1.0.9) (8.9.2.26)
+#16 0.742 Requirement already satisfied: nvidia-cublas-cu12==12.1.3.1 in ./usr/local/lib/python3.10/site-packages (from torch->pathopatch>=1.0.9) (12.1.3.1)
+#16 0.743 Requirement already satisfied: nvidia-cufft-cu12==11.0.2.54 in ./usr/local/lib/python3.10/site-packages (from torch->pathopatch>=1.0.9) (11.0.2.54)
+#16 0.744 Requirement already satisfied: nvidia-curand-cu12==10.3.2.106 in ./usr/local/lib/python3.10/site-packages (from torch->pathopatch>=1.0.9) (10.3.2.106)
+#16 0.745 Requirement already satisfied: nvidia-cusolver-cu12==11.4.5.107 in ./usr/local/lib/python3.10/site-packages (from torch->pathopatch>=1.0.9) (11.4.5.107)
+#16 0.745 Requirement already satisfied: nvidia-cusparse-cu12==12.1.0.106 in ./usr/local/lib/python3.10/site-packages (from torch->pathopatch>=1.0.9) (12.1.0.106)
+#16 0.746 Requirement already satisfied: nvidia-nccl-cu12==2.19.3 in ./usr/local/lib/python3.10/site-packages (from torch->pathopatch>=1.0.9) (2.19.3)
+#16 0.746 Requirement already satisfied: nvidia-nvtx-cu12==12.1.105 in ./usr/local/lib/python3.10/site-packages (from torch->pathopatch>=1.0.9) (12.1.105)
+#16 0.747 Requirement already satisfied: triton==2.2.0 in ./usr/local/lib/python3.10/site-packages (from torch->pathopatch>=1.0.9) (2.2.0)
+#16 0.754 Requirement already satisfied: nvidia-nvjitlink-cu12 in ./usr/local/lib/python3.10/site-packages (from nvidia-cusolver-cu12==11.4.5.107->torch->pathopatch>=1.0.9) (12.9.86)
+#16 0.781 Requirement already satisfied: MarkupSafe>=2.0 in ./usr/local/lib/python3.10/site-packages (from jinja2->torch->pathopatch>=1.0.9) (3.0.3)
+#16 0.784 Requirement already satisfied: mpmath<1.4,>=1.1.0 in ./usr/local/lib/python3.10/site-packages (from sympy->torch->pathopatch>=1.0.9) (1.3.0)
+#16 0.793 Requirement already satisfied: dicomweb-client<0.60.0,>=0.59.1 in ./usr/local/lib/python3.10/site-packages (from wsidicom->pathopatch>=1.0.9) (0.59.3)
+#16 0.794 Requirement already satisfied: marshmallow<4.0.0,>=3.20.1 in ./usr/local/lib/python3.10/site-packages (from wsidicom->pathopatch>=1.0.9) (3.26.2)
+#16 0.795 Requirement already satisfied: universal-pathlib<0.3.0,>=0.2.1 in ./usr/local/lib/python3.10/site-packages (from wsidicom->pathopatch>=1.0.9) (0.2.6)
+#16 0.799 Requirement already satisfied: retrying>=1.3.3 in ./usr/local/lib/python3.10/site-packages (from dicomweb-client<0.60.0,>=0.59.1->wsidicom->pathopatch>=1.0.9) (1.4.2)
+#16 0.808 Requirement already satisfied: czifile>=2019.7.2 in ./usr/local/lib/python3.10/site-packages (from wsidicomizer->pathopatch>=1.0.9) (2019.7.2.2)
+#16 0.809 Requirement already satisfied: opentile<0.14.0,>=0.13.1 in ./usr/local/lib/python3.10/site-packages (from wsidicomizer->pathopatch>=1.0.9) (0.13.4)
+#16 0.809 Requirement already satisfied: tiffslide<3.0.0,>=2.4.0 in ./usr/local/lib/python3.10/site-packages (from wsidicomizer->pathopatch>=1.0.9) (2.5.1)
+#16 0.812 Requirement already satisfied: PyTurboJPEG<2.0.0,>=1.7.3 in ./usr/local/lib/python3.10/site-packages (from opentile<0.14.0,>=0.13.1->wsidicomizer->pathopatch>=1.0.9) (1.8.3)
+#16 0.812 Requirement already satisfied: defusedxml<0.8.0,>=0.7.1 in ./usr/local/lib/python3.10/site-packages (from opentile<0.14.0,>=0.13.1->wsidicomizer->pathopatch>=1.0.9) (0.7.1)
+#16 0.813 Requirement already satisfied: imagecodecs>=2022.12.24 in ./usr/local/lib/python3.10/site-packages (from opentile<0.14.0,>=0.13.1->wsidicomizer->pathopatch>=1.0.9) (2025.3.30)
+#16 0.814 Requirement already satisfied: ome-types<0.6.0,>=0.5.0 in ./usr/local/lib/python3.10/site-packages (from opentile<0.14.0,>=0.13.1->wsidicomizer->pathopatch>=1.0.9) (0.5.3)
+#16 0.822 Requirement already satisfied: pydantic-compat>=0.1.0 in ./usr/local/lib/python3.10/site-packages (from ome-types<0.6.0,>=0.5.0->opentile<0.14.0,>=0.13.1->wsidicomizer->pathopatch>=1.0.9) (0.1.2)
+#16 0.822 Requirement already satisfied: xsdata<24.4,>=23.6 in ./usr/local/lib/python3.10/site-packages (from ome-types<0.6.0,>=0.5.0->opentile<0.14.0,>=0.13.1->wsidicomizer->pathopatch>=1.0.9) (24.3.1)
+#16 0.827 Requirement already satisfied: zarr<3.0,>=2.16.0 in ./usr/local/lib/python3.10/site-packages (from tiffslide<3.0.0,>=2.4.0->wsidicomizer->pathopatch>=1.0.9) (2.18.3)
+#16 0.833 Requirement already satisfied: asciitree in ./usr/local/lib/python3.10/site-packages (from zarr<3.0,>=2.16.0->tiffslide<3.0.0,>=2.4.0->wsidicomizer->pathopatch>=1.0.9) (0.3.3)
+#16 0.833 Requirement already satisfied: numcodecs>=0.10.0 in ./usr/local/lib/python3.10/site-packages (from zarr<3.0,>=2.16.0->tiffslide<3.0.0,>=2.4.0->wsidicomizer->pathopatch>=1.0.9) (0.13.1)
+#16 0.834 Requirement already satisfied: fasteners in ./usr/local/lib/python3.10/site-packages (from zarr<3.0,>=2.16.0->tiffslide<3.0.0,>=2.4.0->wsidicomizer->pathopatch>=1.0.9) (0.20)
+#16 0.954 WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.
+#16 DONE 1.0s
+
+#17 [13/21] RUN pip install "pydantic>=1.10.16,<2.0" "pydicom==2.4.4"
+#17 0.524 Requirement already satisfied: pydantic<2.0,>=1.10.16 in ./usr/local/lib/python3.10/site-packages (1.10.26)
+#17 0.524 Requirement already satisfied: pydicom==2.4.4 in ./usr/local/lib/python3.10/site-packages (2.4.4)
+#17 0.528 Requirement already satisfied: typing-extensions>=4.2.0 in ./usr/local/lib/python3.10/site-packages (from pydantic<2.0,>=1.10.16) (4.15.0)
+#17 0.782 WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.
+#17 DONE 0.9s
+
+#18 [14/21] RUN pip install "ray[default]>=2.9.3"
+#18 0.543 Requirement already satisfied: ray>=2.9.3 in ./usr/local/lib/python3.10/site-packages (from ray[default]>=2.9.3) (2.55.1)
+#18 0.596 Requirement already satisfied: click>=7.0 in ./usr/local/lib/python3.10/site-packages (from ray>=2.9.3->ray[default]>=2.9.3) (8.3.3)
+#18 0.596 Requirement already satisfied: filelock in ./usr/local/lib/python3.10/site-packages (from ray>=2.9.3->ray[default]>=2.9.3) (3.29.0)
+#18 0.597 Requirement already satisfied: jsonschema in ./usr/local/lib/python3.10/site-packages (from ray>=2.9.3->ray[default]>=2.9.3) (4.26.0)
+#18 0.597 Requirement already satisfied: msgpack<2.0.0,>=1.0.0 in ./usr/local/lib/python3.10/site-packages (from ray>=2.9.3->ray[default]>=2.9.3) (1.1.2)
+#18 0.597 Requirement already satisfied: packaging>=24.2 in ./usr/local/lib/python3.10/site-packages (from ray>=2.9.3->ray[default]>=2.9.3) (26.2)
+#18 0.598 Requirement already satisfied: protobuf>=3.20.3 in ./usr/local/lib/python3.10/site-packages (from ray>=2.9.3->ray[default]>=2.9.3) (6.33.6)
+#18 0.598 Requirement already satisfied: pyyaml in ./usr/local/lib/python3.10/site-packages (from ray>=2.9.3->ray[default]>=2.9.3) (6.0.3)
+#18 0.599 Requirement already satisfied: requests in ./usr/local/lib/python3.10/site-packages (from ray>=2.9.3->ray[default]>=2.9.3) (2.33.1)
+#18 0.601 Requirement already satisfied: aiohttp>=3.13.3 in ./usr/local/lib/python3.10/site-packages (from ray[default]>=2.9.3) (3.13.5)
+#18 0.602 Requirement already satisfied: aiohttp_cors in ./usr/local/lib/python3.10/site-packages (from ray[default]>=2.9.3) (0.8.1)
+#18 0.602 Requirement already satisfied: colorful in ./usr/local/lib/python3.10/site-packages (from ray[default]>=2.9.3) (0.5.8)
+#18 0.603 Requirement already satisfied: py-spy>=0.2.0 in ./usr/local/lib/python3.10/site-packages (from ray[default]>=2.9.3) (0.4.2)
+#18 0.604 Requirement already satisfied: grpcio>=1.42.0 in ./usr/local/lib/python3.10/site-packages (from ray[default]>=2.9.3) (1.80.0)
+#18 0.604 Requirement already satisfied: opencensus in ./usr/local/lib/python3.10/site-packages (from ray[default]>=2.9.3) (0.11.4)
+#18 0.605 Requirement already satisfied: opentelemetry-sdk>=1.30.0 in ./usr/local/lib/python3.10/site-packages (from ray[default]>=2.9.3) (1.41.1)
+#18 0.605 Requirement already satisfied: opentelemetry-exporter-prometheus in ./usr/local/lib/python3.10/site-packages (from ray[default]>=2.9.3) (0.62b1)
+#18 0.606 Requirement already satisfied: opentelemetry-proto in ./usr/local/lib/python3.10/site-packages (from ray[default]>=2.9.3) (1.41.1)
+#18 0.606 Requirement already satisfied: pydantic!=2.0.*,!=2.1.*,!=2.10.*,!=2.11.*,!=2.2.*,!=2.3.*,!=2.4.*,!=2.5.*,!=2.6.*,!=2.7.*,!=2.8.*,!=2.9.*,<3 in ./usr/local/lib/python3.10/site-packages (from ray[default]>=2.9.3) (1.10.26)
+#18 0.607 Requirement already satisfied: prometheus_client>=0.7.1 in ./usr/local/lib/python3.10/site-packages (from ray[default]>=2.9.3) (0.25.0)
+#18 0.607 Requirement already satisfied: smart_open in ./usr/local/lib/python3.10/site-packages (from ray[default]>=2.9.3) (7.6.0)
+#18 0.608 Requirement already satisfied: virtualenv!=20.21.1,>=20.0.24 in ./usr/local/lib/python3.10/site-packages (from ray[default]>=2.9.3) (21.3.0)
+#18 0.611 Requirement already satisfied: typing-extensions>=4.2.0 in ./usr/local/lib/python3.10/site-packages (from pydantic!=2.0.*,!=2.1.*,!=2.10.*,!=2.11.*,!=2.2.*,!=2.3.*,!=2.4.*,!=2.5.*,!=2.6.*,!=2.7.*,!=2.8.*,!=2.9.*,<3->ray[default]>=2.9.3) (4.15.0)
+#18 0.614 Requirement already satisfied: aiohappyeyeballs>=2.5.0 in ./usr/local/lib/python3.10/site-packages (from aiohttp>=3.13.3->ray[default]>=2.9.3) (2.6.1)
+#18 0.614 Requirement already satisfied: aiosignal>=1.4.0 in ./usr/local/lib/python3.10/site-packages (from aiohttp>=3.13.3->ray[default]>=2.9.3) (1.4.0)
+#18 0.614 Requirement already satisfied: async-timeout<6.0,>=4.0 in ./usr/local/lib/python3.10/site-packages (from aiohttp>=3.13.3->ray[default]>=2.9.3) (5.0.1)
+#18 0.615 Requirement already satisfied: attrs>=17.3.0 in ./usr/local/lib/python3.10/site-packages (from aiohttp>=3.13.3->ray[default]>=2.9.3) (26.1.0)
+#18 0.615 Requirement already satisfied: frozenlist>=1.1.1 in ./usr/local/lib/python3.10/site-packages (from aiohttp>=3.13.3->ray[default]>=2.9.3) (1.8.0)
+#18 0.616 Requirement already satisfied: multidict<7.0,>=4.5 in ./usr/local/lib/python3.10/site-packages (from aiohttp>=3.13.3->ray[default]>=2.9.3) (6.7.1)
+#18 0.616 Requirement already satisfied: propcache>=0.2.0 in ./usr/local/lib/python3.10/site-packages (from aiohttp>=3.13.3->ray[default]>=2.9.3) (0.4.1)
+#18 0.616 Requirement already satisfied: yarl<2.0,>=1.17.0 in ./usr/local/lib/python3.10/site-packages (from aiohttp>=3.13.3->ray[default]>=2.9.3) (1.23.0)
+#18 0.621 Requirement already satisfied: idna>=2.0 in ./usr/local/lib/python3.10/site-packages (from yarl<2.0,>=1.17.0->aiohttp>=3.13.3->ray[default]>=2.9.3) (3.13)
+#18 0.628 Requirement already satisfied: opentelemetry-api==1.41.1 in ./usr/local/lib/python3.10/site-packages (from opentelemetry-sdk>=1.30.0->ray[default]>=2.9.3) (1.41.1)
+#18 0.628 Requirement already satisfied: opentelemetry-semantic-conventions==0.62b1 in ./usr/local/lib/python3.10/site-packages (from opentelemetry-sdk>=1.30.0->ray[default]>=2.9.3) (0.62b1)
+#18 0.629 Requirement already satisfied: importlib-metadata<8.8.0,>=6.0 in ./usr/local/lib/python3.10/site-packages (from opentelemetry-api==1.41.1->opentelemetry-sdk>=1.30.0->ray[default]>=2.9.3) (8.7.1)
+#18 0.634 Requirement already satisfied: zipp>=3.20 in ./usr/local/lib/python3.10/site-packages (from importlib-metadata<8.8.0,>=6.0->opentelemetry-api==1.41.1->opentelemetry-sdk>=1.30.0->ray[default]>=2.9.3) (3.23.1)
+#18 0.638 Requirement already satisfied: distlib<1,>=0.3.7 in ./usr/local/lib/python3.10/site-packages (from virtualenv!=20.21.1,>=20.0.24->ray[default]>=2.9.3) (0.4.0)
+#18 0.639 Requirement already satisfied: platformdirs<5,>=3.9.1 in ./usr/local/lib/python3.10/site-packages (from virtualenv!=20.21.1,>=20.0.24->ray[default]>=2.9.3) (4.9.6)
+#18 0.639 Requirement already satisfied: python-discovery>=1.2.2 in ./usr/local/lib/python3.10/site-packages (from virtualenv!=20.21.1,>=20.0.24->ray[default]>=2.9.3) (1.2.2)
+#18 0.651 Requirement already satisfied: jsonschema-specifications>=2023.03.6 in ./usr/local/lib/python3.10/site-packages (from jsonschema->ray>=2.9.3->ray[default]>=2.9.3) (2025.9.1)
+#18 0.651 Requirement already satisfied: referencing>=0.28.4 in ./usr/local/lib/python3.10/site-packages (from jsonschema->ray>=2.9.3->ray[default]>=2.9.3) (0.37.0)
+#18 0.651 Requirement already satisfied: rpds-py>=0.25.0 in ./usr/local/lib/python3.10/site-packages (from jsonschema->ray>=2.9.3->ray[default]>=2.9.3) (0.30.0)
+#18 0.656 Requirement already satisfied: opencensus-context>=0.1.3 in ./usr/local/lib/python3.10/site-packages (from opencensus->ray[default]>=2.9.3) (0.1.3)
+#18 0.656 Requirement already satisfied: six~=1.16 in ./usr/local/lib/python3.10/site-packages (from opencensus->ray[default]>=2.9.3) (1.17.0)
+#18 0.657 Requirement already satisfied: google-api-core<3.0.0,>=1.0.0 in ./usr/local/lib/python3.10/site-packages (from opencensus->ray[default]>=2.9.3) (2.30.3)
+#18 0.660 Requirement already satisfied: googleapis-common-protos<2.0.0,>=1.63.2 in ./usr/local/lib/python3.10/site-packages (from google-api-core<3.0.0,>=1.0.0->opencensus->ray[default]>=2.9.3) (1.74.0)
+#18 0.660 Requirement already satisfied: proto-plus<2.0.0,>=1.22.3 in ./usr/local/lib/python3.10/site-packages (from google-api-core<3.0.0,>=1.0.0->opencensus->ray[default]>=2.9.3) (1.27.2)
+#18 0.661 Requirement already satisfied: google-auth<3.0.0,>=2.14.1 in ./usr/local/lib/python3.10/site-packages (from google-api-core<3.0.0,>=1.0.0->opencensus->ray[default]>=2.9.3) (2.50.0)
+#18 0.666 Requirement already satisfied: pyasn1-modules>=0.2.1 in ./usr/local/lib/python3.10/site-packages (from google-auth<3.0.0,>=2.14.1->google-api-core<3.0.0,>=1.0.0->opencensus->ray[default]>=2.9.3) (0.4.2)
+#18 0.666 Requirement already satisfied: cryptography>=38.0.3 in ./usr/local/lib/python3.10/site-packages (from google-auth<3.0.0,>=2.14.1->google-api-core<3.0.0,>=1.0.0->opencensus->ray[default]>=2.9.3) (47.0.0)
+#18 0.671 Requirement already satisfied: charset_normalizer<4,>=2 in ./usr/local/lib/python3.10/site-packages (from requests->ray>=2.9.3->ray[default]>=2.9.3) (3.4.7)
+#18 0.671 Requirement already satisfied: urllib3<3,>=1.26 in ./usr/local/lib/python3.10/site-packages (from requests->ray>=2.9.3->ray[default]>=2.9.3) (2.6.3)
+#18 0.671 Requirement already satisfied: certifi>=2023.5.7 in ./usr/local/lib/python3.10/site-packages (from requests->ray>=2.9.3->ray[default]>=2.9.3) (2026.4.22)
+#18 0.678 Requirement already satisfied: cffi>=2.0.0 in ./usr/local/lib/python3.10/site-packages (from cryptography>=38.0.3->google-auth<3.0.0,>=2.14.1->google-api-core<3.0.0,>=1.0.0->opencensus->ray[default]>=2.9.3) (2.0.0)
+#18 0.680 Requirement already satisfied: pycparser in ./usr/local/lib/python3.10/site-packages (from cffi>=2.0.0->cryptography>=38.0.3->google-auth<3.0.0,>=2.14.1->google-api-core<3.0.0,>=1.0.0->opencensus->ray[default]>=2.9.3) (3.0)
+#18 0.682 Requirement already satisfied: pyasn1<0.7.0,>=0.6.1 in ./usr/local/lib/python3.10/site-packages (from pyasn1-modules>=0.2.1->google-auth<3.0.0,>=2.14.1->google-api-core<3.0.0,>=1.0.0->opencensus->ray[default]>=2.9.3) (0.6.3)
+#18 0.691 Requirement already satisfied: wrapt in ./usr/local/lib/python3.10/site-packages (from smart_open->ray[default]>=2.9.3) (2.1.2)
+#18 0.858 WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.
+#18 DONE 1.0s
+
+#19 [15/21] RUN pip install "scikit-image>=0.19.3,<0.27" "scipy>=1.8.0"
+#19 0.602 Requirement already satisfied: scikit-image<0.27,>=0.19.3 in ./usr/local/lib/python3.10/site-packages (0.25.2)
+#19 0.603 Requirement already satisfied: scipy>=1.8.0 in ./usr/local/lib/python3.10/site-packages (1.15.3)
+#19 0.610 Requirement already satisfied: numpy>=1.24 in ./usr/local/lib/python3.10/site-packages (from scikit-image<0.27,>=0.19.3) (1.26.4)
+#19 0.610 Requirement already satisfied: networkx>=3.0 in ./usr/local/lib/python3.10/site-packages (from scikit-image<0.27,>=0.19.3) (3.4.2)
+#19 0.611 Requirement already satisfied: pillow>=10.1 in ./usr/local/lib/python3.10/site-packages (from scikit-image<0.27,>=0.19.3) (10.4.0)
+#19 0.611 Requirement already satisfied: imageio!=2.35.0,>=2.33 in ./usr/local/lib/python3.10/site-packages (from scikit-image<0.27,>=0.19.3) (2.37.3)
+#19 0.612 Requirement already satisfied: tifffile>=2022.8.12 in ./usr/local/lib/python3.10/site-packages (from scikit-image<0.27,>=0.19.3) (2025.5.10)
+#19 0.612 Requirement already satisfied: packaging>=21 in ./usr/local/lib/python3.10/site-packages (from scikit-image<0.27,>=0.19.3) (26.2)
+#19 0.613 Requirement already satisfied: lazy-loader>=0.4 in ./usr/local/lib/python3.10/site-packages (from scikit-image<0.27,>=0.19.3) (0.5)
+#19 0.866 WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.
+#19 DONE 1.0s
+
+#20 [16/21] RUN pip install "Shapely>=1.8.5.post1,<=2.0.5"
+#20 0.605 Requirement already satisfied: Shapely<=2.0.5,>=1.8.5.post1 in ./usr/local/lib/python3.10/site-packages (2.0.5)
+#20 0.606 Requirement already satisfied: numpy<3,>=1.14 in ./usr/local/lib/python3.10/site-packages (from Shapely<=2.0.5,>=1.8.5.post1) (1.26.4)
+#20 0.861 WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.
+#20 DONE 1.0s
+
+#21 [17/21] RUN pip install python-snappy openslide-python
+#21 0.546 Requirement already satisfied: python-snappy in ./usr/local/lib/python3.10/site-packages (0.7.3)
+#21 0.546 Requirement already satisfied: openslide-python in ./usr/local/lib/python3.10/site-packages (1.4.3)
+#21 0.547 Requirement already satisfied: cramjam in ./usr/local/lib/python3.10/site-packages (from python-snappy) (2.11.0)
+#21 0.548 Requirement already satisfied: Pillow in ./usr/local/lib/python3.10/site-packages (from openslide-python) (10.4.0)
+#21 0.804 WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.
+#21 DONE 0.9s
+
+#22 [18/21] WORKDIR /CellViT-Inference
+#22 DONE 0.0s
+
+#23 [19/21] COPY . .
+#23 DONE 0.1s
+
+#24 [20/21] RUN if [ -f pyproject.toml ]; then pip install .; fi
+#24 0.544 Processing ./.
+#24 0.546   Installing build dependencies: started
+#24 1.508   Installing build dependencies: finished with status 'done'
+#24 1.510   Getting requirements to build wheel: started
+#24 1.856   Getting requirements to build wheel: finished with status 'done'
+#24 1.859   Preparing metadata (pyproject.toml): started
+#24 2.013   Preparing metadata (pyproject.toml): finished with status 'done'
+#24 2.024 Requirement already satisfied: colorama in /usr/local/lib/python3.10/site-packages (from cellvit==1.0.9) (0.4.6)
+#24 2.025 Requirement already satisfied: colour in /usr/local/lib/python3.10/site-packages (from cellvit==1.0.9) (0.1.5)
+#24 2.027 Requirement already satisfied: einops>=0.6.1 in /usr/local/lib/python3.10/site-packages (from cellvit==1.0.9) (0.8.2)
+#24 2.028 Requirement already satisfied: geojson>=2.0.0 in /usr/local/lib/python3.10/site-packages (from cellvit==1.0.9) (3.2.0)
+#24 2.028 Requirement already satisfied: natsort in /usr/local/lib/python3.10/site-packages (from cellvit==1.0.9) (8.4.0)
+#24 2.029 Requirement already satisfied: numba>=0.58.0 in /usr/local/lib/python3.10/site-packages (from cellvit==1.0.9) (0.65.1)
+#24 2.029 Requirement already satisfied: numpy<2.0.0 in /usr/local/lib/python3.10/site-packages (from cellvit==1.0.9) (1.26.4)
+#24 2.030 Requirement already satisfied: opencv-python-headless==4.7.0.72 in /usr/local/lib/python3.10/site-packages (from cellvit==1.0.9) (4.7.0.72)
+#24 2.030 Requirement already satisfied: opt-einsum>=3.3.0 in /usr/local/lib/python3.10/site-packages (from cellvit==1.0.9) (3.4.0)
+#24 2.030 Requirement already satisfied: pandas in /usr/local/lib/python3.10/site-packages (from cellvit==1.0.9) (2.3.3)
+#24 2.031 Requirement already satisfied: pathopatch>=1.0.9 in /usr/local/lib/python3.10/site-packages (from cellvit==1.0.9) (1.0.10)
+#24 2.031 Requirement already satisfied: pydantic<2.0,>=1.10.16 in /usr/local/lib/python3.10/site-packages (from cellvit==1.0.9) (1.10.26)
+#24 2.031 Requirement already satisfied: pydicom==2.4.4 in /usr/local/lib/python3.10/site-packages (from cellvit==1.0.9) (2.4.4)
+#24 2.032 Requirement already satisfied: ray>=2.9.3 in /usr/local/lib/python3.10/site-packages (from ray[default]>=2.9.3->cellvit==1.0.9) (2.55.1)
+#24 2.033 Requirement already satisfied: scikit-image<0.27,>=0.19.3 in /usr/local/lib/python3.10/site-packages (from cellvit==1.0.9) (0.25.2)
+#24 2.033 Requirement already satisfied: scipy>=1.8.0 in /usr/local/lib/python3.10/site-packages (from cellvit==1.0.9) (1.15.3)
+#24 2.034 Requirement already satisfied: Shapely<=2.0.5,>=1.8.5.post1 in /usr/local/lib/python3.10/site-packages (from cellvit==1.0.9) (2.0.5)
+#24 2.034 Requirement already satisfied: ujson==5.8.0 in /usr/local/lib/python3.10/site-packages (from cellvit==1.0.9) (5.8.0)
+#24 2.034 Requirement already satisfied: python-snappy in /usr/local/lib/python3.10/site-packages (from cellvit==1.0.9) (0.7.3)
+#24 2.035 Requirement already satisfied: tqdm in /usr/local/lib/python3.10/site-packages (from cellvit==1.0.9) (4.67.3)
+#24 2.035 Requirement already satisfied: psutil in /usr/local/lib/python3.10/site-packages (from cellvit==1.0.9) (7.2.2)
+#24 2.035 Requirement already satisfied: pyaml in /usr/local/lib/python3.10/site-packages (from cellvit==1.0.9) (26.2.1)
+#24 2.044 Requirement already satisfied: typing-extensions>=4.2.0 in /usr/local/lib/python3.10/site-packages (from pydantic<2.0,>=1.10.16->cellvit==1.0.9) (4.15.0)
+#24 2.052 Requirement already satisfied: networkx>=3.0 in /usr/local/lib/python3.10/site-packages (from scikit-image<0.27,>=0.19.3->cellvit==1.0.9) (3.4.2)
+#24 2.052 Requirement already satisfied: pillow>=10.1 in /usr/local/lib/python3.10/site-packages (from scikit-image<0.27,>=0.19.3->cellvit==1.0.9) (10.4.0)
+#24 2.052 Requirement already satisfied: imageio!=2.35.0,>=2.33 in /usr/local/lib/python3.10/site-packages (from scikit-image<0.27,>=0.19.3->cellvit==1.0.9) (2.37.3)
+#24 2.053 Requirement already satisfied: tifffile>=2022.8.12 in /usr/local/lib/python3.10/site-packages (from scikit-image<0.27,>=0.19.3->cellvit==1.0.9) (2025.5.10)
+#24 2.053 Requirement already satisfied: packaging>=21 in /usr/local/lib/python3.10/site-packages (from scikit-image<0.27,>=0.19.3->cellvit==1.0.9) (26.2)
+#24 2.054 Requirement already satisfied: lazy-loader>=0.4 in /usr/local/lib/python3.10/site-packages (from scikit-image<0.27,>=0.19.3->cellvit==1.0.9) (0.5)
+#24 2.084 Requirement already satisfied: llvmlite<0.48,>=0.47.0dev0 in /usr/local/lib/python3.10/site-packages (from numba>=0.58.0->cellvit==1.0.9) (0.47.0)
+#24 2.088 Requirement already satisfied: PyYAML in /usr/local/lib/python3.10/site-packages (from pathopatch>=1.0.9->cellvit==1.0.9) (6.0.3)
+#24 2.088 Requirement already satisfied: future in /usr/local/lib/python3.10/site-packages (from pathopatch>=1.0.9->cellvit==1.0.9) (1.0.0)
+#24 2.089 Requirement already satisfied: matplotlib in /usr/local/lib/python3.10/site-packages (from pathopatch>=1.0.9->cellvit==1.0.9) (3.10.9)
+#24 2.089 Requirement already satisfied: openslide_python in /usr/local/lib/python3.10/site-packages (from pathopatch>=1.0.9->cellvit==1.0.9) (1.4.3)
+#24 2.090 Requirement already satisfied: rasterio in /usr/local/lib/python3.10/site-packages (from pathopatch>=1.0.9->cellvit==1.0.9) (1.4.4)
+#24 2.090 Requirement already satisfied: requests in /usr/local/lib/python3.10/site-packages (from pathopatch>=1.0.9->cellvit==1.0.9) (2.33.1)
+#24 2.091 Requirement already satisfied: setuptools<=65.6.3 in /usr/local/lib/python3.10/site-packages (from pathopatch>=1.0.9->cellvit==1.0.9) (65.6.3)
+#24 2.091 Requirement already satisfied: torchvision in /usr/local/lib/python3.10/site-packages (from pathopatch>=1.0.9->cellvit==1.0.9) (0.17.2)
+#24 2.091 Requirement already satisfied: torch in /usr/local/lib/python3.10/site-packages (from pathopatch>=1.0.9->cellvit==1.0.9) (2.2.2)
+#24 2.092 Requirement already satisfied: wsidicom in /usr/local/lib/python3.10/site-packages (from pathopatch>=1.0.9->cellvit==1.0.9) (0.20.6)
+#24 2.092 Requirement already satisfied: wsidicomizer in /usr/local/lib/python3.10/site-packages (from pathopatch>=1.0.9->cellvit==1.0.9) (0.14.2)
+#24 2.145 Requirement already satisfied: click>=7.0 in /usr/local/lib/python3.10/site-packages (from ray>=2.9.3->ray[default]>=2.9.3->cellvit==1.0.9) (8.3.3)
+#24 2.145 Requirement already satisfied: filelock in /usr/local/lib/python3.10/site-packages (from ray>=2.9.3->ray[default]>=2.9.3->cellvit==1.0.9) (3.29.0)
+#24 2.146 Requirement already satisfied: jsonschema in /usr/local/lib/python3.10/site-packages (from ray>=2.9.3->ray[default]>=2.9.3->cellvit==1.0.9) (4.26.0)
+#24 2.146 Requirement already satisfied: msgpack<2.0.0,>=1.0.0 in /usr/local/lib/python3.10/site-packages (from ray>=2.9.3->ray[default]>=2.9.3->cellvit==1.0.9) (1.1.2)
+#24 2.147 Requirement already satisfied: protobuf>=3.20.3 in /usr/local/lib/python3.10/site-packages (from ray>=2.9.3->ray[default]>=2.9.3->cellvit==1.0.9) (6.33.6)
+#24 2.151 Requirement already satisfied: aiohttp>=3.13.3 in /usr/local/lib/python3.10/site-packages (from ray[default]>=2.9.3->cellvit==1.0.9) (3.13.5)
+#24 2.151 Requirement already satisfied: aiohttp_cors in /usr/local/lib/python3.10/site-packages (from ray[default]>=2.9.3->cellvit==1.0.9) (0.8.1)
+#24 2.151 Requirement already satisfied: colorful in /usr/local/lib/python3.10/site-packages (from ray[default]>=2.9.3->cellvit==1.0.9) (0.5.8)
+#24 2.152 Requirement already satisfied: py-spy>=0.2.0 in /usr/local/lib/python3.10/site-packages (from ray[default]>=2.9.3->cellvit==1.0.9) (0.4.2)
+#24 2.153 Requirement already satisfied: grpcio>=1.42.0 in /usr/local/lib/python3.10/site-packages (from ray[default]>=2.9.3->cellvit==1.0.9) (1.80.0)
+#24 2.153 Requirement already satisfied: opencensus in /usr/local/lib/python3.10/site-packages (from ray[default]>=2.9.3->cellvit==1.0.9) (0.11.4)
+#24 2.154 Requirement already satisfied: opentelemetry-sdk>=1.30.0 in /usr/local/lib/python3.10/site-packages (from ray[default]>=2.9.3->cellvit==1.0.9) (1.41.1)
+#24 2.154 Requirement already satisfied: opentelemetry-exporter-prometheus in /usr/local/lib/python3.10/site-packages (from ray[default]>=2.9.3->cellvit==1.0.9) (0.62b1)
+#24 2.155 Requirement already satisfied: opentelemetry-proto in /usr/local/lib/python3.10/site-packages (from ray[default]>=2.9.3->cellvit==1.0.9) (1.41.1)
+#24 2.156 Requirement already satisfied: prometheus_client>=0.7.1 in /usr/local/lib/python3.10/site-packages (from ray[default]>=2.9.3->cellvit==1.0.9) (0.25.0)
+#24 2.156 Requirement already satisfied: smart_open in /usr/local/lib/python3.10/site-packages (from ray[default]>=2.9.3->cellvit==1.0.9) (7.6.0)
+#24 2.157 Requirement already satisfied: virtualenv!=20.21.1,>=20.0.24 in /usr/local/lib/python3.10/site-packages (from ray[default]>=2.9.3->cellvit==1.0.9) (21.3.0)
+#24 2.160 Requirement already satisfied: aiohappyeyeballs>=2.5.0 in /usr/local/lib/python3.10/site-packages (from aiohttp>=3.13.3->ray[default]>=2.9.3->cellvit==1.0.9) (2.6.1)
+#24 2.160 Requirement already satisfied: aiosignal>=1.4.0 in /usr/local/lib/python3.10/site-packages (from aiohttp>=3.13.3->ray[default]>=2.9.3->cellvit==1.0.9) (1.4.0)
+#24 2.161 Requirement already satisfied: async-timeout<6.0,>=4.0 in /usr/local/lib/python3.10/site-packages (from aiohttp>=3.13.3->ray[default]>=2.9.3->cellvit==1.0.9) (5.0.1)
+#24 2.161 Requirement already satisfied: attrs>=17.3.0 in /usr/local/lib/python3.10/site-packages (from aiohttp>=3.13.3->ray[default]>=2.9.3->cellvit==1.0.9) (26.1.0)
+#24 2.161 Requirement already satisfied: frozenlist>=1.1.1 in /usr/local/lib/python3.10/site-packages (from aiohttp>=3.13.3->ray[default]>=2.9.3->cellvit==1.0.9) (1.8.0)
+#24 2.162 Requirement already satisfied: multidict<7.0,>=4.5 in /usr/local/lib/python3.10/site-packages (from aiohttp>=3.13.3->ray[default]>=2.9.3->cellvit==1.0.9) (6.7.1)
+#24 2.162 Requirement already satisfied: propcache>=0.2.0 in /usr/local/lib/python3.10/site-packages (from aiohttp>=3.13.3->ray[default]>=2.9.3->cellvit==1.0.9) (0.4.1)
+#24 2.163 Requirement already satisfied: yarl<2.0,>=1.17.0 in /usr/local/lib/python3.10/site-packages (from aiohttp>=3.13.3->ray[default]>=2.9.3->cellvit==1.0.9) (1.23.0)
+#24 2.168 Requirement already satisfied: idna>=2.0 in /usr/local/lib/python3.10/site-packages (from yarl<2.0,>=1.17.0->aiohttp>=3.13.3->ray[default]>=2.9.3->cellvit==1.0.9) (3.13)
+#24 2.177 Requirement already satisfied: opentelemetry-api==1.41.1 in /usr/local/lib/python3.10/site-packages (from opentelemetry-sdk>=1.30.0->ray[default]>=2.9.3->cellvit==1.0.9) (1.41.1)
+#24 2.177 Requirement already satisfied: opentelemetry-semantic-conventions==0.62b1 in /usr/local/lib/python3.10/site-packages (from opentelemetry-sdk>=1.30.0->ray[default]>=2.9.3->cellvit==1.0.9) (0.62b1)
+#24 2.179 Requirement already satisfied: importlib-metadata<8.8.0,>=6.0 in /usr/local/lib/python3.10/site-packages (from opentelemetry-api==1.41.1->opentelemetry-sdk>=1.30.0->ray[default]>=2.9.3->cellvit==1.0.9) (8.7.1)
+#24 2.184 Requirement already satisfied: zipp>=3.20 in /usr/local/lib/python3.10/site-packages (from importlib-metadata<8.8.0,>=6.0->opentelemetry-api==1.41.1->opentelemetry-sdk>=1.30.0->ray[default]>=2.9.3->cellvit==1.0.9) (3.23.1)
+#24 2.198 Requirement already satisfied: distlib<1,>=0.3.7 in /usr/local/lib/python3.10/site-packages (from virtualenv!=20.21.1,>=20.0.24->ray[default]>=2.9.3->cellvit==1.0.9) (0.4.0)
+#24 2.199 Requirement already satisfied: platformdirs<5,>=3.9.1 in /usr/local/lib/python3.10/site-packages (from virtualenv!=20.21.1,>=20.0.24->ray[default]>=2.9.3->cellvit==1.0.9) (4.9.6)
+#24 2.199 Requirement already satisfied: python-discovery>=1.2.2 in /usr/local/lib/python3.10/site-packages (from virtualenv!=20.21.1,>=20.0.24->ray[default]>=2.9.3->cellvit==1.0.9) (1.2.2)
+#24 2.216 Requirement already satisfied: jsonschema-specifications>=2023.03.6 in /usr/local/lib/python3.10/site-packages (from jsonschema->ray>=2.9.3->ray[default]>=2.9.3->cellvit==1.0.9) (2025.9.1)
+#24 2.216 Requirement already satisfied: referencing>=0.28.4 in /usr/local/lib/python3.10/site-packages (from jsonschema->ray>=2.9.3->ray[default]>=2.9.3->cellvit==1.0.9) (0.37.0)
+#24 2.217 Requirement already satisfied: rpds-py>=0.25.0 in /usr/local/lib/python3.10/site-packages (from jsonschema->ray>=2.9.3->ray[default]>=2.9.3->cellvit==1.0.9) (0.30.0)
+#24 2.224 Requirement already satisfied: contourpy>=1.0.1 in /usr/local/lib/python3.10/site-packages (from matplotlib->pathopatch>=1.0.9->cellvit==1.0.9) (1.3.2)
+#24 2.224 Requirement already satisfied: cycler>=0.10 in /usr/local/lib/python3.10/site-packages (from matplotlib->pathopatch>=1.0.9->cellvit==1.0.9) (0.12.1)
+#24 2.225 Requirement already satisfied: fonttools>=4.22.0 in /usr/local/lib/python3.10/site-packages (from matplotlib->pathopatch>=1.0.9->cellvit==1.0.9) (4.62.1)
+#24 2.225 Requirement already satisfied: kiwisolver>=1.3.1 in /usr/local/lib/python3.10/site-packages (from matplotlib->pathopatch>=1.0.9->cellvit==1.0.9) (1.5.0)
+#24 2.226 Requirement already satisfied: pyparsing>=3 in /usr/local/lib/python3.10/site-packages (from matplotlib->pathopatch>=1.0.9->cellvit==1.0.9) (3.3.2)
+#24 2.226 Requirement already satisfied: python-dateutil>=2.7 in /usr/local/lib/python3.10/site-packages (from matplotlib->pathopatch>=1.0.9->cellvit==1.0.9) (2.9.0.post0)
+#24 2.242 Requirement already satisfied: six>=1.5 in /usr/local/lib/python3.10/site-packages (from python-dateutil>=2.7->matplotlib->pathopatch>=1.0.9->cellvit==1.0.9) (1.17.0)
+#24 2.246 Requirement already satisfied: opencensus-context>=0.1.3 in /usr/local/lib/python3.10/site-packages (from opencensus->ray[default]>=2.9.3->cellvit==1.0.9) (0.1.3)
+#24 2.247 Requirement already satisfied: google-api-core<3.0.0,>=1.0.0 in /usr/local/lib/python3.10/site-packages (from opencensus->ray[default]>=2.9.3->cellvit==1.0.9) (2.30.3)
+#24 2.250 Requirement already satisfied: googleapis-common-protos<2.0.0,>=1.63.2 in /usr/local/lib/python3.10/site-packages (from google-api-core<3.0.0,>=1.0.0->opencensus->ray[default]>=2.9.3->cellvit==1.0.9) (1.74.0)
+#24 2.250 Requirement already satisfied: proto-plus<2.0.0,>=1.22.3 in /usr/local/lib/python3.10/site-packages (from google-api-core<3.0.0,>=1.0.0->opencensus->ray[default]>=2.9.3->cellvit==1.0.9) (1.27.2)
+#24 2.251 Requirement already satisfied: google-auth<3.0.0,>=2.14.1 in /usr/local/lib/python3.10/site-packages (from google-api-core<3.0.0,>=1.0.0->opencensus->ray[default]>=2.9.3->cellvit==1.0.9) (2.50.0)
+#24 2.257 Requirement already satisfied: pyasn1-modules>=0.2.1 in /usr/local/lib/python3.10/site-packages (from google-auth<3.0.0,>=2.14.1->google-api-core<3.0.0,>=1.0.0->opencensus->ray[default]>=2.9.3->cellvit==1.0.9) (0.4.2)
+#24 2.257 Requirement already satisfied: cryptography>=38.0.3 in /usr/local/lib/python3.10/site-packages (from google-auth<3.0.0,>=2.14.1->google-api-core<3.0.0,>=1.0.0->opencensus->ray[default]>=2.9.3->cellvit==1.0.9) (47.0.0)
+#24 2.262 Requirement already satisfied: charset_normalizer<4,>=2 in /usr/local/lib/python3.10/site-packages (from requests->pathopatch>=1.0.9->cellvit==1.0.9) (3.4.7)
+#24 2.263 Requirement already satisfied: urllib3<3,>=1.26 in /usr/local/lib/python3.10/site-packages (from requests->pathopatch>=1.0.9->cellvit==1.0.9) (2.6.3)
+#24 2.263 Requirement already satisfied: certifi>=2023.5.7 in /usr/local/lib/python3.10/site-packages (from requests->pathopatch>=1.0.9->cellvit==1.0.9) (2026.4.22)
+#24 2.270 Requirement already satisfied: cffi>=2.0.0 in /usr/local/lib/python3.10/site-packages (from cryptography>=38.0.3->google-auth<3.0.0,>=2.14.1->google-api-core<3.0.0,>=1.0.0->opencensus->ray[default]>=2.9.3->cellvit==1.0.9) (2.0.0)
+#24 2.272 Requirement already satisfied: pycparser in /usr/local/lib/python3.10/site-packages (from cffi>=2.0.0->cryptography>=38.0.3->google-auth<3.0.0,>=2.14.1->google-api-core<3.0.0,>=1.0.0->opencensus->ray[default]>=2.9.3->cellvit==1.0.9) (3.0)
+#24 2.275 Requirement already satisfied: pyasn1<0.7.0,>=0.6.1 in /usr/local/lib/python3.10/site-packages (from pyasn1-modules>=0.2.1->google-auth<3.0.0,>=2.14.1->google-api-core<3.0.0,>=1.0.0->opencensus->ray[default]>=2.9.3->cellvit==1.0.9) (0.6.3)
+#24 2.301 Requirement already satisfied: pytz>=2020.1 in /usr/local/lib/python3.10/site-packages (from pandas->cellvit==1.0.9) (2026.1.post1)
+#24 2.302 Requirement already satisfied: tzdata>=2022.7 in /usr/local/lib/python3.10/site-packages (from pandas->cellvit==1.0.9) (2026.2)
+#24 2.313 Requirement already satisfied: cramjam in /usr/local/lib/python3.10/site-packages (from python-snappy->cellvit==1.0.9) (2.11.0)
+#24 2.321 Requirement already satisfied: affine in /usr/local/lib/python3.10/site-packages (from rasterio->pathopatch>=1.0.9->cellvit==1.0.9) (2.4.0)
+#24 2.321 Requirement already satisfied: cligj>=0.5 in /usr/local/lib/python3.10/site-packages (from rasterio->pathopatch>=1.0.9->cellvit==1.0.9) (0.7.2)
+#24 2.322 Requirement already satisfied: click-plugins in /usr/local/lib/python3.10/site-packages (from rasterio->pathopatch>=1.0.9->cellvit==1.0.9) (1.1.1.2)
+#24 2.332 Requirement already satisfied: wrapt in /usr/local/lib/python3.10/site-packages (from smart_open->ray[default]>=2.9.3->cellvit==1.0.9) (2.1.2)
+#24 2.336 Requirement already satisfied: sympy in /usr/local/lib/python3.10/site-packages (from torch->pathopatch>=1.0.9->cellvit==1.0.9) (1.14.0)
+#24 2.336 Requirement already satisfied: jinja2 in /usr/local/lib/python3.10/site-packages (from torch->pathopatch>=1.0.9->cellvit==1.0.9) (3.1.6)
+#24 2.336 Requirement already satisfied: fsspec in /usr/local/lib/python3.10/site-packages (from torch->pathopatch>=1.0.9->cellvit==1.0.9) (2024.12.0)
+#24 2.337 Requirement already satisfied: nvidia-cuda-nvrtc-cu12==12.1.105 in /usr/local/lib/python3.10/site-packages (from torch->pathopatch>=1.0.9->cellvit==1.0.9) (12.1.105)
+#24 2.338 Requirement already satisfied: nvidia-cuda-runtime-cu12==12.1.105 in /usr/local/lib/python3.10/site-packages (from torch->pathopatch>=1.0.9->cellvit==1.0.9) (12.1.105)
+#24 2.338 Requirement already satisfied: nvidia-cuda-cupti-cu12==12.1.105 in /usr/local/lib/python3.10/site-packages (from torch->pathopatch>=1.0.9->cellvit==1.0.9) (12.1.105)
+#24 2.339 Requirement already satisfied: nvidia-cudnn-cu12==8.9.2.26 in /usr/local/lib/python3.10/site-packages (from torch->pathopatch>=1.0.9->cellvit==1.0.9) (8.9.2.26)
+#24 2.339 Requirement already satisfied: nvidia-cublas-cu12==12.1.3.1 in /usr/local/lib/python3.10/site-packages (from torch->pathopatch>=1.0.9->cellvit==1.0.9) (12.1.3.1)
+#24 2.340 Requirement already satisfied: nvidia-cufft-cu12==11.0.2.54 in /usr/local/lib/python3.10/site-packages (from torch->pathopatch>=1.0.9->cellvit==1.0.9) (11.0.2.54)
+#24 2.341 Requirement already satisfied: nvidia-curand-cu12==10.3.2.106 in /usr/local/lib/python3.10/site-packages (from torch->pathopatch>=1.0.9->cellvit==1.0.9) (10.3.2.106)
+#24 2.341 Requirement already satisfied: nvidia-cusolver-cu12==11.4.5.107 in /usr/local/lib/python3.10/site-packages (from torch->pathopatch>=1.0.9->cellvit==1.0.9) (11.4.5.107)
+#24 2.342 Requirement already satisfied: nvidia-cusparse-cu12==12.1.0.106 in /usr/local/lib/python3.10/site-packages (from torch->pathopatch>=1.0.9->cellvit==1.0.9) (12.1.0.106)
+#24 2.343 Requirement already satisfied: nvidia-nccl-cu12==2.19.3 in /usr/local/lib/python3.10/site-packages (from torch->pathopatch>=1.0.9->cellvit==1.0.9) (2.19.3)
+#24 2.343 Requirement already satisfied: nvidia-nvtx-cu12==12.1.105 in /usr/local/lib/python3.10/site-packages (from torch->pathopatch>=1.0.9->cellvit==1.0.9) (12.1.105)
+#24 2.344 Requirement already satisfied: triton==2.2.0 in /usr/local/lib/python3.10/site-packages (from torch->pathopatch>=1.0.9->cellvit==1.0.9) (2.2.0)
+#24 2.355 Requirement already satisfied: nvidia-nvjitlink-cu12 in /usr/local/lib/python3.10/site-packages (from nvidia-cusolver-cu12==11.4.5.107->torch->pathopatch>=1.0.9->cellvit==1.0.9) (12.9.86)
+#24 2.385 Requirement already satisfied: MarkupSafe>=2.0 in /usr/local/lib/python3.10/site-packages (from jinja2->torch->pathopatch>=1.0.9->cellvit==1.0.9) (3.0.3)
+#24 2.390 Requirement already satisfied: mpmath<1.4,>=1.1.0 in /usr/local/lib/python3.10/site-packages (from sympy->torch->pathopatch>=1.0.9->cellvit==1.0.9) (1.3.0)
+#24 2.402 Requirement already satisfied: dicomweb-client<0.60.0,>=0.59.1 in /usr/local/lib/python3.10/site-packages (from wsidicom->pathopatch>=1.0.9->cellvit==1.0.9) (0.59.3)
+#24 2.403 Requirement already satisfied: marshmallow<4.0.0,>=3.20.1 in /usr/local/lib/python3.10/site-packages (from wsidicom->pathopatch>=1.0.9->cellvit==1.0.9) (3.26.2)
+#24 2.403 Requirement already satisfied: universal-pathlib<0.3.0,>=0.2.1 in /usr/local/lib/python3.10/site-packages (from wsidicom->pathopatch>=1.0.9->cellvit==1.0.9) (0.2.6)
+#24 2.408 Requirement already satisfied: retrying>=1.3.3 in /usr/local/lib/python3.10/site-packages (from dicomweb-client<0.60.0,>=0.59.1->wsidicom->pathopatch>=1.0.9->cellvit==1.0.9) (1.4.2)
+#24 2.419 Requirement already satisfied: czifile>=2019.7.2 in /usr/local/lib/python3.10/site-packages (from wsidicomizer->pathopatch>=1.0.9->cellvit==1.0.9) (2019.7.2.2)
+#24 2.419 Requirement already satisfied: opentile<0.14.0,>=0.13.1 in /usr/local/lib/python3.10/site-packages (from wsidicomizer->pathopatch>=1.0.9->cellvit==1.0.9) (0.13.4)
+#24 2.420 Requirement already satisfied: tiffslide<3.0.0,>=2.4.0 in /usr/local/lib/python3.10/site-packages (from wsidicomizer->pathopatch>=1.0.9->cellvit==1.0.9) (2.5.1)
+#24 2.423 Requirement already satisfied: PyTurboJPEG<2.0.0,>=1.7.3 in /usr/local/lib/python3.10/site-packages (from opentile<0.14.0,>=0.13.1->wsidicomizer->pathopatch>=1.0.9->cellvit==1.0.9) (1.8.3)
+#24 2.423 Requirement already satisfied: defusedxml<0.8.0,>=0.7.1 in /usr/local/lib/python3.10/site-packages (from opentile<0.14.0,>=0.13.1->wsidicomizer->pathopatch>=1.0.9->cellvit==1.0.9) (0.7.1)
+#24 2.424 Requirement already satisfied: imagecodecs>=2022.12.24 in /usr/local/lib/python3.10/site-packages (from opentile<0.14.0,>=0.13.1->wsidicomizer->pathopatch>=1.0.9->cellvit==1.0.9) (2025.3.30)
+#24 2.425 Requirement already satisfied: ome-types<0.6.0,>=0.5.0 in /usr/local/lib/python3.10/site-packages (from opentile<0.14.0,>=0.13.1->wsidicomizer->pathopatch>=1.0.9->cellvit==1.0.9) (0.5.3)
+#24 2.434 Requirement already satisfied: pydantic-compat>=0.1.0 in /usr/local/lib/python3.10/site-packages (from ome-types<0.6.0,>=0.5.0->opentile<0.14.0,>=0.13.1->wsidicomizer->pathopatch>=1.0.9->cellvit==1.0.9) (0.1.2)
+#24 2.434 Requirement already satisfied: xsdata<24.4,>=23.6 in /usr/local/lib/python3.10/site-packages (from ome-types<0.6.0,>=0.5.0->opentile<0.14.0,>=0.13.1->wsidicomizer->pathopatch>=1.0.9->cellvit==1.0.9) (24.3.1)
+#24 2.439 Requirement already satisfied: zarr<3.0,>=2.16.0 in /usr/local/lib/python3.10/site-packages (from tiffslide<3.0.0,>=2.4.0->wsidicomizer->pathopatch>=1.0.9->cellvit==1.0.9) (2.18.3)
+#24 2.446 Requirement already satisfied: asciitree in /usr/local/lib/python3.10/site-packages (from zarr<3.0,>=2.16.0->tiffslide<3.0.0,>=2.4.0->wsidicomizer->pathopatch>=1.0.9->cellvit==1.0.9) (0.3.3)
+#24 2.447 Requirement already satisfied: numcodecs>=0.10.0 in /usr/local/lib/python3.10/site-packages (from zarr<3.0,>=2.16.0->tiffslide<3.0.0,>=2.4.0->wsidicomizer->pathopatch>=1.0.9->cellvit==1.0.9) (0.13.1)
+#24 2.447 Requirement already satisfied: fasteners in /usr/local/lib/python3.10/site-packages (from zarr<3.0,>=2.16.0->tiffslide<3.0.0,>=2.4.0->wsidicomizer->pathopatch>=1.0.9->cellvit==1.0.9) (0.20)
+#24 2.465 Building wheels for collected packages: cellvit
+#24 2.466   Building wheel for cellvit (pyproject.toml): started
+#24 2.671   Building wheel for cellvit (pyproject.toml): finished with status 'done'
+#24 2.674   Created wheel for cellvit: filename=cellvit-1.0.9-py3-none-any.whl size=111297 sha256=3acfb74ae67ab2479563c0cd5183c8ff8de389a9ddd09860a28fc35a6eeb9f31
+#24 2.674   Stored in directory: /root/.cache/pip/wheels/10/2c/a2/b6c3ac2d5bda9fbfb1999c63265a25336e2bda8eba5b3a29dc
+#24 2.681 Successfully built cellvit
+#24 2.698 Installing collected packages: cellvit
+#24 2.698   Attempting uninstall: cellvit
+#24 2.699     Found existing installation: cellvit 1.0.9
+#24 2.704     Uninstalling cellvit-1.0.9:
+#24 2.724       Successfully uninstalled cellvit-1.0.9
+#24 2.790 Successfully installed cellvit-1.0.9
+#24 2.790 WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.
+#24 DONE 2.9s
+
+#25 [21/21] RUN if [ ! -d .git ]; then git init; fi
+#25 DONE 0.3s
+
+#26 exporting to image
+#26 exporting layers
+#26 exporting layers 33.9s done
+#26 writing image sha256:6334f965e6175201d2545a38671dd7f42aff896f41b47c8a7b8f77b66a32c122 done
+#26 naming to docker.io/library/envgym_test_1777656755 done
+#26 DONE 33.9s
+
+
+=== Runtime Log ===  
+Runtime Status: Success
+Runtime Output:
+
+
+Runtime Error:
+
+
+=== Execution End ===
+

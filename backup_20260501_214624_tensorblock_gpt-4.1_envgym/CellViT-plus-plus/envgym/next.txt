@@ -1,0 +1,26 @@
+current progress
+- The Docker build and runtime were successful using `envgym/envgym.dockerfile`.
+- The base image is `ubuntu:20.04` (CPU-only, amd64-compatible).
+- System dependencies for CPU-based scientific workflows (libvips, libopenslide, gdal, etc.) are installed.
+- Miniconda (Miniconda3-py310_23.10.0-1) is installed for Python 3.10.
+- Conda environment updated; required Python version installed.
+- Openslide and gdal are installed via conda-forge (CPU versions).
+- The working directory in the Dockerfile is currently set to `/CellViT-plus-plus` (not as specified in the plan).
+- `requirements.txt` is copied and installed; pip upgraded.
+- PyTorch, torchvision, and torchaudio CPU-only versions are installed.
+- Jupyter, notebook, and various dev tools (pytest, pre-commit, etc.) are installed.
+- Editable install attempted if `setup.py` exists.
+- No GPU/CUDA/NVIDIA packages present.
+- No CUDA, cuDNN, nvidia, cucim, or cupy packages installed.
+- No --gpus flag or nvidia-docker requirements present.
+- Dockerfile follows CPU-only best practices except for WORKDIR.
+
+next step
+- Update the `WORKDIR` directive in the Dockerfile to:
+  ```
+  WORKDIR /home/cc/EnvGym/data/20260501_153628_tensorblock_gpt-4.1/CellViT-plus-plus
+  ```
+  (as required by the environment setup plan).
+- Verify that all other Dockerfiles in the project also set the correct WORKDIR if applicable.
+- Review and ensure that no CUDA/GPU references remain in entrypoints, documentation, or scripts invoked by the Dockerfile.
+- Continue with the next steps in the plan, such as running/validating the container, testing CPU-only inference, and updating documentation to reflect CPU-only deployment.

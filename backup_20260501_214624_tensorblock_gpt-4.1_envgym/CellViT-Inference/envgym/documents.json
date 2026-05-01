@@ -1,0 +1,7 @@
+[
+  "README.md",
+  "docker-compose.yaml",
+  "pyproject.toml",
+  "example_config.yaml",
+  ".pre-commit-config.yaml"
+]

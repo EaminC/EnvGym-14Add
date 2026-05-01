@@ -1,0 +1,19 @@
+current progress
+
+- Docker build and runtime using envgym/envgym.dockerfile completed successfully.
+- Dockerfile uses python:3.11-slim (CPU-only) and installs all necessary system dependencies per plan.
+- GPU/NIM/NVIDIA-related packages and steps are omitted.
+- WORKDIR is correctly set to /home/cc/EnvGym/data/20260501_153628_tensorblock_gpt-4.1/pdf-to-podcast.
+- Python dependency manager 'uv' is installed.
+- Repository files are copied into the container.
+- Python dependencies from requirements files are installed using uv, matching plan requirements.
+- Editable install for frontend/shared is included if setup.py exists.
+- Permissions for the working directory are set.
+- Entrypoint is an interactive bash shell at the repo root.
+
+next step
+
+- Review and ensure all requirements files (requirements.txt, requirements-dev.txt, per-service requirements) specify CPU-only versions of torch, torchvision, torchaudio (no CUDA/CU* dependencies).
+- Validate that all Dockerfile installation steps match the latest adjusted plan and do not reference GPU/NIM/CUDA/NVIDIA content.
+- Optionally uncomment/install openssh-server if remote SSH access is needed.
+- Test container build and runtime for all services using this Dockerfile to confirm full CPU-only compatibility.

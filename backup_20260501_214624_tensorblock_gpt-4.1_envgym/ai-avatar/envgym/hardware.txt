@@ -1,0 +1,6 @@
+- Working Directory: /home/cc/EnvGym/data/20260501_153628_tensorblock_gpt-4.1/ai-avatar; deep directory structure; project likely expects /workspace or /app as workdir
+- Architecture: x86_64; recommended --platform=linux/amd64
+- Base Image: ubuntu:20.04, debian:bullseye, python:3.x-slim, or other amd64 images; no CUDA or GPU-specific base needed
+- GPU: No NVIDIA GPU present; skip all CUDA, nvidia/cuda, or --gpus related images and instructions
+- Instruction Notes: No GPU-specific instructions (no RUN nvidia-smi); leverage high core count for parallel builds (e.g., RUN make -j96 if compiling); ensure WORKDIR matches project structure; consider multi-stage builds for storage efficiency
+- Docker Version: 28.1.1; BuildKit supported; --gpus flag not applicable; compatible with docker-compose v2.35.1

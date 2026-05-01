@@ -1,0 +1,17 @@
+current progress
+- The Dockerfile uses a standard CPU-only base image (`python:3.10-slim`) as required.
+- All system dependencies (git, pandoc, curl, etc.) are installed correctly.
+- Working directory is set to `/app`.
+- `requirements.txt` and `requirements-lock.txt` are copied and installed, with CPU-only torch/torchvision/timm enforced through requirements files.
+- The repository is fully copied after dependencies are installed (supports better Docker caching).
+- Environment variables (`PYTHONUNBUFFERED`, `PYTHONDONTWRITEBYTECODE`, `PYTHONPATH`) are set appropriately.
+- `/app/models` and `/app/outputs` directories are created and permissions set.
+- Port 8000 is exposed.
+- The entrypoint is currently set to `/bin/bash` (not the application server).
+- Previous Docker build and runtime logs show success, indicating the image builds and starts without errors.
+
+next step
+- Change the `ENTRYPOINT` in the Dockerfile from `[ "/bin/bash" ]` to launch the application server as intended (e.g., `[ "python", "start_server.py" ]` or your actual API entrypoint command).
+- Optionally, ensure any additional environment variables (such as `MODEL_PATH`) required by the application are set or documented.
+- Confirm that no CUDA/NVIDIA/GPU references remain anywhere in the Dockerfile.
+- Rebuild the Docker image and test the API server endpoint (`curl http://localhost:8000/health`) to verify the application starts automatically.

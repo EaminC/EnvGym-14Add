@@ -1,0 +1,156 @@
+=== ADJUSTED ENVIRONMENT SETUP PLAN (FOR x86_64 CPU-ONLY UBUNTU/DEBIAN DOCKER) ===
+
+1. DOWNLOADS NEEDED:
+
+   - Python 3.10.x  
+     - [Required for Linux native, venv, Mac installs, and conda environments]
+     - [https://www.python.org/downloads/release/python-3100/]
+     - Version must match `python=3.10` in `environment.yaml`
+     - For Docker: Use python:3.10-slim or install via apt/pyenv
+   - Pip 23.0 (minimum)
+     - [https://pip.pypa.io/en/stable/installation/]
+     - Version must match `pip=23.0` in `environment.yaml`
+   - Packaging (Python package)
+     - Installed via `environment.yaml`
+   - (Optional) Anaconda or Miniconda (not recommended for minimal Docker images)
+     - In Docker, prefer venv or system python
+   - Git  
+     - [https://git-scm.com/downloads]
+     - Install via apt (`apt-get install -y git`)
+   - Fooocus Source Code  
+     - `git clone https://github.com/lllyasviel/Fooocus.git`
+   - PyTorch (CPU-only)
+     - Install CPU-only version:  
+       `pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu`
+     - DO NOT install CUDA, ROCm, torch-directml, or MPS versions
+   - Required Python packages (from requirements_versions.txt and environment.yaml):
+     - torchsde==0.2.5
+     - einops==0.4.1
+     - transformers==4.30.2
+     - safetensors==0.3.1
+     - accelerate==0.21.0
+     - pyyaml==6.0
+     - Pillow==9.2.0
+     - scipy==1.9.3
+     - tqdm==4.64.1
+     - psutil==5.9.5
+     - pytorch_lightning==1.9.4
+     - omegaconf==2.2.3
+     - gradio==3.41.2
+     - pygit2==1.12.2
+     - opencv-contrib-python==4.8.0.74
+     - httpx==0.24.1
+     - onnxruntime==1.16.3
+     - timm==0.9.2
+     - Ensure all package versions match requirements files
+   - 7-Zip (Not needed on Linux; use `unzip` or `tar` if required)
+   - Stable Diffusion XL Models (auto-downloaded or manual from official links)
+     - Main models: juggernautXL_v8Rundiffusion, realisticStockPhoto_v20, animaPencilXL_v100
+     - Inpaint model: [https://huggingface.co/lllyasviel/fooocus_inpaint/resolve/main/inpaint_v26.fooocus.patch]
+   - GPU drivers: SKIP, not needed (no Nvidia/AMD GPU present)
+   - (Optional) Text editor (e.g. nano, vim, code-server for VSCode in Docker)
+   - Example authentication file: `auth-example.json`
+   - (Optional) Secure password management tools (best practice, not enforced)
+
+2. FILES TO CREATE:
+
+   - `environment.yaml`
+     - Include python=3.10, pip=23.0, packaging, and all dependencies from requirements_versions.txt
+     - Ensure PyTorch is pinned to CPU-only version (`torch` via CPU wheel)
+   - `requirements_versions.txt`
+     - All package versions as above, PyTorch must be the CPU-only variant (see above)
+   - `Fooocus/config.txt` (auto-generated)
+   - `Fooocus/config_modification_tutorial.txt` (auto-generated)
+   - `Fooocus/language/<your_language>.json`
+   - `auth.json` (optional, for authentication)
+     - Base on `auth-example.json`, change credentials for production
+   - `auth-example.json` (template/example only)
+   - (Optional) `.env` file for storing environment variables
+   - (Optional, for Colab) `fooocus_colab.ipynb`
+
+3. NECESSARY TEST CASES IN THE CODEBASE:
+
+   - Test installation script (Python, package installation, model download)
+   - Test pip installation (`pip install -r requirements_versions.txt`)
+   - Test first image generation (`python entry_with_update.py`) on CPU
+   - Test with different presets (`--preset anime`, `--preset realistic`)
+   - Test inpaint functionality
+   - Test web UI accessibility (Gradio launches and is accessible)
+   - Test authentication (with secure and example credentials)
+   - Test localization (custom language file)
+   - GPU/VRAM error handling:
+     - Simulate insufficient RAM or swap, check for error messages (not VRAM-specific)
+   - Test on CPU-only system: 
+     - Ensure software warns about lack of GPU and continues on CPU
+   - Test advanced CLI flags
+   - Test configuration reload
+   - Test package import for all listed packages
+   - Test model inference (using onnxruntime, PyTorch Lightning, etc.)
+
+4. COMPLETE TODO LIST (ADJUSTED FOR CPU-ONLY UBUNTU/DEBIAN DOCKER):
+
+   - [1] Verify hardware compatibility:
+     - x86_64 CPU architecture is compatible (amd64); no ARM instructions
+     - Confirm available RAM and disk space (at least 8GB RAM, 40GB disk for swap/models)
+   - [2] Install Python 3.10.x:
+     - Use python:3.10-slim as base image, or install in Dockerfile via apt/pyenv
+     - Verification: `python3 --version` returns 3.10.x
+   - [3] (SKIP) Anaconda/Miniconda:
+     - Not recommended in minimal Docker images; use venv or system python
+   - [4] Install Git:
+     - `apt-get update && apt-get install -y git`
+   - [5] Clone Fooocus repository:
+     - `git clone https://github.com/lllyasviel/Fooocus.git`
+   - [6] Update `environment.yaml`:
+     - Match all dependencies from requirements_versions.txt (ensure torch is CPU-only)
+   - [7] Create/activate Python venv (recommended for Docker)
+     - `python3 -m venv /path/to/venv && . /path/to/venv/bin/activate`
+   - [8] Install dependencies with pip:
+     - `pip install --upgrade pip`
+     - `pip install -r requirements_versions.txt`
+     - For torch:  
+       `pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu`
+   - [9] PyTorch version for your hardware:
+     - Install only the CPU wheel (see above); do not install CUDA, ROCm, torch-directml or MPS versions
+     - Verification: `python -c "import torch; print(torch.cuda.is_available())"` (should print `False`)
+   - [10] 7-Zip: Not needed (use `unzip` or `tar` if needed)
+   - [11] Download or verify models:
+     - Start Fooocus once, allow automatic download, or place in `Fooocus/models/checkpoints`
+   - [12] (Optional) Setup authentication:
+     - Use `auth-example.json` as template, never in production
+   - [13] (Optional) Localization: as before
+   - [14] Configure swap/virtual memory:
+     - Ensure Linux swap is enabled (at least 40GB free storage)
+     - In Docker, use `--privileged` and ensure host swap is available, or configure swapfile in entry script
+   - [15] (Optional) Advanced CLI flags/configuration
+   - [16] Run Fooocus:
+     - `python entry_with_update.py` (within activated venv)
+     - Use correct WORKDIR (set with `WORKDIR` in Dockerfile to `/workspace` or `/app` as expected by the project; adjust if project expects a specific path)
+   - [17] Run test cases (as above, ensure all work on CPU-only)
+   - [18] Troubleshooting:
+     - Ignore GPU-specific errors; if VRAM errors, ensure enough swap/RAM
+     - For "no CUDA" errors, confirm torch CPU-only is installed
+   - [19] (Optional) Update/rollback: as before
+   - [20] Security review for authentication: as before
+
+5. DOCKER & FILESYSTEM SPECIFICS:
+
+   - Ensure WORKDIR in Dockerfile matches project expectation (e.g., `/workspace` or `/app`, not `/home/cc/...`)
+   - If using a deep directory structure, symlink or set WORKDIR accordingly to avoid path errors
+   - Mount `models/` or `outputs/` directories as volumes if persistent storage is needed
+   - Use BuildKit and multi-stage builds for efficiency if compiling dependencies
+   - Omit all `--gpus` and nvidia/cuda related Docker options and ENV variables
+
+6. SUMMARY OF CHANGES FROM ORIGINAL PLAN:
+
+   - All GPU/CUDA/ROCm/DirectML/MPS-specific steps and drivers are REMOVED
+   - PyTorch must be installed as CPU-only
+   - 7-Zip and Windows-specific tools are REMOVED
+   - Conda/Miniconda is NOT recommended inside minimal Docker images (unless explicitly required)
+   - Emphasis on correct WORKDIR and Docker best practices
+   - Swap/virtual memory must be available in the host or configured in the container if running large models
+   - All test cases and installation steps must work on CPU-only
+   - No references to nvidia-smi, CUDA drivers, or --gpus flags
+   - Emphasized storage, RAM, and path considerations for Docker
+
+=== END OF ADJUSTED PLAN ===

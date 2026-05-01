@@ -1,0 +1,142 @@
+=== ADJUSTED ENVIRONMENT SETUP PLAN (CPU-ONLY, x86_64, Ubuntu 20.04, NO NVIDIA GPU) ===
+
+1. DOWNLOADS NEEDED: 
+   - Ubuntu 20.04 LTS (or compatible Linux distribution), or Windows 10/11 with WSL2 and Ubuntu 20.04 installed
+   - Docker CE (latest stable)
+   - git (latest stable)
+   - wget (latest stable)
+   - curl (latest stable)
+   - unzip (latest stable)
+   - pigz (latest stable)
+   - dcmtk (latest stable)
+   - build-essential (latest stable)
+   - cmake and cmake-curses-gui (latest stable)
+   - libboost-all-dev (latest stable)
+   - libeigen3-dev (latest stable)
+   - libtbb-dev (latest stable)
+   - libfltk1.3-dev (latest stable)
+   - pytorch/pytorch:1.9.0-cpu-devel **(CPU ONLY; do NOT use CUDA images)**
+   - dcm2niix (cloned from https://github.com/rordenlab/dcm2niix.git, development branch)
+   - MIRTK repo (to be placed/copied into /MIRTK)
+   - SVRTK repo (to be placed/copied into /SVRTK under /MIRTK/Packages)
+   - Pre-trained neural network weights and brain atlases:
+     - https://gin.g-node.org/SVRTK/fetal_mri_network_weights/raw/master/checkpoints-brain-loc-2-labels/latest.ckpt
+     - https://gin.g-node.org/SVRTK/fetal_mri_network_weights/raw/master/checkpoints-brain-loc-2-labels-cropped/latest.ckpt
+     - https://gin.g-node.org/SVRTK/fetal_mri_network_weights/raw/master/checkpoints-brain-reo-5-labels/latest.ckpt
+     - https://gin.g-node.org/SVRTK/fetal_mri_network_weights/raw/master/checkpoints-brain-reo-5-labels-raw-stacks/latest.ckpt
+   - SVRTK Docker repository with submodules: https://github.com/SVRTK/svrtk-docker-gpu.git
+   - Segmentation_FetalMRI/requirements.txt (for Python dependencies)
+   - (Optional) reference-templates for reorientation (from Segmentation_FetalMRI)
+   - (Optional) Pre-built Docker image: fetalsvrtk/svrtk:pride-svr-docker-0.2.0 **(Confirm this is CPU-only; otherwise, build from source with CPU base image)**
+
+   **NOT NEEDED:**
+   - Nvidia GPU drivers
+   - CUDA Toolkit
+   - Nvidia Container Toolkit
+
+2. FILES TO CREATE: 
+   - svrtk-docker-gpu/.env (optional): Store environment variables such as user-specific configs (NO CUDA paths needed)
+   - svrtk-docker-gpu/svrtk-docker-gpu.Dockerfile: Used to build the Docker image, **ensure FROM pytorch/pytorch:1.9.0-cpu-devel**
+   - svrtk-docker-gpu/recon/ (directory): For input/output NIFTI files
+   - Segmentation_FetalMRI/trained-models/checkpoints-brain-loc-labels/latest.ckpt (downloaded weight file)
+   - Segmentation_FetalMRI/trained-models/checkpoints-brain-loc-labels-cropped/latest.ckpt (downloaded weight file)
+   - Segmentation_FetalMRI/trained-models/checkpoints-brain-reorientation/latest.ckpt (downloaded weight file)
+   - Segmentation_FetalMRI/trained-models/checkpoints-brain-reorientation-stacks/latest.ckpt (downloaded weight file)
+   - Segmentation_FetalMRI/reference-templates/ (directory, must be present for reorientation templates)
+   - Segmentation_FetalMRI/requirements.txt (Python requirements file, must exist)
+   - svrtk-docker-gpu/test/ (directory): Place for test input data and verification scripts
+   - svrtk-docker-gpu/.gitmodules: For submodule tracking (should exist after git clone --recurse-submodules)
+   - (Optional) svrtk-docker-gpu/scripts/verify_installation.sh: Script to automate test runs and output verification
+   - MIRTK/ (directory): MIRTK source, to be copied into Docker image
+   - SVRTK/ (directory): SVRTK source, to be copied into Docker image under MIRTK/Packages/SVRTK
+   - scripts/ (directory): To be present for Docker COPY and contain all pipeline scripts
+   - (Optional) Additional Python virtual environment files if running outside Docker
+   - **Working Directory:** /home/cc/EnvGym/data/20260501_153628_tensorblock_gpt-4.1/SVRTK_Docker_GPU
+     - **Use relative paths as needed for Docker build context and scripts**
+
+3. NECESSARY TEST CASES IN THE CODEBASE: 
+   - Test Docker image/container:
+     - Verify container launches and MIRTK is in PATH (`mirtk` command outputs usage)
+     - Verify SVRTK tools are present in `/home/MIRTK/build/bin`
+   - Test dcm2niix installation:
+     - Run `/home/dcm2niix/build/bin/dcm2niix --version` inside container
+   - Test network weight downloads:
+     - Confirm presence and integrity (file size, checksum) of all .ckpt files in /home/Segmentation_FetalMRI/trained-models/
+   - Test input/output pipeline:
+     - Place a mock/test NIFTI stack in `recon/`, run Docker container, check for existence of `SVR-output.nii.gz`
+   - Test **CPU** execution:
+     - Run pipeline in container, verify CPU-only execution (no GPU/CUDA code, no nvidia-smi checks)
+     - Confirm torch detects CPU: `python -c "import torch; print(torch.cuda.is_available())"` should print `False`
+   - Test Python requirements:
+     - Verify all packages in requirements.txt are installed and importable from Python inside the container
+   - Test scripts permissions:
+     - Verify all /home/scripts/* are executable in the container
+   - Test error handling:
+     - Attempt run with missing input files or missing weights, verify meaningful error messages are produced
+   - Test file permissions:
+     - Confirm that files written to `recon/` have correct permissions for the host OS
+   - Test presence of reorientation templates:
+     - Check that reference-templates are present and readable inside the container
+   - (Optional) Automated test script execution:
+     - Run verify_installation.sh and confirm all checks pass
+
+4. COMPLETE TODO LIST: 
+   1. [ ] Install Ubuntu 20.04 LTS or set up WSL2 with Ubuntu 20.04 on Windows 10/11
+       - Verify with `lsb_release -a`
+   2. [ ] Install Docker CE (according to official documentation)
+       - Verify with `docker --version`
+   3. [ ] Install git, wget, curl, unzip, pigz, dcmtk (`sudo apt-get install git wget curl unzip pigz dcmtk`)
+       - Verify with `git --version`, `wget --version`, `curl --version`, `unzip -v`, `pigz --version`, `dcmdump --version`
+   4. [ ] Install build-essential, cmake, cmake-curses-gui, libboost-all-dev, libeigen3-dev, libtbb-dev, libfltk1.3-dev
+       - Verify with `cmake --version`, `g++ --version`, and check library files
+   5. [ ] **Skip GPU steps! Do NOT install Nvidia GPU drivers, CUDA Toolkit, or Nvidia Container Toolkit**
+   6. [ ] Clone the SVRTK Docker repository with submodules:
+       - `git clone --recurse-submodules https://github.com/SVRTK/svrtk-docker-gpu.git <target-directory>`
+       - Verify by checking for presence of submodule directories
+   7. [ ] Ensure presence of MIRTK and SVRTK source code:
+       - Place MIRTK at `<build context>/MIRTK`
+       - Place SVRTK at `<build context>/SVRTK`
+       - Verify main CMakeLists.txt exists in /MIRTK and SVRTK
+   8. [ ] Ensure scripts/ and Segmentation_FetalMRI/ directories are present in the build context with all required files
+   9. [ ] Download pre-trained neural network weights and atlases into Segmentation_FetalMRI/trained-models/
+       - Use the provided wget commands
+       - Verify files exist and are non-zero size
+   10. [ ] Ensure Segmentation_FetalMRI/requirements.txt and reference-templates/ are present and complete
+   11. [ ] (Optional) Create `.env` and/or other config files if any environment customization is needed
+   12. [ ] Option A: Pull pre-built Docker image
+       - `docker pull fetalsvrtk/svrtk:pride-svr-docker-0.2.0`
+       - **Confirm this image is CPU-only; if not, proceed to Option B**
+       - Verify with `docker images | grep fetalsvrtk/svrtk`
+   13. [ ] Option B: Build Docker image from source using the updated Dockerfile
+       - **Ensure Dockerfile uses the CPU base image:**  
+         `FROM pytorch/pytorch:1.9.0-cpu-devel`
+       - `docker build --platform=linux/amd64 -f svrtk-docker-gpu.Dockerfile -t fetalsvrtk/svrtk:pride-svr-docker-0.2.0 .`
+       - Verify image build completes without error and that all components are installed
+   14. [ ] Create `recon/` directory for input/output
+   15. [ ] Test Docker container launches:
+        - `docker run -it fetalsvrtk/svrtk:pride-svr-docker-0.2.0`
+        - Inside, run `mirtk`, `dcm2niix --version`, and `python -c "import torch; print(torch.cuda.is_available())"` (**should print False**)
+   16. [ ] Test pipeline with sample NIFTI stack:
+        - Place test NIFTI file(s) in `recon/`
+        - Run:
+          - `docker run -v "<full_path_to_recon>":/home/recon fetalsvrtk/svrtk:pride-svr-docker-0.2.0 /home/scripts/docker-recon-brain-auto.bash /home/recon`
+        - Verify that `SVR-output.nii.gz` appears in `recon/`
+   17. [ ] Test Python requirements:
+        - Inside container, run `python -m pip check` and `python -c "import <package>"` for all requirements
+   18. [ ] (Optional) Write and execute test script(s) in `test/` or as `verify_installation.sh` to automate above checks
+   19. [ ] Test error and edge cases:
+        - Remove/move weights or input NIFTI files, rerun, and confirm error messages are informative
+   20. [ ] Document any environment-specific changes (e.g., file permissions, Docker storage, network issues)
+   21. [ ] Clean up any temporary files, ensure all large downloads are present and not corrupted
+
+**NOTES & COMPATIBILITY ADJUSTMENTS:**
+- **Architecture:** x86_64 only; use `--platform=linux/amd64` for Docker builds.
+- **Base Images:** All images must be amd64-based; do NOT use ARM images.
+- **No GPU/CUDA:** Remove all CUDA, nvidia-smi, Nvidia drivers/toolkit/container toolkit references.
+- **Storage/Memory:** If large downloads or builds, ensure sufficient disk space and RAM; adjust swap if needed.
+- **Paths:** Use `/home/cc/EnvGym/data/20260501_153628_tensorblock_gpt-4.1/SVRTK_Docker_GPU` as working directory, with relative paths for Docker build context.
+- **Docker Version:** 28.1.1, supports BuildKit/buildx; no special flags needed for CPU build.
+- **Python/PyTorch:** Ensure pytorch-cpu is installed; check requirements for any GPU-specific dependencies and remove/replace as needed.
+
+**SUMMARY:**  
+This plan is fully adjusted for an x86_64 CPU-only environment, with no GPU, CUDA, or Nvidia dependencies. All steps and files are compatible with Ubuntu 20.04, Docker CE, and standard CPU development tools. Ensure all Dockerfiles, scripts, and requirements are updated to run on CPU, and verify that all testing and pipeline steps do not reference GPU or CUDA functionality.

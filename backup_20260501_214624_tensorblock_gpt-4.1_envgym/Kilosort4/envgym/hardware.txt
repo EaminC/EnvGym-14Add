@@ -1,0 +1,6 @@
+- Working Directory: /home/cc/EnvGym/data/20260501_153628_tensorblock_gpt-4.1/Kilosort4; project likely expects Linux paths, deep directory structure
+- Architecture: x86_64; recommended --platform=linux/amd64
+- Base Image: Ubuntu:20.04, Debian:buster, python:3.x-slim, or similar amd64-compatible images; avoid NVIDIA CUDA images
+- GPU: No NVIDIA GPU detected; Matrox G200eW3 present; CUDA base image not applicable
+- Instruction Notes: No GPU-specific instructions (no --gpus, no nvidia/cuda); use multi-core build optimizations if needed; compatible with overlay2 storage; use cgroupfs for resource management if required
+- Docker Version: 28.1.1; supports BuildKit, modern Dockerfile syntax, Compose v2, but no GPU build features; compatible with Docker Buildx

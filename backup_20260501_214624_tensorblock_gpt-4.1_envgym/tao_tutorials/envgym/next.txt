@@ -1,0 +1,25 @@
+current progress
+- Successfully built and ran a Docker image using the provided Dockerfile (envgym/envgym.dockerfile).
+- Dockerfile installs all required system utilities and Python dependencies for a CPU-only environment.
+- Uses Ubuntu 22.04 base image; sets up Python 3.10 as default (native for 22.04).
+- Locale configured for Jupyter/Python compatibility.
+- Pip upgraded and Jupyter-related packages installed.
+- AWS CLI and s3cmd installed for S3/air-gapped workflows.
+- TAO Tutorials repository cloned and copied to /workspace.
+- requirements.txt and requirements-pip.txt (if present) installed.
+- Workspace permissions set.
+- TAO_CPU_MODE environment variable set (CPU-only operation indicated).
+- Ports exposed for Jupyter, NGINX, MongoDB, SeaweedFS.
+- ENTRYPOINT set to /bin/bash.
+- Build and runtime logs indicate successful execution; no GPU/NVIDIA components present.
+
+next step
+- Update Dockerfile to ensure Python version compatibility per plan (Python >=3.12.x, allow override to 3.11 if needed).
+- If requirements.txt or requirements-pip.txt specify Python >=3.12, install Python 3.12.x via deadsnakes or source, and set as default.
+- Remove any residual GPU/NVIDIA-related environment variables or comments (none currently present, but verify).
+- Explicitly document CPU-only mode and TAO_CPU_MODE usage in Dockerfile comments.
+- Check if any TAO containers/tools in the tutorial require GPU; if so, document limitation and suggest alternative workflows (PyTorch/TensorFlow CPU).
+- Optionally, streamline final image by removing unused packages or add additional CPU-only dependencies if required by notebooks/services.
+- Ensure all exposed ports match those needed by services (update if new services are added).
+- Add/verify CMD or ENTRYPOINT for Jupyter notebook/lab startup if desired for easier notebook use (optional).
+- Rebuild and test Docker image after modifications; verify notebook and dependency compatibility.

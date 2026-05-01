@@ -1,0 +1,221 @@
+=== ADJUSTED ENVIRONMENT SETUP PLAN (CPU-ONLY, x86_64, LINUX/AMD64) ===
+
+**Key Hardware-Specific Adjustments:**
+- NO GPU: Remove all CUDA/NVIDIA/GPU requirements and options.
+- Use CPU-only Python wheels for torch/torchvision/timm.
+- Use standard amd64 Linux base images (NOT CUDA/NVIDIA images).
+- Remove all references to NVIDIA Container Toolkit, CUDA Toolkit installation, and GPU-specific Docker Compose/Dockerfile config.
+- Healthcheck remains, but no CUDA_VISIBLE_DEVICES env needed.
+- Platform: x86_64 (linux/amd64) only (no ARM/multiarch).
+- Project path: nested under /home/cc/EnvGym/data/*/SciDOCX — ensure no hardcoded paths or references to /root or /workspace.
+- You have modern Docker/Compose/BuildKit: Use best practices, but no --gpus, no runtime: nvidia, etc.
+- System has large RAM and storage, so no special out-of-memory handling required.
+
+---
+
+1. DOWNLOADS NEEDED:
+
+   - **Python 3.8+** (tested with 3.10/3.12; 3.8 or higher required)
+     - Verify: `python --version`
+   - **UV** (optional, for local installs): `pip install uv`
+   - **Docker** (v28.1.1 or newer)
+   - **Docker Compose** (v2.x or higher)
+   - **Git**
+   - **Pandoc**
+   - **Hugging Face tools:**
+     - `huggingface_hub` (`pip install huggingface_hub`)
+     - `huggingface-cli` (included in huggingface_hub)
+   - **DeepSeek-OCR model weights** (see below)
+   - **Qwen2-VL-2B-Instruct model weights** (optional)
+   - **DeepSeek-OCR source code**
+   - **Project Python dependencies**  
+     - All as-per updated `requirements.txt` (see below)
+   - **vLLM OpenAI Docker base image** (see adjustments below)
+   - **(Optional) Jupyter Notebook**
+   - **(Optional) curl** (for API health checks)
+   - **(Optional) .dockerignore**
+   - **(Optional) System utilities**
+
+   **Python dependencies (`requirements.txt`):**
+   - All as previously listed, EXCEPT:
+     - **torch**, **torchvision**, **timm**: Must use CPU-only wheels (i.e., do not use +cu121 or any CUDA/CU* build tags).
+       - For torch: Use e.g. `torch==2.5.1` (no +cu121)
+       - For torchvision: `torchvision==0.20.1` (no +cu121)
+       - For timm: `timm==1.0.21` (no CUDA required)
+     - If you had version-pinned CUDA builds (e.g., `torch==2.5.1+cu121`), REMOVE the `+cu121` or any CUDA tag.
+   - All other packages remain, version-pinned.
+
+   **Version compatibility:**
+   - All dependency versions as specified in `requirements-lock.txt`.
+   - **NO CUDA required or supported.**
+   - Python 3.8+ compatible.
+   - If using Python 3.12+, confirm upstream dependency compatibility.
+
+2. FILES TO CREATE & ADJUST:
+
+   - **.env** (optional)
+     - Remove/ignore `CUDA_VISIBLE_DEVICES` references.
+   - **docker-compose.yml**
+     - Service name: `deepseek-ocr`
+     - Build context: `.`
+     - Container name: `deepseek-ocr-vllm`
+     - **Volumes:**
+       - `./models:/app/models`
+       - `./outputs:/app/outputs`
+     - **Environment variables:**
+       - Remove `CUDA_VISIBLE_DEVICES`.
+       - Retain those actually used (e.g., `MODEL_PATH`, `MAX_CONCURRENCY`, `GPU_MEMORY_UTILIZATION` if supported CPU-side).
+     - **GPU support:** REMOVE any `runtime: nvidia` and `deploy.resources.reservations.devices`.
+     - **Healthcheck:** still use `curl`
+     - **Restart policy:** as before
+     - **Ports:** as before (not specified by default)
+   - **Dockerfile**
+     - **Base image:** Use a standard x86_64/amd64 Python or Debian/Ubuntu image, e.g. `python:3.10-slim`, `ubuntu:20.04`, or `debian:bullseye` as appropriate.
+       - DO NOT use CUDA/NVIDIA/`vllm/vllm-openai` images unless you have confirmed a CPU-only option is available.
+       - If vLLM is required, ensure you use a CPU-compatible base image and install vllm with CPU support (if feasible).
+     - Ensure all installs use CPU-only wheels for torch/torchvision/timm.
+     - Remove any GPU/NVIDIA/CUDA-specific RUN/ENV/COPY steps.
+     - Install `curl` (for healthcheck).
+     - Set `PYTHONPATH` as needed.
+     - Expose port 8000; set entrypoint to run `start_server.py`.
+   - **requirements.txt**
+     - As above — **torch**, **torchvision** must be CPU-only wheels.
+   - **requirements-lock.txt**
+     - Same as above; confirm torch/torchvision are CPU-only.
+   - **README.md**
+     - Remove all references to GPU requirements, CUDA, NVIDIA driver install, or GPU-optional steps.
+     - Explicitly state: "This setup is CPU-only. GPU and CUDA are NOT required or supported. If you have a GPU, you must adjust the configuration accordingly."
+     - Document that all torch/torchvision/timm dependencies are CPU-only.
+   - **All other files/directories:** as before.
+
+3. TEST CASES & CODEBASE:
+
+   - Retain all test cases.
+   - For "Hardware Fallback": Only CPU mode is supported. All tests for CPU fallback should always pass. Remove any instructions to test with GPU.
+   - For "Resource Constraints": If desired, test on low-memory settings, but this is optional because RAM is ample.
+   - For "Cross-Platform Compatibility": Test on Linux/x86_64 as primary; macOS/Windows optional.
+   - For "Docker Container Validation": Confirm image works as a CPU-only container.
+   - For "Dependency Consistency": Confirm all torch/torchvision/timm dependencies are installed as CPU-only wheels.
+
+4. COMPLETE TODO LIST (ADJUSTED):
+
+   1. **Install System Dependencies**
+      - [ ] Install Python 3.8+ (preferably 3.10/3.12)
+      - [ ] Install Git
+      - [ ] Install Docker and Docker Compose
+      - [ ] **DO NOT install NVIDIA drivers or CUDA Toolkit**
+      - [ ] Install Pandoc
+      - [ ] Verify: `python --version`, `docker --version`, `pandoc --version`
+   
+   2. **Set Up Python Environment (Local)**
+      - [ ] Install UV (optional)
+      - [ ] Clone repo
+      - [ ] Update `requirements.txt` to use **CPU-only** torch/torchvision/timm (see notes above)
+      - [ ] Install dependencies: `uv pip install -r requirements.txt` or `pip install -r requirements.txt`
+      - [ ] If accidentally installed CUDA wheels, uninstall and reinstall CPU-only:
+        ```
+        pip uninstall torch torchvision timm
+        pip install torch==2.5.1 torchvision==0.20.1 timm==1.0.21
+        ```
+        (No +cu121, no CUDA tags).
+   
+   3. **Download Models and Dependencies**
+      - [ ] As before (no change; models are not CUDA-specific).
+   
+   4. **Configure Environment Variables**
+      - [ ] DO NOT set `CUDA_VISIBLE_DEVICES`.
+      - [ ] Set `PYTHONPATH` and `MODEL_PATH` as needed.
+   
+   5. **Prepare and Verify Docker Setup**
+      - [ ] Ensure `docker-compose.yml` and `Dockerfile` are present.
+      - [ ] **docker-compose.yml**:
+        - Remove `runtime: nvidia` and all GPU/CUDA fields.
+        - Volumes and env vars as before (remove CUDA envs).
+      - [ ] **Dockerfile**:
+        - Use standard Python/Ubuntu/Debian base image (see above).
+        - **Install CPU-only torch/torchvision/timm**.
+        - Do NOT install CUDA toolkit, NVIDIA drivers, or nvidia-container-toolkit.
+      - [ ] Build and run: `docker compose up -d --build`
+      - [ ] Test healthcheck with `curl http://localhost:8000/health`
+      - [ ] Add `ports:` to `docker-compose.yml` override if exposing API.
+   
+   6. **Prepare Data Directories** (as before)
+   
+   7. **Run Test Conversions** (as before)
+   
+   8. **Verify Outputs** (as before)
+   
+   9. **Run API Server**
+      - [ ] Entrypoint and API unchanged.
+      - [ ] No CUDA/GPU env required.
+   
+   10. **Run and Expand Test Suite**
+       - [ ] All as before, but CPU-only.
+   
+   11. **Error Handling and Cross-Platform Verification**
+       - [ ] No CUDA/GPU errors should ever occur; if they do, check for accidental CUDA wheels.
+   
+   12. **Document and Finalize Setup**
+       - [ ] Update README.md:
+         - Remove all CUDA/GPU/NVIDIA installation/config/healthcheck instructions.
+         - State CPU-only.
+         - Document torch/torchvision/timm are CPU-only.
+         - Document base image is standard Python/Ubuntu/Debian.
+       - [ ] Ensure LICENSE.
+   
+   13. **(Optional) Advanced/Evaluation** (as before)
+
+**Final Notes & Verification:**
+- All references to CUDA, NVIDIA, or GPU support are to be REMOVED.
+- All torch/torchvision/timm installs must use CPU-only wheels (no +cu*, no CUDA tags).
+- Dockerfile and docker-compose.yml must NOT reference nvidia runtimes, --gpus, or CUDA.
+- Base image must be standard x86_64/amd64 Linux (python, debian, ubuntu, etc.) — NOT nvidia/cuda.
+- If using vLLM, ensure it supports CPU mode on your base image; otherwise, adjust accordingly.
+- All instructions, environment variables, and error handling should assume CPU-only operation.
+- README must reflect that this is a CPU-only configuration.
+
+---
+
+**In summary:**
+- This plan is now fully CPU-only, x86_64/amd64, Linux-compatible.
+- No NVIDIA, CUDA, or GPU-specific dependencies or instructions remain.
+- torch/torchvision/timm are CPU-only.
+- Docker uses standard base images.
+- All healthchecks, tests, and scripts are CPU-only.
+- README and documentation reflect the above.
+
+---
+
+**If you need a sample CPU-only section for torch/torchvision in requirements.txt:**
+```
+torch==2.5.1
+torchvision==0.20.1
+timm==1.0.21
+```
+*(Do NOT use any +cu* or torch-cuda or cu121 tags!)*
+
+---
+
+**If you need a sample Dockerfile base line:**
+```dockerfile
+FROM python:3.10-slim
+
+# ... rest of your Dockerfile
+```
+*(Do NOT use vllm/vllm-openai, nvidia/cuda, etc. unless you have a known CPU mode.)*
+
+---
+
+**If you need a sample removal in docker-compose.yml:**
+```yaml
+services:
+  deepseek-ocr:
+    # ... (other config)
+    # REMOVE: runtime: nvidia
+    # REMOVE: deploy.resources.reservations.devices
+    # REMOVE: environment: CUDA_VISIBLE_DEVICES
+```
+
+---
+
+Your configuration is now correct for your hardware and environment.

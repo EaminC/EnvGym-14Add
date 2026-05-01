@@ -1,0 +1,6 @@
+- Working Directory: /home/cc/EnvGym/data/20260501_153628_tensorblock_gpt-4.1/SciDOCX; project located in a nested directory under EnvGym, no special context (e.g. no CUDA or GPU-specific structure required)
+- Architecture: x86_64; recommended --platform=linux/amd64
+- Base Image: Use standard amd64 Linux base images (e.g., ubuntu:20.04, python:3.10-slim, debian:bullseye); avoid cuda, nvidia, or GPU-specific tags
+- GPU: No NVIDIA GPU present; do not use CUDA or nvidia/cuda base images; no GPU-specific instructions needed
+- Instruction Notes: No special ARGs or ENV for GPU; standard RUN, COPY, WORKDIR, CMD, ENTRYPOINT; large memory/CPU available for builds, project path not root; no ARM, Power, or multiarch adjustments needed
+- Docker Version: 28.1.1; BuildKit supported; --gpus flag not applicable; compatible with modern Compose and buildx features

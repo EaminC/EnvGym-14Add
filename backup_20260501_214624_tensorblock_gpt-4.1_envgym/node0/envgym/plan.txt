@@ -1,0 +1,216 @@
+=== ADJUSTED ENVIRONMENT SETUP PLAN ===
+
+1. DOWNLOADS NEEDED (Adjusted for CPU-only, x86_64, Ubuntu 20.04 base):
+
+   - Git (latest stable version)
+   - Docker (already installed; version 28.1.1; BuildKit supported)
+   - jq (JSON processor)
+   - Python 3.11 (exact version required; installed INSIDE Docker via conda or apt/pyenv as needed)
+   - pip (latest version; installed inside Docker)
+   - Miniconda/Anaconda (for Conda environment management; installed inside Docker, optional but recommended for WSL/Windows host)
+   - tmux (for persistent terminal sessions, recommended outside Docker)
+   - lsof (for port and file management, required for stopping server and freeing resources)
+   - wget and curl (required for Dockerfile, network testing, and troubleshooting)
+   - build-essential (required for compilation, installed inside Docker)
+   - rsync (for file synchronization, installed inside Docker)
+   - openssh-client (for SSH operations, installed inside Docker)
+   - vim (for in-container editing, installed inside Docker)
+   - Optional: Conda (latest version, for easier environment management on Windows/WSL host)
+   - Optional: telnet/nc (for network testing)
+   - Version compatibility:
+     - CUDA and cuDNN: **DO NOT INSTALL/USE** (No GPU present; remove references)
+     - GPU drivers: **DO NOT INSTALL/USE**
+     - nvidia-docker2/NVIDIA Docker runtime: **DO NOT INSTALL/USE**
+     - Docker base image: **Use Ubuntu 20.04 (or 22.04 if compatible with all requirements), python:3.11-slim, or debian:buster**
+     - Python 3.11 (inside Docker and for source installs; must be >=3.11,<3.12 as per pyproject.toml)
+   - Python packages from pyproject.toml: (no change)
+     - PyYAML
+     - prometheus_client
+     - torch==2.7.0 (will run in CPU mode)
+     - numpy>=1.17
+     - scipy>=1.2.1
+     - prefetch_generator>=1.0.1
+     - msgpack>=0.5.6
+     - sortedcontainers
+     - uvloop>=0.14.0
+     - grpcio-tools>=1.33.2
+     - protobuf>=5.29.0
+     - configargparse>=1.2.3
+     - py-multihash>=0.2.3
+     - cryptography>=3.4.6
+     - pydantic>=2.0.0
+     - packaging>=20.9
+     - varint>=1.0.2
+     - base58>=1.0.2
+     - netaddr>=1.3.0
+     - idna>=3.10
+     - py-cid>=0.3.0
+     - requests>=2.32.3
+     - speedtest-cli>=2.1.3
+     - psutil>=7.0.0
+     - hivemind @ git+https://github.com/learning-at-home/hivemind.git@4d5c41495be082490ea44cce4e9dd58f9926bb4e
+   - Hatchling (build backend for Python, for PEP 517 builds; required if building from pyproject.toml)
+   - [Optional] Additional tools for testing build-system compliance
+
+2. FILES TO CREATE (No major changes, but clarify context):
+
+   - All as previously listed.
+   - /etc/docker/daemon.json: **DO NOT create or modify for "default-runtime": "nvidia"** (no NVIDIA GPU present)
+   - Dockerfile: 
+     - Set **base image to ubuntu:20.04/22.04, python:3.11-slim, or debian:buster** (no nvidia/cuda).
+     - Ensure all installation steps are compatible with Ubuntu 20.04 userland.
+     - **Remove all CUDA, cuDNN, and nvidia-docker-specific instructions.**
+     - Set WORKDIR to /workspace or the project’s deep path as appropriate (/home/cc/EnvGym/data/20260501_153628_tensorblock_gpt-4.1/node0 or a trimmed subdir).
+   - .env: (optional, unchanged)
+   - environment.yml: (ensure all dependencies are CPU-compatible)
+   - requirements.txt: (should match pyproject.toml, CPU-compatible)
+   - All other files: unchanged.
+
+3. NECESSARY TEST CASES IN THE CODEBASE (Adjusted for CPU-only):
+
+   - Installation verification:
+     - Test that Docker image builds successfully (using provided Dockerfile) and **runs in CPU mode**.
+     - Test that pip install from source completes without errors in Python 3.11 environment.
+     - Test that conda environment is activated and Python/pip versions are as expected inside Docker.
+     - Test that installation via pyproject.toml (PEP 517 build) completes without errors, using Hatchling as the build backend.
+     - Test that all dependencies from pyproject.toml are installed and importable.
+   - Dockerfile compliance:
+     - Test that all tools (conda, git, wget, curl, rsync, openssh-client, vim) are available in the container.
+     - Test that locale is set correctly (LC_ALL=en_US.UTF-8).
+     - Test that build-system requirements (Hatchling) are satisfied.
+     - Test that Dockerfile uses pyproject.toml for dependency installation, or requirements.txt is consistent with pyproject.toml.
+     - **Test that no CUDA/nvidia tools are present or required.**
+   - Script generation:
+     - Test that generate_script.py creates start_server.sh with correct parameters (without Docker GPU flags).
+     - Test that generate_script.py handles missing/invalid HuggingFace token gracefully.
+   - GPU detection:
+     - **Skip/disable all GPU detection and --gpu_id flag tests.**
+     - Test that code runs without GPU and that torch uses CPU.
+   - Port configuration, Authorization, Logging, File management, Restart/stop, Sanity check, Multi-instance, Docker CMD compliance, Conda TOS acceptance, Build-system and metadata compliance, Dependency checks, Build-system tests: **All as before, but ensure all tests are CPU-only.**
+   - Dependency checks:
+     - Test that torch==2.7.0 is installed and operates in CPU mode (no CUDA).
+     - Test that hivemind is installed from specified commit.
+     - Test that all required dependencies from pyproject.toml are importable and correct versions.
+   - Build-system tests:
+     - Test `python -m build` or equivalent PEP 517 build using Hatchling.
+
+4. COMPLETE TODO LIST (Adjusted for CPU-only, x86_64, Ubuntu 20.04):
+
+   1. Install Git (latest stable version).
+      - Verify with `git --version`.
+   2. Clone the repository:
+      - `git clone https://github.com/PluralisResearch/node0`
+      - `cd node0`
+   3. **SKIP: Install NVIDIA GPU drivers.** (No GPU present)
+   4. Install Docker (**already present, 28.1.1**).
+      - Skip nvidia-docker2.
+      - Do not use `--gpus` flag with Docker.
+      - Verify Docker with `docker --version`.
+   5. Install jq:
+      - `sudo apt-get install jq`
+      - Verify with `jq --version`.
+   6. **SKIP: Configure Docker daemon for NVIDIA GPU runtime.**
+      - DO NOT edit/create `/etc/docker/daemon.json` for "default-runtime": "nvidia".
+   7. **SKIP: WSL2 CUDA/WSL-specific NVIDIA steps.**
+   8. [Optional/Host] Install Miniconda/Anaconda for environment management (if running outside Docker or for host tooling).
+      - Follow [official instructions](https://www.anaconda.com/docs/getting-started/miniconda/install#linux).
+      - Verify with `conda --version`.
+   9. Install tmux (for persistent sessions outside Docker).
+      - `sudo apt-get install tmux`
+      - Verify with `tmux -V`.
+   10. Install lsof (for port/file management).
+      - `sudo apt-get install lsof`
+      - Verify with `lsof -v`.
+   11. Generate HuggingFace access token via web UI.
+      - Store token securely.
+   12. [Docker] Build Docker image:
+      - **Set base image to Ubuntu 20.04/22.04, python:3.11-slim, or debian:buster.**
+      - **Ensure no CUDA/cudnn/nvidia instructions are present.**
+      - Ensure Dockerfile installs all dependencies from pyproject.toml, using PEP 517 build with Hatchling if possible.
+      - Add Hatchling installation if not already present: `pip install hatchling`
+      - Ensure Python version in Docker matches >=3.11,<3.12.
+      - `docker build . -t pluralis_node0`
+      - Verify build completion and image presence with `docker images`.
+      - Confirm all tools (git, wget, curl, conda, pip, python, rsync, openssh-client, vim) exist in the image.
+      - Confirm Python 3.11 and pip are available within the container.
+      - Confirm all dependencies from pyproject.toml are installed and importable.
+      - **Test that torch -- no CUDA, only CPU mode.**
+   13. [Optional/Source] Create and activate Conda environment on host:
+      - `conda create -n node0 python=3.11`
+      - `conda activate node0`
+      - Install Hatchling: `pip install hatchling`
+      - Install dependencies: `pip install .` or `python -m pip install .` (will use pyproject.toml)
+      - Alternatively, create environment.yml with all pyproject.toml dependencies and use `conda env create`.
+   14. [Optional/Source] Install node0 via pip (for host/source runs):
+      - `pip install .`
+      - Verify installation with `pip list | grep node0`.
+      - Verify all dependencies from pyproject.toml are installed.
+   15. [Docker/Source] Generate start_server.sh with generate_script.py:
+      - `python3 generate_script.py` (do NOT use --use_docker --gpus)
+      - Enter HuggingFace token and email when prompted, or pass via flags.
+      - Verify creation of start_server.sh.
+   16. [Optional] Create .env file to store environment variables.
+      - Add HF_TOKEN, EMAIL, HOST_PORT, ANNOUNCE_PORT as needed.
+   17. Verify port accessibility:
+      - Follow [docs/network.md] guide to open/expose port 49200 (or custom port).
+      - Test port reachability with `telnet <host_ip> <port>` or `nc -zv <host_ip> <port>`.
+   18. Start Docker container:
+      - `docker run -it --rm -p <host_port>:<container_port> -v $(pwd):/workspace pluralis_node0`
+      - Once inside container, run `./start_server.sh` or as directed.
+      - **Do NOT use --gpus all or any nvidia runtime options.**
+   19. Verify logs:
+      - Ensure logs/server.log and run.out are created and populated.
+   20. Monitor training:
+      - `tail -f run.out`
+      - Check for "Processed [N] batches in last 60 seconds" and "Averaged gradients/parameters with [N > 1] peers" messages.
+   21. [Outside Docker] Run server inside tmux for session persistence.
+      - `tmux new -s node0`
+      - Start server inside tmux.
+   22. Stop server:
+      - [Docker] `docker stop <container_name_or_ID>` and `docker rm <container_name_or_ID>`
+      - Update file ownership: `sudo chown -R <linux_user> .`
+      - [Source] Press Ctrl+Z; remove socket files with `rm /tmp/hivemind*`
+      - Free ports: `for i in $(sudo lsof -t -i tcp:<host_port>); do kill -9 $i; done`
+      - **Skip freeing GPU resources with lsof /dev/nvidia\*** (no GPU).
+   23. Restart server as needed:
+      - `./start_server.sh`
+   24. Error handling and troubleshooting:
+      - Check logs for network, authorization, and averaging errors.
+      - Refer to [docs/network.md] and [docs/cloud.md] for solutions.
+      - Rebuild/reinstall if verification fails after repository changes.
+   25. Verify file integrity:
+      - Ensure private.key is present and not deleted.
+      - Confirm ownership of files after Docker runs.
+   26. Test multi-instance configuration:
+      - Setup multiple repo folders for each instance/port.
+      - Run generate_script.py for each instance with different ports.
+      - Verify that logs and private.key do not overlap.
+   27. Verify legal compliance:
+      - Check LICENSE and THIRD_PARTY_LICENSES.md presence and accuracy.
+      - Ensure LICENSE matches Apache-2.0 and is recognized by build tools.
+      - Ensure THIRD_PARTY_LICENSES.md is recognized as a license-file.
+   28. Verify citation and acknowledgements:
+      - Ensure citation information is available for users.
+   29. [Docker] Confirm conda TOS is accepted and all installations complete without error during build.
+   30. [Docker] Confirm CMD ["bash"] enables both interactive and scripted container entry.
+   31. [Docker] Confirm locale is set to LC_ALL=en_US.UTF-8 inside container.
+   32. [Docker] Confirm all copied files (COPY . node0/) are present and pip install completes inside container.
+   33. [Build-system] Confirm Hatchling is installed and build via pyproject.toml works (`python -m build` or `pip install .`).
+   34. [Build-system] Confirm direct references (hivemind @ git+...) are handled correctly.
+   35. [Metadata] Confirm README.md is present and referenced in pyproject.toml.
+   36. [Dependency] Confirm torch==2.7.0 is installed and working (CPU mode; no CUDA).
+   37. [Dependency] Confirm all Python package versions meet pyproject.toml requirements.
+   38. [Sanity] Confirm Python version is >=3.11,<3.12 everywhere (host, Docker, Conda env).
+   39. [Repository hygiene] Confirm .gitignore is present and configured (optional).
+   40. [Optional] Update environment.yml and requirements.txt to ensure consistency with pyproject.toml.
+
+**NOTES:**
+- Remove all CUDA/NVIDIA/nvidia-docker/cudnn/--gpus/NVIDIA driver related steps and Docker instructions.
+- Use only CPU-compatible Python wheels and packages (torch, numpy, etc.).
+- If using a deep path (e.g., /home/cc/EnvGym/data/20260501_153628_tensorblock_gpt-4.1/node0), set Docker WORKDIR accordingly or trim as needed for context and volume mounts.
+- Ensure all scripts and tools work in a CPU-only, x86_64, Ubuntu 20.04 environment.
+- Review memory and storage usage during Docker image build if hardware is resource-constrained; adjust accordingly if needed (e.g., clean up apt cache, minimize layers).
+- Build/test only on x86_64 (--platform=linux/amd64 if using `docker buildx` on ARM or mixed hosts).
+- All code/tests/launch scripts must gracefully handle and run in CPU-only mode.
+
+=== END OF PLAN ===

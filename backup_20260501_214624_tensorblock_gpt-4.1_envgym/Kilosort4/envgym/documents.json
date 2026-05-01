@@ -1,0 +1,8 @@
+[
+  "README.md",
+  "setup.py",
+  "tox.ini",
+  "pytest.ini",
+  "docs/requirements.txt",
+  ".readthedocs.yml"
+]

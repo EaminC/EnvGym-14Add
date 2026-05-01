@@ -1,0 +1,6 @@
+- Working Directory: /home/cc/EnvGym/data/20260501_153628_tensorblock_gpt-4.1/nesa_bootstrap; deep subdirectory under project; no GPU-specific context required
+- Architecture: x86_64; recommended --platform=linux/amd64
+- Base Image: Use amd64-compatible images, e.g., ubuntu:20.04, python:3.10-slim, debian:bullseye, etc.
+- GPU: No NVIDIA GPU detected; do not use CUDA or nvidia/cuda base images
+- Instruction Notes: No GPU-specific RUN/ENV needed; standard instructions for CPU-based builds; large available memory and CPU cores—no special limits required; extfs/overlay2 storage
+- Docker Version: 28.1.1; BuildKit and compose fully supported; --gpus flag not applicable

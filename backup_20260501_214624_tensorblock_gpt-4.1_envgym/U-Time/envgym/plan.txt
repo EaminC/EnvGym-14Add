@@ -1,0 +1,219 @@
+=== ADJUSTED ENVIRONMENT SETUP PLAN (CPU-ONLY, x86_64, NO GPU) ===
+
+**Key changes for your hardware:**
+- All GPU/CUDA/cuDNN-specific instructions, dependencies, and verification steps are REMOVED or marked as NOT APPLICABLE.
+- All requirements and steps are tailored for a CPU-only, x86_64 (amd64), Linux environment (e.g., Ubuntu 20.04), with no NVIDIA GPU or CUDA support.
+- Paths for Docker/working directory context are clarified if relevant.
+- All base image, architecture, and toolchain details match your provided specs.
+- Additional memory/storage checks are noted as reminders, but not changed unless you provide specific RAM/disk numbers.
+
+---
+
+1. DOWNLOADS NEEDED: 
+
+   - Anaconda (v4.5 or higher, 64-bit) or Miniconda (v4.5 or higher, 64-bit)
+   - Git (latest version)
+   - **[REMOVED] NVIDIA GPU Drivers, CUDA Toolkit, cuDNN SDK** (NOT APPLICABLE – no GPU)
+   - U-Time repository: https://github.com/perslev/U-Time.git
+   - Python packages (install via conda/pip, as specified below):
+     - numpy (>=1.21.5) [explicitly listed in environment.yaml]
+     - conda (>=4.10.3) [explicitly listed in environment.yaml]
+     - python (>=3.7.7) [explicitly listed in environment.yaml]
+     - pip (>=21.2.4) [explicitly listed in environment.yaml]
+     - setuptools (>=52.0.0) [explicitly listed in environment.yaml]
+     - setuptools_git (>=0.3) [new, required by setup.py in setup_requires]
+     - tk (>=8.6.10) [explicitly listed in environment.yaml]
+     - wheel (>=0.37.0) [explicitly listed in environment.yaml]
+     - tensorflow (>=2.8.0) [CPU version only]
+     - tensorflow-addons (>=0.16.1)
+     - utime (latest via pip or local install)
+     - h5py (>=3.6.0)
+     - matplotlib (>=3.4.3)
+     - pandas (>=1.3.5)
+     - psutil (>=5.9.0)
+     - scipy (>=1.7.3)
+     - mne (>=0.24.1)
+     - tables (>=3.7.0)
+     - tabulate (>=0.8.9)
+     - wfdb (>=3.4.1)
+     - ruamel.yaml (>=0.17.21)
+     - scikit-learn (>=1.0.2)
+     - requests (>=2.27.1)
+     - carbontracker (>=1.1.6)
+     - psg_utils (>=0.1.6)
+     - yamlhparams (>=0.2.0)
+     - Any other dependencies listed in U-Time/environment.yaml, requirements.txt, or setup.py
+   - Datasets for demo and full reproduction (e.g., sedf_sc, dcsm, others as listed in documentation)
+   - Optional: requirements.txt (for pip-based installs or as supplementary to environment.yaml)
+   - Optional: HISTORY.rst and README.md (needed for setup.py execution)
+   - Version compatibility requirements:
+     - Ensure all package versions meet minimum constraints in environment.yaml, requirements.txt, and setup.py.
+     - **[REMOVED] Confirm CUDA/cuDNN compatibility for GPU use** (NOT APPLICABLE)
+     - Prefer conda installation where possible for scientific packages (numpy, h5py, etc.), but supplement with pip for packages not available via conda.
+     - Use both "defaults" and "conda-forge" channels for maximum package availability.
+     - Ensure setuptools_git (>=0.3) is available for setup.py support.
+     - Ensure presence of utime/version.py for version management.
+   - **[NOTE] Make sure to install the CPU-only versions of TensorFlow and related packages.**
+
+2. FILES TO CREATE: 
+
+   - environment.yaml (U-Time/environment.yaml): Conda environment definition with all required packages and version constraints, updated to include:
+     - conda>=4.10.3
+     - python>=3.7.7
+     - pip>=21.2.4
+     - setuptools>=52.0.0
+     - setuptools_git>=0.3 [new, as required by setup.py]
+     - tk>=8.6.10
+     - wheel>=0.37.0
+     - numpy>=1.21.5
+     - All other dependencies from requirements.txt, setup.py (install_requires/setup_requires), and previous plan
+     - Both "defaults" and "conda-forge" channels
+     - **[REMOVED] Any CUDA-related dependencies**
+   - requirements.txt: Python package requirements file (used for pip installs and referenced by setup.py install_requires). Ensure it is present and matches dependencies in environment.yaml and setup.py.
+   - setup.py: Python package setup script (provided; ensure it is in the repository and up to date).
+   - utime/version.py: Version file for utime (ensure present and contains __version__).
+   - HISTORY.rst: Changelog/history file (required by setup.py for long_description).
+   - README.md: Project readme (required by setup.py for long_description).
+   - LICENSE.txt: License file (referenced in setup.py).
+   - hyperparameters/hparams.yaml: Project-specific hyperparameters for model training.
+   - hyperparameters/dataset_configurations/: Per-dataset configuration files specifying paths, channel selections, preprocessing, etc.
+   - processed_data.h5: HDF5 archive for preprocessed data (created by ut preprocess).
+   - demo/, my_utime_project/, u-sleep/: Project directories initialized with ut init, containing hyperparameters and model files.
+   - predictions/, eval/: Output directories for model predictions and evaluation results.
+   - log files: Command output logs for troubleshooting (e.g., train.log, preprocess.log).
+   - .gitignore: Exclude large data files, logs, and model checkpoints from version control.
+   - test/ or tests/: Directory for test scripts (unit and integration tests).
+   - setup log or README: Document environment setup, customizations, and error handling strategies.
+   - Modified files:
+     - Update environment.yaml to ensure all requirements.txt and setup.py dependencies (install_requires, setup_requires) are included with correct version constraints.
+     - Add requirements.txt to repository if not already present and ensure it matches environment.yaml and setup.py.
+     - Ensure HISTORY.rst, README.md, LICENSE.txt, and utime/version.py are present as required by setup.py.
+
+3. NECESSARY TEST CASES IN THE CODEBASE: 
+
+   - Environment initialization:
+     - Test conda environment creation and activation with updated environment.yaml, including new dependencies (conda, python, pip, setuptools, setuptools_git, tk, wheel, numpy).
+     - Test pip installation using requirements.txt if conda env creation fails or is not preferred.
+     - Test python setup.py install and pip install . from cloned repository.
+     - Test import of all required Python packages (including new ones from environment.yaml, requirements.txt, and setup.py).
+     - Test channel selection logic for conda installs (defaults and conda-forge).
+   - Distribution and packaging:
+     - Test that setup.py successfully builds the package and all files (README.md, HISTORY.rst, LICENSE.txt, utime/version.py) are found.
+     - Test that the entry point 'ut' command is created and runs (ut=utime.bin.ut:entry_func).
+     - Test that install_requires and setup_requires are respected during setup and install.
+   - Data fetching:
+     - Test ut fetch for each supported dataset (valid download, file integrity, correct folder structure).
+     - Test behavior if download fails or disk space is insufficient.
+   - Data preprocessing:
+     - Test ut preprocess for correct data transformation, HDF5 archive creation, and error handling for malformed input.
+     - Test channel selection, sampling rate adjustment, hypnogram mapping.
+     - Test compatibility of preprocessing scripts with mne, tables, and other dependencies.
+   - Dataset splitting:
+     - Test ut cv_split for proper train/val/test allocation, reproducibility with seed, and error for missing subjects.
+   - Model training:
+     - Test ut train for successful startup, **CPU-only** selection, checkpoint creation, and error handling on resource exhaustion.
+     - Test compatibility with tensorflow-addons and carbontracker on CPU.
+     - **[REMOVED] GPU/CPU selection logic or GPU-specific tests; only test CPU.**
+   - Model prediction and evaluation:
+     - Test ut predict and ut evaluate for output file correctness, deterministic prediction, and handling of missing model files.
+     - Test confusion matrix generation (ut cm), including edge cases with missing/invalid labels.
+   - Project directory initialization:
+     - Test ut init for correct folder creation and hyperparameter file generation.
+   - End-to-end pipeline:
+     - Test full workflow on sample/demo datasets, from fetch to evaluation.
+   - Error handling:
+     - Test all CLI commands for graceful failure on invalid arguments, missing files, and permission errors.
+   - Package versioning and compatibility:
+     - Test environment with minimum and maximum allowed package versions as in environment.yaml, requirements.txt, and setup.py.
+     - Test for conflicts between conda and pip installs.
+     - Test for proper installation and functioning of core environment dependencies (conda, python, pip, setuptools, setuptools_git, tk, wheel, numpy).
+   - Optional test scenarios:
+     - Test fallback to pip install using requirements.txt if conda environment creation fails.
+     - Test yamlhparams and ruamel.yaml integration for hyperparameter management.
+     - Test that utime/version.py contains a valid __version__ variable.
+     - Test presence and contents of README.md, HISTORY.rst, LICENSE.txt for packaging and PyPI upload.
+
+4. COMPLETE TODO LIST: 
+
+   - [ ] Confirm system hardware meets minimal requirements (CPU, RAM, storage, **NO GPU**).
+     - Verification: Run `lscpu`, `free -h`, `df -h`
+     - **[REMOVED] `nvidia-smi` (no NVIDIA GPU present)**
+   - [ ] Install Anaconda or Miniconda (v4.5+), Git.
+     - Verification: Run `conda --version`, `git --version`
+     - **[REMOVED] `nvcc --version`, `nvidia-smi`, `cat /usr/local/cuda/include/cudnn.h | grep CUDNN_MAJOR`**
+   - [ ] Clone U-Time repository: `git clone https://github.com/perslev/U-Time.git`
+     - Verification: Check U-Time directory exists.
+   - [ ] Update U-Time/environment.yaml to include:
+     - conda>=4.10.3
+     - python>=3.7.7
+     - pip>=21.2.4
+     - setuptools>=52.0.0
+     - setuptools_git>=0.3 [new, as required by setup.py]
+     - tk>=8.6.10
+     - wheel>=0.37.0
+     - numpy>=1.21.5
+     - All other required dependencies from requirements.txt, setup.py, and previous plan
+     - Both "defaults" and "conda-forge" channels
+     - **[REMOVED] Any CUDA or GPU-related dependencies**
+     - Verification: Review environment.yaml and confirm all requirements covered, including setup.py install_requires and setup_requires.
+   - [ ] Add requirements.txt to repository and ensure it matches environment.yaml and setup.py install_requires.
+     - Verification: Cross-check requirements.txt, environment.yaml, and setup.py for completeness and consistency.
+   - [ ] Ensure setup.py is present and up to date in the repository.
+     - Verification: Confirm setup.py contains all required parameters and is consistent with requirements.txt and environment.yaml.
+   - [ ] Ensure HISTORY.rst, README.md, LICENSE.txt, and utime/version.py are present.
+     - Verification: Confirm these files exist and are referenced correctly in setup.py; check utime/version.py contains __version__.
+   - [ ] Create conda environment using updated environment.yaml: `conda env create --file U-Time/environment.yaml`
+     - Verification: Run `conda activate u-sleep` and check package installation, including new dependencies.
+   - [ ] If using pip, install packages via requirements.txt: `pip install -r requirements.txt`
+     - Verification: Run `python -c "import utime; import tensorflow_addons; import mne; import tables; import tabulate; ..."` for all packages.
+   - [ ] Install U-Time package:
+     - Using setup.py: `pip install .` or `python setup.py install`
+     - Or: `pip install U-Time/` (local) or `pip install utime` (PyPI)
+     - Verification: Run `python -c "import utime"` and `ut --help` to check entry point; check for errors.
+   - [ ] Initialize project directory with `ut init` (e.g., demo, my_utime_project, u-sleep).
+     - Verification: Check creation of hyperparameters/, model/, etc.
+   - [ ] Fetch demo datasets using `ut fetch` for sedf_sc and dcsm.
+     - Verification: Check that files are downloaded and folder structure matches README.
+   - [ ] Split datasets using `ut cv_split` with appropriate parameters.
+     - Verification: Check generated split files, reproducibility with seed.
+   - [ ] Preprocess data with `ut preprocess` (as needed for demo/full pipeline).
+     - Verification: Confirm processed_data.h5 exists and contains valid data.
+   - [ ] Train model with `ut train`, **CPU-only**.
+     - Verification: Monitor progress, check for model checkpoints, review train.log.
+   - [ ] Run predictions and evaluation using `ut predict` and `ut cm`.
+     - Verification: Confirm prediction files, confusion matrix output as expected.
+   - [ ] (Optional) Perform full reproduction by downloading and processing all datasets as per instructions.
+     - Verification: Check all datasets in place, configuration files updated, and pipeline runs without errors.
+   - [ ] (Optional) Train U-Time model using provided example.
+     - Verification: End-to-end pipeline completes, evaluation results generated.
+   - [ ] Write and run test cases as listed above.
+     - Verification: All tests pass, failures logged and resolved.
+   - [ ] Add .gitignore to exclude data, logs, and checkpoints from version control.
+     - Verification: Run `git status` to confirm only relevant files tracked.
+   - [ ] Check compatibility for CPU-only systems (MacOS, Linux), and ensure fallback to CPU works without errors.
+     - Verification: Run all steps on CPU-only machine, confirm functionality.
+   - [ ] Document any customizations, environment variables, and error handling strategies in a setup log or README.
+     - Verification: Ensure documentation is up to date and clear.
+   - [ ] Test installation and compatibility for all new and existing packages introduced by requirements.txt, environment.yaml, and setup.py (tensorflow-addons, mne, tables, tabulate, carbontracker, wfdb, yamlhparams, psg_utils, conda, python, pip, setuptools, setuptools_git, tk, wheel, numpy, etc.).
+     - Verification: All packages can be imported and used as needed in the codebase.
+   - [ ] Resolve any conflicts between environment.yaml, requirements.txt, and setup.py; prioritize conda for scientific packages and pip for others.
+     - Verification: Environment creation and package installation succeed without version conflicts or missing dependencies.
+   - [ ] Ensure "defaults" and "conda-forge" channels are configured and working for conda installs.
+     - Verification: Test package installs from both channels.
+   - [ ] Test that 'ut' CLI entry point is available after setup/installation.
+     - Verification: Run `ut --help` and confirm output.
+   - [ ] Ensure all packaging files required by setup.py (README.md, HISTORY.rst, LICENSE.txt, utime/version.py) are tracked in version control and included in PyPI builds.
+     - Verification: Run `python setup.py sdist` and confirm all files are packaged.
+
+**Additional Platform-Specific Notes:**
+- **CPU Architecture:** Confirm all conda/pip packages are available for x86_64/amd64 (should be default for your setup).
+- **Operating System:** All instructions are Linux-compatible (e.g., Ubuntu 20.04) and work in Docker containers based on python:3.10-slim or ubuntu:20.04 images.
+- **No GPU:** Do NOT attempt to install or configure CUDA/cuDNN or GPU-enabled TensorFlow/PyTorch. Use CPU-only TensorFlow (or allow conda/pip to select the default).
+- **Memory & Storage:** Ensure sufficient RAM (at least 8 GB recommended; more for large datasets) and disk space for datasets and checkpoints.
+- **Development Tools:** Docker 28.1.1 features are supported; ensure COPY and WORKDIR in Dockerfiles are set appropriately (e.g., context /home/cc/EnvGym/data/20260501_153628_tensorblock_gpt-4.1/U-Time).
+- **Paths:** All paths in scripts, Dockerfiles, and documentation should reference the actual directory structure as per your Working Directory.
+
+---
+
+**Summary:**  
+This adjusted plan ensures the environment setup is fully compatible with a CPU-only, x86_64 Linux system, omitting any GPU/CUDA steps or dependencies, and is ready for use in Docker or bare-metal environments with your provided hardware specs.

@@ -1,0 +1,6 @@
+- Working Directory: /home/cc/EnvGym/data/20260501_153628_tensorblock_gpt-4.1/pdf-to-podcast; project is in a subdirectory, set WORKDIR accordingly
+- Architecture: x86_64; recommended --platform=linux/amd64
+- Base Image: Use amd64-compatible images (e.g., ubuntu:20.04, python:3.11-slim, etc.)
+- GPU: No NVIDIA GPU present; do not use CUDA or GPU-based base images
+- Instruction Notes: No GPU-specific instructions (e.g., no nvidia-smi, no --gpus flag); ample CPU and RAM resources; compatible with multi-stage builds and BuildKit features
+- Docker Version: 28.1.1; fully supports BuildKit, Buildx, Compose; no native GPU passthrough
