@@ -1,0 +1,75 @@
+=== Docker Execution Log - 20260501_120100 ===
+Dockerfile: envgym/envgym.dockerfile
+Image Name: envgym_test_1777636857
+
+=== Build Log ===
+Build Status: Success
+Build Output:
+
+
+Build Error:
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from envgym.dockerfile
+#1 transferring dockerfile: 1.41kB done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/ubuntu:22.04
+#2 DONE 0.1s
+
+#3 [internal] load .dockerignore
+#3 transferring context:
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [1/9] FROM docker.io/library/ubuntu:22.04@sha256:962f6cadeae0ea6284001009daa4cc9a8c37e75d1f5191cf0eb83fe565b63dd7
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 109.73kB 0.0s done
+#5 DONE 0.0s
+
+#6 [2/9] WORKDIR /home/cc/EnvGym/data/20260501_071208_tensorblock_gpt-4.1-mini/nesa_bootstrap
+#6 CACHED
+
+#7 [3/9] RUN apt-get update && apt-get install -y --no-install-recommends     curl     jq     python3     python3-pip     bash     sudo     && rm -rf /var/lib/apt/lists/*
+#7 CACHED
+
+#8 [4/9] RUN ln -sf /usr/bin/python3 /usr/bin/python
+#8 CACHED
+
+#9 [5/9] COPY . /home/cc/EnvGym/data/20260501_071208_tensorblock_gpt-4.1-mini/nesa_bootstrap
+#9 DONE 0.1s
+
+#10 [6/9] RUN if [ -f /home/cc/EnvGym/data/20260501_071208_tensorblock_gpt-4.1-mini/nesa_bootstrap/requirements.txt ]; then pip3 install --no-cache-dir -r /home/cc/EnvGym/data/20260501_071208_tensorblock_gpt-4.1-mini/nesa_bootstrap/requirements.txt; fi
+#10 DONE 0.3s
+
+#11 [7/9] RUN if ! getent group cc >/dev/null; then groupadd -g 1000 cc; fi     && if ! id -u cc >/dev/null 2>&1; then useradd -m -u 1000 -g cc -s /bin/bash cc; fi     && if getent group sudo >/dev/null && ! id -nG cc | grep -qw sudo; then usermod -aG sudo cc; fi     && if getent group docker >/dev/null && ! id -nG cc | grep -qw docker; then usermod -aG docker cc; fi
+#11 0.350 useradd: warning: the home directory /home/cc already exists.
+#11 0.350 useradd: Not copying any file from skel directory into it.
+#11 DONE 0.4s
+
+#12 [8/9] RUN echo "cc ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/cc     && chmod 440 /etc/sudoers.d/cc
+#12 DONE 0.3s
+
+#13 [9/9] RUN chown -R cc:cc /home/cc
+#13 DONE 0.5s
+
+#14 exporting to image
+#14 exporting layers
+#14 exporting layers 0.7s done
+#14 writing image sha256:93fbf3a531ff8085ecc3cb3af52b3cdc41cf95de3fafe76977ef917f19961621 done
+#14 naming to docker.io/library/envgym_test_1777636857 done
+#14 DONE 0.7s
+
+
+=== Runtime Log ===  
+Runtime Status: Success
+Runtime Output:
+
+
+Runtime Error:
+
+
+=== Execution End ===
+

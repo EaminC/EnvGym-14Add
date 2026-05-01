@@ -1,0 +1,19 @@
+current progress  
+- Base image set to Ubuntu 20.04, compatible with x86_64 architecture.  
+- Core dependencies including git, wget, curl, build tools, libraries, pigz, dcmtk, python3, and pip installed successfully without GPU or CUDA components.  
+- Entire repository copied into container; working directory aligned with host absolute path.  
+- Pip upgraded; dcm2niix installed from Ubuntu package as fallback.  
+- Git submodules initialized and `Segmentation_FetalMRI` checked out to `dev` branch inside container.  
+- Neural network weights download scripted if present.  
+- Executable permissions set on `./scripts` directory; `/home/scripts` added to PATH.  
+- Default command set to bash shell for interactive use.  
+- No GPU or CUDA-related instructions present; GPU flags and drivers omitted per plan.
+
+next step  
+- Verify or modify Dockerfile to rename `/home/scripts` directory to `/home/cc/EnvGym/data/20260501_071208_tensorblock_gpt-4.1-mini/SVRTK_Docker_GPU/scripts` or ensure consistency with volume mounts and script locations.  
+- Confirm that `download_weights.sh` script exists and correctly downloads neural network weights inside container; if missing, add explicit download commands or instructions.  
+- Remove or adjust any residual GPU or CUDA references if present in scripts or Dockerfile layers (currently none detected).  
+- Add explicit verification steps for presence and correct installation of `mirtk`, `dcm2niix`, and Python packages inside Dockerfile or via entrypoint script.  
+- Consider adding health check or test commands in Dockerfile to validate core tool availability on build or container start.  
+- Confirm that volume mount points and input/output directories are properly configured for running reconstruction commands in CPU-only mode.  
+- Finalize Dockerfile tagging for CPU-only image (e.g., `fetalsvrtk/svrtk:cpu-only`) and document build command without GPU flags.

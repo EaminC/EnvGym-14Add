@@ -1,0 +1,19 @@
+current progress  
+- Base image ubuntu:22.04 set with necessary system dependencies installed including python3.10 and pip.  
+- Python3 default points to python3.10.  
+- Pip upgraded to version 23.0 and packaging module installed globally.  
+- Fooocus repository cloned into /root/Fooocus.  
+- Python virtual environment created inside Fooocus directory.  
+- Inside virtual environment, pip upgraded to 23.0, packaging module installed, and requirements_versions.txt packages installed with pinned versions.  
+- Port 7860 exposed for potential GUI access.  
+- Environment variables set for virtual environment activation.  
+- Default container command activates virtual environment and opens bash shell.  
+- Docker build and run logs show success with no errors.  
+
+next step  
+- Modify Dockerfile to run the Fooocus app automatically on container start instead of opening a bash shell, e.g., run `python entry_with_update.py` or equivalent launch command within the activated venv.  
+- Add model download steps or ensure models auto-download on first run, possibly by running a script or command during build or container startup.  
+- Verify swap/pagefile configuration or memory management if needed inside the container for CPU-only operation.  
+- Include copying or creation of optional files like `auth.json` if authentication is desired.  
+- Add health checks or test commands to verify environment and model loading during build or startup.  
+- Document or create entrypoint scripts for easier container usability and automated testing.

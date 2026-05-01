@@ -1,0 +1,9 @@
+[
+  "README.md",
+  "pyproject.toml",
+  "docker-compose.yaml",
+  ".pre-commit-config.yaml",
+  ".gitignore",
+  "example_config.yaml",
+  "docs/README-PyPI.md"
+]

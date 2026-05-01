@@ -1,0 +1,193 @@
+=== ADJUSTED ENVIRONMENT SETUP PLAN ===
+
+**Note:** This adjusted plan reflects that your hardware environment is **x86_64 Linux without an NVIDIA GPU**, and Docker version 28.1.1 without GPU support. Accordingly, GPU- and CUDA-dependent steps and configurations have been modified or marked optional where appropriate, to ensure compatibility and feasibility in your environment.
+
+---
+
+### 1. DOWNLOADS NEEDED:
+
+- **Python 3.9+**, preferably Python 3.10 to align with pre-commit default language version  
+- **CUDA Toolkit 12.1:**  
+  - **Not required nor recommended** on this system as no NVIDIA GPU is detected. Skip CUDA Toolkit installation.  
+- **NVIDIA Container Toolkit / Docker with GPU support:**  
+  - **Skip installation** because no NVIDIA GPU is present and no GPU support is available in Docker.  
+- **Docker Engine** (version compatible with Compose v3.8)  
+- **Docker Compose** (version supporting `version: '3.8'`)  
+- **PyTorch 2.2.2:**  
+  - Install CPU-only versions of PyTorch and related packages:  
+    ```bash  
+    pip install torch==2.2.2+cpu torchvision==0.17.2+cpu torchaudio==2.2.2 --index-url https://download.pytorch.org/whl/cpu  
+    ```  
+  - Verify by importing torch and checking `torch.cuda.is_available()` returns `False`.  
+- **CellViT Python package** (`cellvit`) version 1.0.9 (or later) with dependencies listed in `pyproject.toml` (no changes needed here)  
+- **OpenSlide** (Whole slide image library)  
+- **libvips** (Image processing library)  
+- **C/C++ compilers:** gcc and g++ (verify installed and in PATH)  
+- **OpenCV development libraries:** `libopencv-core-dev`, `libopencv-imgproc-dev`  
+- **Compression and geometry libraries:** `libsnappy-dev`, `libgeos-dev`  
+- **LLVM compiler infrastructure**  
+- **Image format libraries:** `libjpeg-dev`, `libpng-dev`, `libtiff-dev`  
+- **Optional (for hardware acceleration):**  
+  - CuPy and cuCIM require NVIDIA GPU and CUDA; **skip or mark as unavailable** given no GPU.  
+- **NVIDIA GPU Drivers:**  
+  - **Not applicable**; skip installation.  
+- **Pre-commit tool:**  
+  - Install via pip: `pip install pre-commit`  
+  - Configured to use Python 3.10 environment version by default  
+- **Code quality and formatting tools integrated via pre-commit hooks:**  
+  - Black (version 23.1.0)  
+  - Ruff (version v0.3.4)  
+  - Standard pre-commit-hooks repository (v4.4.0)  
+  - Conventional commit message validator (`conventional-pre-commit` v2.1.1) (optional)  
+
+---
+
+### 2. FILES TO CREATE:
+
+- **YAML Configuration File for CellViT Inference Pipeline:**  
+  - The same updated example config as planned, but adjust or document that:  
+    - `model` selection remains as `"SAM"` or `"HIPT"`  
+    - **GPU-related options (`gpu` id, `enforce_amp`) should be set with awareness that no GPU is available; typically set `gpu: -1` or omit GPU usage**  
+    - Batch size may need to be reduced for CPU-only inference due to performance considerations  
+    - Optional flags for CuPy and cuCIM should be disabled or omitted since no GPU  
+- **Environment Variable Setup Script:** (unchanged)  
+- **Optional requirements.txt:** (unchanged)  
+- **Pyproject.toml:** (unchanged)  
+- **README-PyPI.md:**  
+  - Modify hardware requirements section to clarify:  
+    - GPU is **optional**; if no GPU, CPU inference is supported but slower  
+    - Remove or mark GPU memory and CUDA driver requirements as conditional  
+    - Document CPU-only installation instructions for PyTorch and skip CUDA drivers  
+- **Docker Compose File:**  
+  - Modify the Docker Compose file as follows:  
+    - **Remove or comment out**:  
+      - `runtime: nvidia` (not supported without NVIDIA GPU)  
+      - GPU device reservations under `deploy.resources.reservations.devices`  
+      - Environment variable `NVIDIA_VISIBLE_DEVICES=all`  
+    - Keep volume mounts and working directory as is  
+    - You may use a CPU-only CellViT Docker image or the same image if it supports CPU fallback  
+- **Pre-commit configuration file:** `.pre-commit-config.yaml` (unchanged)  
+- **.gitignore file:** (unchanged)  
+- **Optional Docker-related scripts or documentation:**  
+  - Update instructions to note **no GPU support in containers**  
+  - Remove references to NVIDIA Container Toolkit and GPU runtime  
+
+---
+
+### 3. NECESSARY TEST CASES IN THE CODEBASE:
+
+Adjust test cases related to GPU and CUDA as follows:
+
+- **Installation Verification Test:**  
+  - Verify CPU-only PyTorch installation (`torch.cuda.is_available() == False`)  
+  - Confirm warnings related to missing CUDA or GPU are expected and do not cause failure  
+  - Confirm optional hardware acceleration libraries (CuPy, cuCIM) warnings shown if missing  
+- **Inference Pipeline Test:**  
+  - Run inference on sample WSI with CPU-only config (`gpu: -1` or omit GPU)  
+  - Verify successful completion and correct output  
+- **Docker Container Tests:**  
+  - Verify container runs without GPU runtime  
+  - Confirm no errors related to missing NVIDIA GPU or CUDA in container logs  
+  - Confirm volume mounts and commands run correctly on CPU-only container  
+- **Debug Mode Test:** (unchanged)  
+- **Other tests:** (unchanged)  
+
+---
+
+### 4. COMPLETE TODO LIST:
+
+**Modify or skip CUDA and GPU-related steps as follows:**
+
+1. **Prepare system prerequisites:**  
+   - On Linux, run:  
+     ```bash  
+     sudo apt-get update  
+     sudo apt-get install -y libvips openslide gcc g++ libopencv-core-dev libopencv-imgproc-dev libsnappy-dev libgeos-dev llvm libjpeg-dev libpng-dev libtiff-dev  
+     ```  
+   - Verify `gcc` and `g++` are installed and in PATH.  
+   - Install OpenSlide binaries if not available.  
+   - **Skip NVIDIA GPU drivers installation** (no GPU present).  
+   - Install Docker Engine and Docker Compose compatible with Compose file version 3.8.  
+   - **Skip NVIDIA Container Toolkit installation** (no GPU).  
+   - Verify Docker installation by running a CPU-only container, e.g.:  
+     ```bash  
+     docker run --rm busybox echo "Docker is working"  
+     ```  
+
+2. **Install OpenSlide Python bindings:** (unchanged)  
+
+3. **Install CUDA Toolkit 12.1:**  
+   - **Skip CUDA installation** (no GPU).  
+
+4. **Install PyTorch 2.2.2 with CPU-only support:**  
+   ```bash  
+   pip install torch==2.2.2+cpu torchvision==0.17.2+cpu torchaudio==2.2.2 --index-url https://download.pytorch.org/whl/cpu  
+   ```  
+   - Verify installation and confirm CUDA is unavailable.  
+
+5. **Install CellViT package:** (unchanged)  
+
+6. **Set up environment variable for cache directory:** (unchanged)  
+
+7. **(Optional) Install hardware acceleration libraries:**  
+   - **Skip CuPy and cuCIM installation** (require GPU).  
+
+8. **Download test example database:** (unchanged)  
+
+9. **Create YAML inference configuration file:**  
+   - Set `gpu` parameter to `-1` or omit to enforce CPU usage  
+   - Reduce batch size if needed for CPU performance  
+   - Disable or omit CuPy/cuCIM related options  
+
+10. **Add and maintain `.gitignore` file:** (unchanged)  
+
+11. **Configure and use Docker Compose:**  
+    - Use the adjusted `docker-compose.yaml` without GPU runtime or device reservations  
+    - Edit volume paths as needed  
+    - Start container with:  
+      ```bash  
+      docker-compose up -d  
+      ```  
+    - Verify container runs without GPU errors  
+    - Use `docker exec` to run commands inside container for testing  
+
+12. **Install pre-commit and configure git hooks:** (unchanged)  
+
+13. **Run installation verification:**  
+    - Run `cellvit-check`  
+    - Confirm no errors due to missing CUDA or GPU; warnings about optional hardware acceleration are expected  
+
+14. **Test basic usage:** (unchanged, ensure CPU-only mode configured)  
+
+15. **Test CLI entry points:** (unchanged)  
+
+16. **Pre-commit hooks functionality test:** (unchanged)  
+
+17. **Debug Mode Test:** (unchanged)  
+
+18. **Development and packaging steps:** (unchanged)  
+
+19. **Error handling and troubleshooting:**  
+    - Verify errors related to GPU/CUDA are not blocking or are documented as expected in CPU-only setups  
+    - Confirm environment variables and config files specify CPU-only usage  
+    - For Docker issues, check no GPU runtime flags are used  
+
+20. **Documentation and further testing:**  
+    - Update README and docs to clearly specify CPU-only installation and usage instructions  
+    - Document limitations and performance expectations without GPU  
+    - Maintain `.gitignore`, `pyproject.toml`, `.pre-commit-config.yaml` as usual  
+
+---
+
+### ADDITIONAL NOTES:
+
+- **CPU Architecture Compatibility:** Your x86_64 environment matches planned software base images and dependencies; no ARM or alternative arch adjustments needed.  
+- **Memory and Storage:** No changes needed; ensure sufficient disk and RAM as per original recommendations.  
+- **Operating System:** Linux-compatible instructions and packages remain applicable.  
+- **Development Tools:** gcc/g++ and LLVM installation as planned; verify versions compatible with system package manager.  
+- **Paths and Directories:** Confirm that volume mounts and relative paths in Docker Compose and config files correspond to your working directory `/home/cc/EnvGym/data/20260501_071208_tensorblock_gpt-4.1-mini/CellViT-Inference` or adjust accordingly.  
+- **Docker Build:** Use standard build commands without `--gpus` flag.  
+
+---
+
+This adjusted plan ensures smooth installation and operation of CellViT in a CPU-only Linux environment without NVIDIA GPU support. It removes all GPU-dependent components and configurations, clarifies expected behavior and limitations, and updates Docker and documentation accordingly.

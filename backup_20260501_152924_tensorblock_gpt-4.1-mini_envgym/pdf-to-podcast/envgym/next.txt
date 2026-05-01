@@ -1,0 +1,5 @@
+current progress  
+The Docker image builds and runs successfully using a Python 3.11-slim base image. The Dockerfile installs essential build tools and utilities, sets up a Python virtual environment, and installs both core and test Python dependencies as specified. The working directory and environment PATH are correctly configured. No GPU-related components or flags are present, aligning with the CPU-only environment setup plan.
+
+next step  
+Modify the Dockerfile to create CPU-only variants for PDFModelService API and Worker by replacing any CUDA or GPU-enabled PyTorch base images with CPU-only PyTorch images (e.g., `pytorch/pytorch:2.4.0-cpu`). Remove or skip installation of CUDA libraries if present. Adjust COPY and RUN commands to align with the CPU-only Dockerfiles and ensure no GPU-specific environment variables or runtime flags are included. Confirm Docker Compose and related service configurations reference these CPU-only images.

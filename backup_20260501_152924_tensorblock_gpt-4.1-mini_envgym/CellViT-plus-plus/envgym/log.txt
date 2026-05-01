@@ -1,0 +1,26 @@
+=== Docker Execution Log - 20260501_095422 ===
+Dockerfile: envgym/envgym.dockerfile
+Image Name: envgym_test_1777629260
+
+=== Build Log ===
+Build Status: Failed
+Build Error:
+--------------------
+51 |
+52 | >>> RUN conda update -n base -c defaults conda -y && \
+53 | >>>     conda config --set channel_priority strict && \
+54 | >>>     conda config --add channels defaults && \
+55 | >>>     conda config --add channels conda-forge && \
+56 | >>>     conda config --add channels bioconda && \
+57 | >>>     conda info && \
+58 | >>>     conda config --show
+59 |
+--------------------
+ERROR: failed to solve: process "/bin/bash -c conda update -n base -c defaults conda -y &&     conda config --set channel_priority strict &&     conda config --add channels defaults &&     conda config --add channels conda-forge &&     conda config --add channels bioconda &&     conda info &&     conda config --show" did not complete successfully: exit code: 1
+
+=== Runtime Log ===  
+Runtime Status: Failed
+Runtime Error:
+
+
+=== Execution End ===

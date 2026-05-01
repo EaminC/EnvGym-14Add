@@ -1,0 +1,6 @@
+- Working Directory: /home/cc/EnvGym/data/20260501_071208_tensorblock_gpt-4.1-mini/NeMo_Gym, project likely Linux-based, no GPU-specific code implied  
+- Architecture: x86_64, recommended --platform=linux/amd64  
+- Base Image: Linux x86_64 compatible images (e.g., ubuntu, debian, python official images for amd64)  
+- GPU: NVIDIA GPU not available, no CUDA base image needed  
+- Instruction Notes: Use standard Linux filesystem paths, no GPU drivers or CUDA dependencies, consider large memory for builds if needed, overlay2 storage driver compatible with all standard Dockerfile instructions  
+- Docker Version: 28.1.1, supports BuildKit, Docker Buildx, no GPU build features required due to absence of NVIDIA GPU

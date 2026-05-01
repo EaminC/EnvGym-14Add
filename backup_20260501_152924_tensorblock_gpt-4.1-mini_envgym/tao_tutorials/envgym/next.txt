@@ -1,0 +1,19 @@
+current progress  
+- Base Ubuntu 22.04 image used with locale set to en_US.UTF-8  
+- Installed necessary base dependencies including wget, git, jq, and build tools  
+- Installed pyenv and Python 3.12.0 via pyenv, set as global Python version  
+- Upgraded pip to version 23.1.2 (>21.06 requirement)  
+- Copied and set executable permissions for quickstart_launcher.sh script  
+- Copied .gitignore file to repo root  
+- Copied secrets.json placeholder to setup folder  
+- Entrypoint and default command set for bash shell interaction  
+- No GPU-specific dependencies or configurations present, consistent with CPU-only environment plan  
+
+next step  
+- Verify and copy s3-config.json into the container or mount at runtime to support SeaweedFS S3 configuration  
+- Add or confirm mounting of volumes for persistent storage such as /shared-storage/models (done via docker-compose, ensure documented)  
+- Consider installing Jupyter and NGC CLI inside the Docker image or ensure quickstart_launcher.sh properly installs them at runtime if missing  
+- Confirm presence and correctness of environment variable files (config.env) and docker-compose.yml outside Dockerfile, ensure no GPU flags  
+- Optionally add scripts or commands in Dockerfile or entrypoint to validate environment readiness (e.g., secrets.json presence, no GPU variables)  
+- Finalize Dockerfile to include any missing TAO-specific Python dependencies if required (via pip install) or document installation outside Docker build  
+- Prepare for testing container startup and service operation without GPU dependencies

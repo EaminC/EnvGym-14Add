@@ -1,0 +1,161 @@
+=== ADJUSTED ENVIRONMENT SETUP PLAN ===
+
+**Note on Hardware Context:**  
+- No NVIDIA GPU available; **CUDA and GPU-dependent packages and steps must be adjusted or disabled**.  
+- CPU-only environment on x86_64 architecture.  
+- Docker version supports BuildKit and buildx; GPU flag not applicable.  
+- Use Linux paths as standard.  
+- Leverage high core count CPU for parallel operations.  
+- Storage and RAM assumptions remain unchanged but ensure CPU-only environment requirements.  
+
+---
+
+1. DOWNLOADS NEEDED:  
+   - **Anaconda or Miniconda** (latest stable version), compatible with x86_64 Linux.  
+   - **Python 3.10**, pinned to 3.10.14 preferred for main env; viewer uses 3.10.13 or compatible patch.  
+   - **PyTorch 2.2.1 or 2.2.2**, torchvision 0.17.1 or 0.17.2, torchaudio 2.2.1 or 2.2.2:  
+     - **Use CPU-only PyTorch wheels** (no CUDA).  
+     - Install via pip with official PyTorch CPU-only wheel index URL or conda packages without CUDA libs.  
+     - Adjust `environment_full.yaml` and related environment files accordingly to pin CPU-only torch versions and remove CUDA dependencies.  
+   - **pip** updated to version 24.0 per environment files.  
+   - **CuPy 13.3.0** and **cupy-core 13.3.0**:  
+     - **CuPy is CUDA-dependent and cannot be used without GPU.**  
+     - Remove CuPy and cupy-core from environment files and installation steps.  
+     - Adjust any code/tests that depend on CuPy to skip or fallback gracefully in CPU-only environment.  
+   - **CUDA libraries and dependencies:**  
+     - **Remove all CUDA and NVIDIA CUDA packages (libcublas, libcufft, libcurand, libcusolver, libcusparse, nvidia-cublas-cu12, nvidia-cuda-runtime-cu12, nvidia-cudnn-cu12, nvidia-nccl-cu12, etc.)** from environment files and installation steps.  
+     - Use CPU-only versions of dependencies where applicable.  
+   - **Critical imaging and processing packages:**  
+     - cucim=24.04.00 is GPU-accelerated; confirm CPU fallback available or remove if incompatible.  
+     - openslide=4.0.0, openslide-python≥1.3.1, pyvips=2.2.3, rasterio=1.3.5.post1, pillow=10.3.0, gdal-bin, libgdal-dev remain as is.  
+     - VIPS tool is required system tool; ensure installed on CPU machine.  
+   - **Scientific and ML-related packages:**  
+     - numpy=1.23.5, tensorflow=2.12.0 (CPU-only if no GPU), tensorflow-estimator=2.12.0, tensorboard=2.12.3, tensorboardx=2.6.2.2, torchmetrics=0.11.4, xgboost=2.1.1, timm=1.0.8, wandb=0.15.4, scikit-learn=1.3.0, scikit-image=0.19.3, scikit-survival=0.22.2, lightgbm=4.5.0, evalutils=0.4.2, albumentations=1.3.0, keras=2.12.0 (CPU), seaborn=0.12.2, h5py=3.9.0, numba=0.59.0, opencv-python-headless=4.5.4.58, pandas=1.4.3, matplotlib=3.7.1, pycm=4.0, pydantic=1.10.4, pydantic-compat=0.1.2, pydantic-core=2.20.1, pyjwt=2.6.0, pyaml=24.7.0, schema=0.7.5, scikit-base=0.7.8, shapely=1.8.5.post1, simpleitk=2.2.1, snappy=3.1.1, wsidicom=0.20.4, wsidicomizer=0.14.1, torchinfo=1.8.0, torchstain=1.3.0, ujson=5.8.0, tabulate=0.9.0, flatbuffers=24.3.7, fonttools=4.50.0, babel=2.14.0, colorama=0.4.6, colour=0.1.5, cachetools=5.3.3, jedi=0.19.1, genbadge=1.1.0, kaleido=0.2.1, natsort=8.4.0, pandarallel=1.6.5, pathopatch≥1.0.1, python-snappy (0.7.3 or compatible), pydicom==2.4.2, python-multipart remain unchanged.  
+   - **Development and tooling packages:** black=23.1.0, ruff=0.5.6, flake8=6.0.0, flake8-html=0.4.3, pre-commit=3.0.3, pip-tools=7.4.1, setuptools=65.6.3 remain unchanged.  
+   - **Additional imaging/scientific:** tifffile=2024.2.12, tiffslide=2.4.0, stardist=0.8.5, pyarrow=15.0.2, pyvips=2.2.3 remain unchanged.  
+   - **Viewer service dependencies:**  
+     - Conda channels: bioconda, defaults, conda-forge, nvidia, rapidsai:  
+       - **Remove nvidia and rapidsai channels and packages requiring CUDA.**  
+       - Confirm viewer environment uses CPU-compatible packages only.  
+     - Conda packages: openslide=4.0.0, python=3.10.13 (viewer backend) remain.  
+     - Pip packages in viewer environment remain unchanged (cachetools, certifi, fastapi, openslide-python, uvicorn, numpy, pathopatch, ujson, pydicom, python-multipart, python-snappy).  
+   - **Node.js and npm:** no changes; Node.js 20-alpine base image remains, minimum Node 14+ required for Vite.  
+   - **Frontend build tools:** Vite v5.1.6, Parcel, OpenLayers, proj4, ol-ext, sweetalert2, lil-gui remain unchanged.  
+   - **System packages for viewer Docker build:** build-essential, python3-dev, python3-pip, python3-setuptools, python3-wheel, gdal-bin, libgdal-dev remain unchanged.  
+   - **CUDA and GPU support:**  
+     - **Remove NVIDIA Container Toolkit installation and configuration steps.**  
+     - Docker images and containers do not require GPU support or CUDA runtime.  
+   - **Additional new dataset requirements and tooling:**  
+     - VIPS image processing tool required and must be installed and accessible on system PATH for Lizard and MIDOG++ dataset image resizing and pyramid TIFF conversion.  
+   - **Scripts dependencies:** no changes; all Python scripts compatible with CPU-only environment as torch and numpy remain.  
+   - **Version compatibility:**  
+     - Python 3.10.13/3.10.14 alignment recommended.  
+     - CUDA 12.2 compatibility steps removed.  
+     - Openslide pinned to 4.0.0 remains.  
+     - GDAL system libraries remain.  
+     - Node.js 20-alpine base image remains.  
+     - Use `package-lock.json` for Node.js dependency locking.  
+
+---
+
+2. FILES TO CREATE:  
+   - Create environment files (`environment.yaml`, `environment_full.yaml`, `environment_verbose.yaml`) with **CUDA and GPU packages removed**, CuPy removed, and CPU-only PyTorch versions pinned.  
+   - Viewer backend environment file `viewer/SlideProvider/environment.yml` updated to remove CUDA and NVIDIA channels/packages; ensure CPU-only compatible packages.  
+   - Pip requirements files updated accordingly to remove CUDA-dependent packages (CuPy, NVIDIA CUDA libs).  
+   - All dataset label map files, notebooks, scripts, and tooling files remain unchanged.  
+   - Dockerfiles updated:  
+     - Viewer backend Dockerfile remains but ensure no CUDA/NVIDIA packages installed.  
+     - Viewer frontend Dockerfile remains unchanged (Node.js 20-alpine).  
+     - Viewer docker-compose files remain; remove GPU device requests or runtime specifications.  
+   - Annotation tool `.env` and config.yaml files remain unchanged.  
+   - New scripts (`find_best_hyperparameter.py`, `calc_threshold_pr.py`, `calc_threshold_roc.py`, `average_folds.py`) remain unchanged.  
+   - All dataset preparation scripts, notebooks, and label maps remain unchanged.  
+
+---
+
+3. NECESSARY TEST CASES IN THE CODEBASE:  
+   - Environment verification adjusted:  
+     - Confirm PyTorch is CPU-only (no CUDA available).  
+     - Confirm CuPy is not installed or skipped in tests.  
+     - Confirm VIPS tool is installed and functional for image resizing.  
+   - Docker container tests:  
+     - Confirm containers run without GPU or CUDA runtime configuration.  
+     - Confirm viewer backend and frontend run correctly without GPU dependencies.  
+   - Annotation tool, dataset loading, label map loading, viewer and annotation tools tests remain unchanged.  
+   - Dataset preparation and training/evaluation tests remain as is, noting CPU-only PyTorch usage.  
+   - Scripts tests remain.  
+   - Viewer service tests remain, but no GPU or NVIDIA runtime involved.  
+   - VIPS image processing tests remain.  
+   - Hyperparameter and metric scripts tests remain unchanged.  
+
+---
+
+4. COMPLETE TODO LIST:  
+
+   Step 1: Prepare hardware environment  
+   - Confirm machine has ≥32 GB RAM, ≥16 CPU cores, ≥300 GB free disk space (for MIDOG++ dataset).  
+   - No NVIDIA GPU; skip GPU driver and CUDA toolkit installation.  
+   - GPU-dependent tools (NVIDIA Container Toolkit) **not required or installed**.  
+
+   Step 2: Review licensing terms (unchanged).  
+
+   Step 3: Install Conda environments  
+   - Download & install Anaconda or Miniconda for x86_64 Linux.  
+   - Create main environment from **CPU-only adjusted** `environment_full.yaml`:  
+     ```bash
+     conda env create -f environment_full.yaml
+     conda activate cellvit_env
+     ```  
+   - For lightweight setup:  
+     ```bash
+     conda env create -f environment_verbose.yaml
+     conda activate cellvit_env
+     ```  
+   - Create viewer backend environment from CPU-only adjusted `viewer/SlideProvider/environment.yml`:  
+     ```bash
+     conda env create -f viewer/SlideProvider/environment.yml
+     conda activate fastapi_patho
+     ```  
+   - Align Python patch version (3.10.13 or 3.10.14).  
+
+   Step 4: Install or verify PyTorch CPU-only  
+   - Confirm torch 2.2.1 (CPU-only), torchvision 0.17.1, torchaudio 2.2.1 installed.  
+   - Optional upgrade with CPU-only pip wheels:  
+     ```bash
+     pip install torch==2.2.2+cpu torchvision==0.17.2+cpu torchaudio==2.2.2+cpu -f https://download.pytorch.org/whl/torch_stable.html
+     ```  
+   - Verify CPU-only torch:  
+     ```bash
+     python3 -c "import torch; print(torch.cuda.is_available())"  # Should print False
+     ```  
+
+   Step 5: CuPy packages  
+   - **Do not install CuPy**; remove CuPy from environment and code paths or skip gracefully.  
+
+   Step 6: Install pip packages from updated `requirements.txt` inside conda environment.  
+
+   Step 7: Download model checkpoints (unchanged).  
+
+   Step 8: Download example datasets and files (unchanged).  
+
+   Step 9 through Step 42: Follow original steps as described, **excluding all CUDA and GPU-specific instructions** and ensuring that:  
+   - All references to CUDA toolkit, NVIDIA Container Toolkit, GPU runtime, and CUDA-dependent packages are omitted.  
+   - VIPS tool installation and usage remain mandatory for image resizing and pyramid TIFF conversion.  
+   - Dockerfiles and docker-compose files are used without GPU runtime or device requests.  
+   - PyTorch runs in CPU mode only; adjust training/evaluation commands if necessary to avoid GPU flags or CUDA device selection.  
+   - Tests and scripts are run in CPU environment; confirm all tests pass without GPU dependencies.  
+
+---
+
+**Additional Notes:**  
+- Code and environment must handle absence of CUDA gracefully; if any code attempts to use CUDA, it should fallback to CPU or raise informative errors.  
+- CuPy-related functionalities must be disabled or replaced with CPU-compatible code paths or skipped.  
+- Training and inference performance will be slower without GPU; plan accordingly.  
+- Docker images should be based on CPU-optimized base images (e.g., python:3.10-slim) without CUDA or NVIDIA drivers.  
+- Viewer frontend and backend services remain unchanged except for GPU runtime removal.  
+- Ensure all volume mount paths and Linux paths remain consistent with the provided working directory and project structure.  
+- Verify all tools, scripts, and notebooks work correctly on CPU-only environment by running environment checks and test cases.  
+
+---
+
+This adjusted plan ensures compatibility with the given hardware: a CPU-only x86_64 Linux environment without NVIDIA GPU or CUDA support.

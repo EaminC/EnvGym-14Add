@@ -1,0 +1,178 @@
+=== ADJUSTED ENVIRONMENT SETUP PLAN (GPU-LESS x86_64 LINUX) ===
+
+This adjusted plan incorporates your hardware info: x86_64 Linux system with no NVIDIA GPU available. All GPU-specific setup steps and CUDA toolkit requirements are removed or revised accordingly. Python 3.9, 3.10, and 3.11 compatibility remain supported for Read the Docs and testing. Paths reflect working directory `/home/cc/EnvGym/data/20260501_071208_tensorblock_gpt-4.1-mini/Kilosort4`.
+
+---
+
+1. DOWNLOADS NEEDED:  
+   - Anaconda Python distribution (https://www.anaconda.com/products/distribution), supporting Python 3.9, 3.10, or 3.11 (for Read the Docs build compatibility)  
+   - Git client (https://git-scm.com/downloads) for cloning repository  
+   - Pandoc (https://pandoc.org/) - required for markdown conversion in documentation builds  
+   - Optional: Jupyter Notebook or JupyterLab (via conda or pip) for notebook support  
+   - Optional: Phy GUI for manual spike sorting curation (https://github.com/cortex-lab/phy)  
+   - Python package dependencies as defined in `setup.py`:  
+     - Core: numpy (≥1.20.0), scipy, scikit-learn, tqdm, torch (≥1.6), numba, faiss-cpu  
+       - **Note:** Install CPU-only PyTorch version since no GPU is available  
+     - GUI extras: pyqtgraph (≥0.13.0), qtpy, pyqt6 and pyqt6.sip (or pyqt5/pyqt5.sip, or PySide2/PySide6 depending on system), matplotlib  
+     - Documentation extras: sphinx (≥3.0), sphinxcontrib-apidoc, nbsphinx, myst_parser, sphinx_rtd_theme, pandoc  
+     - Testing tools: pytest (including pytest-cov, pytest-xvfb), py (for test execution and coverage)  
+   - Note on PyQt and Qt bindings: Installer detects existing Qt backends and adjusts GUI dependencies accordingly  
+   - tox configured for automated testing across Python versions (3.9, 3.10, 3.11) on Linux, macOS, Windows  
+   - pytest.ini filters out DeprecationWarnings during test runs  
+   - Sphinx documentation build tools with Makefile (Unix) and make.bat (Windows) scripts  
+   - Network access required during docs build to download external README.md (via `docs/conf.py`)  
+   - Python 3.11 support included for Read the Docs compatibility  
+
+---
+
+2. FILES TO CREATE (relative to `/home/cc/EnvGym/data/20260501_071208_tensorblock_gpt-4.1-mini/Kilosort4`):  
+   - Optional conda environment activation scripts: `activate_kilosort.sh` or `.bat`  
+   - `params.py` user-generated Phy config in results folder  
+   - Optional: Clone `Kilosort/` repo folder if developing  
+   - Optional: Jupyter notebooks in `docs/source/tutorials/` or local copies  
+   - Optional: Custom probe `.mat` files  
+   - Optional: `README.md` (auto-downloaded by `docs/conf.py` during doc build)  
+   - Provided `setup.py` managing dependencies dynamically  
+   - `tox.ini` updated to include Python 3.11 environment for Linux (x86_64) without GPU environment variables  
+   - `pytest.ini` suppressing DeprecationWarnings  
+   - `docs/requirements.txt` listing `nbsphinx`, `myst_parser`, `sphinx_rtd_theme`  
+   - `docs/Makefile` (Unix) and `docs/make.bat` (Windows) for Sphinx builds  
+   - `docs/conf.py` with automatic README.md download and extensions setup  
+   - `.readthedocs.yml` specifying Ubuntu 22.04, Python 3.11, docs build configuration, PDF output  
+   - Optional activation helper scripts for environment, tests, and docs build  
+
+---
+
+3. NECESSARY TEST CASES:  
+   - Unit tests for core spike sorting  
+   - CPU-only runs (no `--gpu` flag) as no GPU present  
+   - Regression tests (`pytest --runslow`)  
+   - GUI launch and Qt backend detection tests  
+   - Data loading and probe config tests  
+   - Phy compatibility tests  
+   - Dependency conflict checks, especially no GPU torch conflicts  
+   - tox executes tests on Python 3.9, 3.10, 3.11 on Linux x86_64 without GPU environment variables or CUDA dependencies  
+   - Coverage reports via pytest-cov  
+   - pytest-xvfb used on Linux for GUI tests (headless)  
+   - pytest.ini filters DeprecationWarnings  
+   - Documentation build tests as per original plan, verifying README.md download, notebook rendering, and Python 3.11 compatibility  
+
+---
+
+4. COMPLETE TODO LIST (adjusted steps):  
+
+**Step 1:** Install Anaconda Python distribution  
+- Verify `conda --version`  
+- Ensure Python 3.9, 3.10, and optionally 3.11 environments available  
+
+**Step 2:** Create and activate Kilosort conda environment  
+- Run: `conda create --name kilosort python=3.9` (or 3.10/3.11)  
+- Run: `conda activate kilosort`  
+- Confirm `python --version`  
+
+**Step 3:** Prepare `setup.py` presence in working directory (`/home/cc/EnvGym/data/20260501_071208_tensorblock_gpt-4.1-mini/Kilosort4`)  
+
+**Step 4:** Install Kilosort package with GUI support  
+- Run: `python -m pip install 'kilosort[gui]'`  
+- For minimal install: `python -m pip install kilosort`  
+- Note: Installer detects no GPU, installs CPU-only torch version  
+- Verify import: `python -c "import kilosort"`  
+
+**Step 5:** (Skip) Remove CPU-only PyTorch and reinstall GPU PyTorch  
+- **Omit entirely** since no GPU available  
+
+**Step 6:** (Skip) Install GPU-enabled PyTorch with CUDA 11.8  
+- **Omit entirely**; instead rely on CPU-only PyTorch installed by pip or conda  
+- Verify `python -c "import torch; print(torch.cuda.is_available())"` returns `False` (expected)  
+
+**Step 7:** (Optional) Install Jupyter notebook support  
+- `conda install jupyter` or `pip install notebook`  
+- Test with `jupyter notebook`  
+
+**Step 8:** Install Pandoc separately  
+- Follow https://pandoc.org/installing.html  
+- Verify `pandoc --version`  
+
+**Step 9:** (Optional) Install documentation dependencies  
+- Run: `pip install -r docs/requirements.txt`  
+- Build docs:  
+  ```
+  cd docs
+  make html
+  ```  
+- Confirm no errors, notebooks and markdown render, README.md downloads successfully  
+- Network access required  
+
+**Step 10:** (Optional) Install pytest and testing dependencies  
+- `pip install pytest pytest-cov pytest-xvfb py`  
+- Confirm `pytest --version`  
+- Ensure `pytest.ini` present with DeprecationWarning filters  
+
+**Step 11:** (Optional, developer mode) Clone repo and install editable  
+- `git clone https://github.com/MouseLand/Kilosort.git` (or SSH if preferred)  
+- `conda activate kilosort`  
+- `pip install -e Kilosort[gui]`  
+- Skip torch uninstall/reinstall steps for GPU  
+
+**Step 12:** Configure and use tox for testing  
+- Confirm `tox.ini` includes Python 3.11 env without GPU variables  
+- Run `tox` to test across Python 3.9, 3.10, 3.11 on Linux x86_64  
+- tox installs pytest and dependencies in isolated envs, runs tests with coverage  
+- GUI tests run with pytest-xvfb on Linux  
+- Verify no test failures  
+
+**Step 13:** Verify Kilosort GUI and command line launch  
+- Run: `python -m kilosort`  
+- Troubleshoot Qt plugin errors as needed  
+- Load example data and run sorting pipeline to verify output  
+
+**Step 14:** (Optional) Install Phy for manual curation  
+- Install Phy in separate environment  
+- Navigate to Kilosort results folder  
+- Run: `phy template-gui params.py`  
+- Verify GUI functionality  
+
+**Step 15:** Run unit tests manually or via tox  
+- `pytest --runslow` (without `--gpu`)  
+- Confirm clean test logs, no DeprecationWarnings, no failures  
+
+**Step 16:** Build and verify documentation  
+- Ensure Pandoc installed and in PATH  
+- Ensure docs dependencies installed  
+- Build docs using:  
+  ```
+  cd docs
+  make html
+  ```  
+- Confirm notebooks and markdown render correctly, README.md fetched properly  
+- Confirm docs build cleanly on Python 3.11 environment (matches Read the Docs)  
+- Optionally generate PDF documentation locally or rely on Read the Docs PDF output  
+
+**Step 17:** Troubleshoot common issues  
+- PyTorch GPU detection expected to be false (no GPU present)  
+- Qt GUI errors: verify compatible PyQt installation and environment variables  
+- GUI tests on Linux use pytest-xvfb for headless mode  
+- Documentation build errors: verify `nbsphinx`, `myst_parser`, `sphinx_rtd_theme`, Pandoc, and network access  
+- Ensure `sphinx-build` is in PATH, `docs/Makefile` usable  
+- Check GitHub issues for latest fixes  
+
+**Step 18:** (Optional) Create activation helper scripts  
+- Shell or batch scripts to activate environment and launch Kilosort or Jupyter  
+- Scripts to run tox and documentation builds (`cd docs && make html`)  
+
+---
+
+5. ADDITIONAL NOTES BASED ON HARDWARE:  
+- Architecture is x86_64: use official amd64 compatible images/binaries if using Docker or prebuilt packages  
+- No NVIDIA GPU present: **Do not install CUDA toolkit or GPU-enabled PyTorch**  
+- Use CPU-only PyTorch (`pip install torch` or conda CPU channel)  
+- Skip all CUDA toolkit and NVIDIA driver installation steps  
+- tox environment variables and test commands do not require GPU flags or CUDA variables  
+- Storage driver overlay2 noted: no special action needed, ensure Dockerfile COPY/ADD paths match project under `/home/cc/EnvGym/data/20260501_071208_tensorblock_gpt-4.1-mini/Kilosort4`  
+- Ensure local filesystem has sufficient space for Anaconda, Python packages, and documentation build artifacts (typically a few GBs total)  
+- OS compatibility: Linux x86_64 fully supported by Anaconda and PyTorch CPU packages  
+- Development tools: conda, pip, git, make, Python 3.9-3.11 supported  
+
+---
+
+This completes the adjusted and integrated environment setup plan tailored for your x86_64 Linux system without NVIDIA GPU, ensuring CPU-only PyTorch usage, skipping CUDA-related steps, and maintaining full Python 3.11 compatibility for documentation and testing.

@@ -1,0 +1,6 @@
+- Working Directory: /home/cc/EnvGym/data/20260501_071208_tensorblock_gpt-4.1-mini/CellViT-plus-plus; project likely CPU-bound, no GPU dependencies detected  
+- Architecture: x86_64; recommended --platform=linux/amd64  
+- Base Image: CPU-optimized base images for x86_64 (e.g., ubuntu, debian, python:3.x-slim)  
+- GPU: NVIDIA GPU not available; no CUDA base image required  
+- Instruction Notes: Use Linux paths; no GPU-specific instructions needed; leverage high core count for parallel build steps if applicable  
+- Docker Version: 28.1.1; supports BuildKit and docker buildx; no native GPU build support required (--gpus flag unnecessary)

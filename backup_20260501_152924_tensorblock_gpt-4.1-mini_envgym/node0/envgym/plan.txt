@@ -1,0 +1,210 @@
+=== ADJUSTED ENVIRONMENT SETUP PLAN ===
+
+**Note:** This plan is tailored for your hardware environment:  
+- x86_64 architecture (linux/amd64)  
+- No NVIDIA GPU detected (no CUDA or GPU-specific setup needed)  
+- Linux base images compatible (e.g., ubuntu:20.04)  
+- Docker v28.1.1 with BuildKit support, no GPU build/runtime required  
+- Working directory is nested under `/home/cc/EnvGym/data/20260501_071208_tensorblock_gpt-4.1-mini/node0` — use relative paths carefully  
+- Storage driver: overlay2 (efficient layering)  
+
+---
+
+1. **DOWNLOADS NEEDED:**  
+   - **Docker** (latest stable version)  
+     - For Linux: [https://docs.docker.com/engine/install/](https://docs.docker.com/engine/install/)  
+     - *Note:* No NVIDIA Docker support or CUDA-related Docker images needed due to lack of GPU. Use standard Linux amd64 base images (e.g., `ubuntu:20.04`).  
+   - **NVIDIA GPU Drivers, NVIDIA Container Toolkit, CUDA Toolkit:**  
+     - **Omit entirely** since no NVIDIA GPU detected. No CUDA dependencies or drivers required.  
+   - **Python 3.11** (required for from-source installation and inside Docker)  
+     - Must be ≥3.11 and <3.12 to match `pyproject.toml`.  
+   - **Conda** (optional but recommended if installing from source or local environments)  
+   - **Git** for cloning repository and installing dependencies via `git+https`  
+   - **jq**, **lsof** (Linux only)  
+     - Still recommended for troubleshooting and Docker config, though GPU Docker runtime config steps will be skipped.  
+   - **tmux** (optional)  
+   - **HuggingFace Access Token** (no special permissions needed)  
+   - **Additional packages inside Docker image:**  
+     - build-essential, rsync, openssh-client, curl, wget, git, vim  
+     - Installed inside container as before.  
+   - **Python packages and dependencies:**  
+     - Install exactly as specified in `pyproject.toml` including `hivemind` from GitHub commit reference.  
+   - **Build system tools:**  
+     - `hatchling` required as build backend.  
+     - Install via `pip install hatchling`.  
+
+---
+
+2. **FILES TO CREATE:**  
+   - `start_server.sh`  
+     - Generated as before using `python3 generate_script.py` with or without `--use_docker`.  
+   - Docker daemon configuration file `/etc/docker/daemon.json`  
+     - **Skip any NVIDIA runtime configuration** since no GPU present. Default Docker daemon config is sufficient.  
+   - `private.key`  
+     - Auto-generated on first run; preserve for node identity.  
+   - `.env` or similar environment file (optional)  
+   - Port forwarding / firewall rules configuration (user responsibility)  
+     - Ensure port 49200 (default) or configured port is open.  
+   - Git clone destination folder: `node0` (or multiple copies for multiple instances)  
+   - **Dockerfile**  
+     - Adjust base image to standard Linux amd64 base, e.g., `ubuntu:20.04` or similar (no CUDA base image).  
+     - Remove CUDA-related environment variables and dependencies.  
+     - Set up conda environment with Python 3.11 as before.  
+     - Install node0 package and dependencies per `pyproject.toml`.  
+     - Ensure locale `en_US.UTF-8` set in environment.  
+     - Include essential packages for build/runtime utilities.  
+   - `pyproject.toml`  
+     - Use as is for dependency and build configuration.  
+   - Optional `README.md` and license files.  
+
+---
+
+3. **NECESSARY TEST CASES IN THE CODEBASE:**  
+   - All tests remain valid except:  
+     - **Skip GPU detection and usage tests** since no NVIDIA GPU available.  
+     - Docker GPU availability tests also skipped.  
+   - Other tests for authorization, networking, multiple instances, port config, Docker container lifecycle, logs, key generation, error handling, Python environment, dependency resolution, build system, and compatibility remain unchanged.  
+
+---
+
+4. **COMPLETE TODO LIST:**  
+
+   **Preparation**  
+   1. Verify hardware meets minimum requirements:  
+      - Since no GPU, verify sufficient CPU and RAM (≥32GB recommended) and ≥80GB disk space available.  
+      - GPU minimum requirement omitted.  
+   2. Choose OS environment: Linux native preferred (x86_64).  
+   3. **Skip GPU drivers and CUDA Toolkit installation entirely.**  
+   4. Install Docker only (no NVIDIA Container Toolkit).  
+   5. Install Git, Python 3.11 (≥3.11,<3.12), Conda (optional), jq, lsof, tmux (optional).  
+   6. Install `hatchling` build backend system-wide or in base environment:  
+      ```
+      pip install hatchling
+      ```  
+
+   **Repository Setup**  
+   7. Clone repository:  
+      ```
+      git clone https://github.com/PluralisResearch/node0
+      cd node0
+      ```  
+
+   **Python Environment Setup (From Source Installation)**  
+   8. Create and activate conda environment for node0:  
+      ```
+      conda create -n node0 python=3.11
+      conda activate node0
+      ```  
+   9. Install package dependencies using `pyproject.toml`:  
+      ```
+      pip install --upgrade pip
+      pip install .
+      ```  
+   10. Verify Python environment:  
+       - Check Python version (`python --version`) is within `>=3.11,<3.12`  
+       - Confirm `node0` package installed (`pip show node0`)  
+
+   **Docker Daemon Configuration (Linux only)**  
+   11. **Skip NVIDIA runtime configuration steps.**  
+       - Default Docker daemon config is sufficient.  
+       - Verify Docker daemon is running and accessible.  
+
+   **Docker Image Build and Verification**  
+   12. Build Docker image using adjusted Dockerfile (no CUDA base):  
+       ```
+       docker build . -t pluralis_node0
+       ```  
+       - Dockerfile installs Python 3.11, dependencies via `pip install .`, and node0 package.  
+   13. Verify container environment:  
+       ```
+       docker run --rm -it pluralis_node0 bash
+       ```  
+       - Check Python version: `python --version` (≥3.11,<3.12)  
+       - Check node0 package installed: `pip show node0`  
+       - Check locale: `echo $LC_ALL` → `en_US.UTF-8`  
+       - GPU commands such as `nvidia-smi` are not applicable here and should be skipped.  
+
+   **Authorization & Script Generation**  
+   14. Obtain HuggingFace token.  
+   15. Generate `start_server.sh`:  
+       - With Docker:  
+         ```
+         python3 generate_script.py --use_docker --token <HF_token> [--email <youremail>] [--skip_input]
+         ```  
+       - Without Docker:  
+         ```
+         python3 generate_script.py --token <HF_token> [--email <youremail>] [--skip_input]
+         ```  
+   16. Verify `start_server.sh` is created.  
+
+   **Networking Setup**  
+   17. Ensure port 49200 or configured port is open inbound and outbound.  
+   18. Modify port parameters if needed in `start_server.sh`.  
+   19. Test port accessibility externally.  
+
+   **Run & Monitor**  
+   20. Start server:  
+       ```
+       ./start_server.sh
+       ```  
+   21. Monitor logs:  
+       - Docker mode:  
+         ```
+         tail -f run.out
+         ```  
+       - Non-Docker mode: run in `tmux` and monitor `logs/server.log`.  
+   22. Verify authorization success and batch processing via logs.  
+   23. Confirm no critical errors in logs.  
+
+   **Stopping & Cleanup**  
+   24. Stop server gracefully:  
+       - Docker:  
+         ```
+         docker ps
+         docker stop <container_name_or_ID>
+         docker rm <container_name_or_ID>
+         sudo chown -R <linux_user> .
+         ```  
+       - Without Docker:  
+         - Press `Ctrl + Z`  
+         - Remove socket files:  
+           ```
+           rm /tmp/hivemind*
+           ```  
+         - Kill processes on port 49200:  
+           ```
+           sudo apt-get install lsof
+           for i in $(sudo lsof -t -i tcp:49200); do kill -9 $i; done
+           ```  
+   25. Preserve `private.key` between runs.  
+
+   **Error Handling & Verification**  
+   26. Authorization failures: check token, delete `private.key` and retry.  
+   27. Network errors: verify port forwarding, firewall, internet stability.  
+   28. Docker issues: verify Docker service, restart if needed.  
+   29. Restart machine if persistent issues.  
+
+   **Optional: Multi-Instance Setup**  
+   30. For multiple instances:  
+       - Clone repo into separate folders.  
+       - Generate `start_server.sh` with distinct `--host_port` and `--announce_port`.  
+       - Run independently.  
+   31. Monitor logs and resource usage per instance.  
+
+   **Documentation & References**  
+   32. Refer to `docs/useful_links.md`, `docs/network.md`, `docs/cloud.md`.  
+   33. Keep `README.md` and citation info for attribution.  
+
+---
+
+**Summary of Main Adjustments:**  
+- **Remove all GPU-related requirements and steps:** No NVIDIA drivers, CUDA toolkit, or nvidia-docker2.  
+- **Use standard Linux amd64 base Docker image (e.g., ubuntu:20.04) instead of CUDA base image.**  
+- **Skip Docker daemon NVIDIA runtime configuration.**  
+- **Skip GPU detection and CUDA runtime tests.**  
+- **Ensure all paths and volumes respect nested working directory structure.**  
+- **Maintain Python version and dependency installation as per `pyproject.toml`.**  
+- **Continue using `hatchling` as build backend and install dependencies via `pip install .`.**  
+- **Keep general instructions for authorization, networking, running, stopping, and troubleshooting unchanged except GPU-specific parts removed.**  
+
+This adjusted plan ensures compatibility and smooth setup on your CPU-only x86_64 Linux environment without NVIDIA GPUs.

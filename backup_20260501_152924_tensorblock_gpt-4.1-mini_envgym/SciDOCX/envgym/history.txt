@@ -1,0 +1,1784 @@
+=== Iteration 1 - [2026-05-01 10:48:54] ===
+PLAN:
+  === ADJUSTED ENVIRONMENT SETUP PLAN (GPU-LESS AMD64 LINUX) ===
+  **Context:**  
+  - Host architecture: x86_64 (AMD64) Linux-compatible base images only  
+  - No NVIDIA GPU detected → **No CUDA, no NVIDIA drivers, no GPU runtime needed**  
+  - Docker version 28.1.1 supports BuildKit/buildx, no GPU build support (`--gpus` flag not applicable)  
+  - Use standard Linux instructions with overlay2 storage driver compatibility  
+  - Working directory is local Linux path; no special volume mount adjustments needed  
+  - Paths inside container remain Linux-style  
+  - Adjust software and container setup to CPU-only environment  
+  ---
+  ### 1. DOWNLOADS NEEDED (UPDATED):
+  - **Docker** (latest stable version, already installed 28.1.1)  
+    - **Do NOT install NVIDIA Container Toolkit or CUDA drivers/toolkit** since no GPU is present  
+    - Docker Compose v2 or compatible (already supported)  
+  - **Python 3.8+** (Recommended 3.10)  
+  - **Git** (latest stable)  
+  - **UV** (Universal Virtual environment manager)  
+  - **Pandoc** (latest stable) for document conversion  
+  - **curl** available inside container for healthcheck (verify or install as needed)  
+  - **No NVIDIA GPU drivers or CUDA Toolkit installation required**  
+  - Python libraries as listed remain the same (core API, image/PDF processing, utilities, Hugging Face, vLLM, optional VLM dependencies)  
+  **Dependencies notes:**  
+  - The optional VLM dependencies (`torch`, `torchvision`, `timm`) must be installed with CPU-only variants (no `+cu121` CUDA tags). Use CPU wheels from PyPI or specify CPU versions explicitly to avoid CUDA dependencies.  
+  - For example, install `torch==2.5.1+cpu` or just `torch==2.5.1` if CPU-only wheel is default; **do NOT install CUDA-specific torch wheels**.  
+  - Update `requirements.txt` or Dockerfile installs accordingly to CPU-compatible versions of these packages.  
+  ---
+  ### 2. FILES TO CREATE (UPDATED):
+  - **`docker-compose.yml`**:  
+    - Remove `runtime: nvidia` (no GPU runtime)  
+    - Remove `deploy.resources.reservations.devices` section that requests NVIDIA GPUs  
+    - Keep service name `deepseek-ocr`, container named `deepseek-ocr-vllm`  
+    - Keep volumes mounts (`./models` → `/app/models`, `./outputs` → `/app/outputs`)  
+    - Environment variables inside container remain:  
+      - `CUDA_VISIBLE_DEVICES=""` or unset (empty string to disable GPU usage)  
+      - `MODEL_PATH=/app/models/deepseek-ai/DeepSeek-OCR`  
+      - `MAX_CONCURRENCY=5`  
+      - `GPU_MEMORY_UTILIZATION=0.85` (can keep, but note no GPU memory usage on CPU-only)  
+    - Restart policy: `unless-stopped`  
+    - Healthcheck unchanged (curl to `http://localhost:8000/health`)  
+    - Remove any GPU-specific deploy or resource reservation keys to avoid Docker warnings/errors  
+  - **`Dockerfile`**:  
+    - Use CPU-friendly base image, e.g. `python:3.10-slim` or similar lightweight Debian/Ubuntu-based image compatible with x86_64  
+      - **Do NOT use `vllm/vllm-openai:v0.8.5` base image if it assumes GPU/CUDA support**; instead, use a base image that does not require GPU or CUDA  
+    - Copy DeepSeek-OCR source code from `DeepSeek-OCR-master/DeepSeek-OCR-master/DeepSeek-OCR-vllm/` as before (ensure path correctness)  
+    - Install all Python dependencies from `requirements-lock.txt` with the following changes:  
+      - For optional VLM dependencies, install CPU-only torch and torchvision versions (without CUDA extensions)  
+      - Avoid installing CUDA Toolkit or NVIDIA drivers inside container  
+    - Set `PYTHONPATH` environment variable as before  
+    - Expose port 8000  
+    - Set entrypoint as before (`python3 start_server.py`)  
+    - Create `/app/models` and `/app/outputs` directories inside container  
+  - **`.dockerignore`** and **`.gitignore`** files remain unchanged as specified, placed at root of repository  
+  - **`.env`** file (optional):  
+    - Set `CUDA_VISIBLE_DEVICES=""` or omit entirely to reflect no GPU available  
+    - Other environment variables remain the same  
+  - **`requirements.txt`** (updated):  
+    - Pin all packages as per `requirements-lock.txt`  
+    - For optional VLM dependencies: specify CPU-only versions of `torch` and `torchvision` (e.g., `torch==2.5.1`, `torchvision==0.20.1`, no `+cu121`)  
+    - Include comments or instructions to install CPU variants when no GPU is available  
+  - Configuration shell scripts (`setup_env.sh`, `setup_env.bat`) updated accordingly:  
+    - Set `CUDA_VISIBLE_DEVICES=""` explicitly or unset  
+    - Export other environment variables unchanged  
+    - Ensure `PYTHONPATH` reflects correct local source path  
+  - Model weights directory structure unchanged  
+  - Source code path correctness check remains necessary  
+  ---
+  ### 3. NECESSARY TEST CASES IN THE CODEBASE (UNCHANGED):
+  - All tests remain valid  
+  - Add emphasis on testing **CPU-only fallback and performance** since no GPU present  
+  - Verify that optional VLM enrichment runs correctly using CPU-only torch if enabled  
+  - Confirm healthcheck and service startup without GPU or CUDA errors  
+  ---
+  ### 4. COMPLETE TODO LIST (UPDATED):
+  1. **Install Required Software:**  
+     - Docker (already installed 28.1.1) and Docker Compose v2 (already supported)  
+     - **Do NOT install NVIDIA Container Toolkit, CUDA drivers, or CUDA Toolkit**  
+     - Python 3.10+ and Git  
+     - Pandoc  
+     - UV environment manager  
+     - Confirm `curl` is present in container base image or plan to install manually in Dockerfile  
+  2. **Clone Repository:**  
+     - As before, clone `SciDOCX` repo  
+     - Clone or add `DeepSeek-OCR` repo separately or as submodule at `DeepSeek-OCR/`  
+  3. **Add `.dockerignore` and `.gitignore`:**  
+     - As specified, no changes  
+  4. **Prepare Python Dependencies:**  
+     - Adjust `requirements.txt` to pin CPU-only versions of torch and torchvision for optional VLM dependencies  
+     - For example:  
+       ```
+       # Optional VLM dependencies (CPU-only)
+       torch==2.5.1
+       torchvision==0.20.1
+       timm==1.0.21
+       ```  
+     - Install all dependencies with `uv pip install -r requirements.txt` locally and inside Docker build  
+  5. **Download Model Weights:**  
+     - No changes  
+  6. **Set Environment Variables:**  
+     - Set `CUDA_VISIBLE_DEVICES=""` explicitly to disable GPU usage  
+     - Others unchanged  
+  7. **Build and Launch Setup:**  
+     - **Docker Build and Run:**  
+       - Use updated `Dockerfile` with CPU-friendly base image (e.g., `python:3.10-slim`)  
+       - Remove GPU runtime and device reservation from `docker-compose.yml`  
+       - Build and run container as usual:  
+         ```bash
+         docker compose build
+         docker compose up -d
+         ```  
+       - Verify container runs without GPU errors  
+       - Verify healthcheck endpoint reachable at `http://localhost:8000/health`  
+       - Confirm environment variables inside container (check `CUDA_VISIBLE_DEVICES=""`)  
+       - Confirm exposed port 8000 matches API server port  
+       - Confirm `.dockerignore` exclusions work (check build context size)  
+     - **Local Python Environment:**  
+       - `uv pip install -r requirements.txt` with CPU-only dependencies  
+       - Clone DeepSeek-OCR repo if needed  
+       - Run API server locally (default port 8001)  
+       - Verify server starts without errors and healthcheck endpoint reachable  
+  8. **Verify Model Loading and Inference:**  
+     - Run sample PDF processing as before  
+  9. **Run Batch Processing:**  
+     - No changes  
+  10. **Test GPU Fallback:**  
+      - Now default operation is CPU-only; verify no GPU-related errors occur  
+      - Confirm that running with `CUDA_VISIBLE_DEVICES=""` or unset works gracefully  
+  11. **Error Handling Validation:**  
+      - No changes  
+  12. **Test New Environment Variables:**  
+      - `MAX_CONCURRENCY` and `GPU_MEMORY_UTILIZATION` still effective for concurrency and resource control (note GPU memory utilization is irrelevant on CPU but can be kept for code compatibility)  
+  13. **Test Optional VLM Features:**  
+      - Ensure optional VLM dependencies installed as CPU-only versions  
+      - Run enrichment pipeline and verify correctness  
+  14. **Dependency Compatibility & Performance Validation:**  
+      - Confirm no conflicts with CPU-only torch and torchvision versions  
+      - Monitor performance and resource usage on CPU  
+  15. **Documentation & Scripts:**  
+      - Update documentation to reflect no GPU usage and CPU-only setup  
+      - Provide notes on installing CPU-only torch wheels  
+      - Update `setup_env.sh` and `.env` to reflect `CUDA_VISIBLE_DEVICES=""`  
+  16. **Optional: Evaluation Framework Setup:**  
+      - No changes  
+  17. **Final Verification:**  
+      - Confirm Dockerfile uses CPU-only base image and no GPU runtime  
+      - Confirm Docker Compose YAML has no GPU device reservations or runtime settings  
+      - Confirm environment variables set properly (`CUDA_VISIBLE_DEVICES=""`)  
+      - Confirm all pipelines run without GPU or CUDA dependencies  
+      - Confirm API port consistency (container port 8000, local server port 8001)  
+      - Confirm container healthcheck passes  
+      - Confirm `.dockerignore` and `.gitignore` exclude files as expected  
+      - Confirm upstream DeepSeek-OCR code cloned separately and not committed inside repo  
+  ---
+  ### SUMMARY OF KEY ADJUSTMENTS:
+  | Aspect                  | Original Plan                             | Adjusted Plan (No GPU)                           |
+  |-------------------------|------------------------------------------|-------------------------------------------------|
+  | Base Docker Image       | `vllm/vllm-openai:v0.8.5` (CUDA-enabled) | Use official CPU-only base image (e.g., `python:3.10-slim`) |
+  | Docker Compose `runtime`| `nvidia` (GPU runtime)                    | Remove runtime setting (default runtime)         |
+  | Docker Compose `deploy.resources` | Reserve NVIDIA GPUs                | Remove GPU device reservation                    |
+  | CUDA Drivers/Toolkit    | Install CUDA 12.1 and NVIDIA drivers      | **Do not install CUDA or NVIDIA drivers**         |
+  | CUDA_VISIBLE_DEVICES    | `0` (GPU device 0)                        | Set to empty string `""` or unset to disable GPU |
+  | Optional VLM deps       | CUDA-enabled torch/torchvision wheels (`+cu121`) | Use CPU-only torch/torchvision wheels             |
+  | Environment variables   | Include GPU-specific vars                  | Set `CUDA_VISIBLE_DEVICES=""`, others unchanged  |
+  | Healthcheck & Ports     | Port 8000 exposed, healthcheck on localhost:8000 | No change                                        |
+  | `requirements.txt`      | CUDA-enabled packages in optional deps    | CPU-only variants for torch/torchvision           |
+  | Build context & ignores | No change                                 | No change                                         |
+  | Scripts and docs        | GPU instructions included                  | Remove GPU instructions, add CPU-specific notes   |
+  ---
+  This adjusted plan ensures full compatibility with your hardware environment (no NVIDIA GPU, AMD64 Linux), avoids unnecessary CUDA and GPU dependencies, and maintains all functional features of DeepSeek-OCR and vLLM pipelines on CPU-only infrastructure.
+NEXT:
+  current progress  
+  - Base image set to `python:3.10-slim` (CPU-only compatible)  
+  - System dependencies installed: git, curl, pandoc  
+  - UV installed via pip  
+  - Dockerfile attempts to copy DeepSeek-OCR source from `DeepSeek-OCR-master/DeepSeek-OCR-master/DeepSeek-OCR-vllm/` but fails due to missing path in build context  
+  - Both `requirements-lock.txt` and `requirements.txt` copied if present  
+  - Conditional Python dependencies installation implemented using UV  
+  - Created `/app/models` and `/app/outputs` directories  
+  - Set `PYTHONPATH=/app` and `CUDA_VISIBLE_DEVICES=""` environment variables  
+  - Exposed port 8000 and default CMD set to bash  
+  next step  
+  - Fix the source code copy path issue: ensure the Docker build context includes the full `DeepSeek-OCR-master/DeepSeek-OCR-master/DeepSeek-OCR-vllm/` directory or adjust the COPY command to the correct relative path matching the build context  
+  - Verify and update `requirements-lock.txt` and `requirements.txt` to specify CPU-only torch and torchvision versions (no CUDA tags)  
+  - Optionally add an entrypoint or CMD to automatically start the server (`python3 start_server.py`) for streamlined container startup  
+  - Confirm curl availability inside container for healthcheck or add explicit installation if missing  
+  - Test Docker build again after path correction and dependency verification
+LOG:
+  === Docker Execution Log - 20260501_104849 ===
+  Dockerfile: envgym/envgym.dockerfile
+  Image Name: envgym_test_1777632529
+  === Build Log ===
+  Build Status: Failed
+  Build Output:
+  Build Error:
+  #0 building with "default" instance using docker driver
+  #1 [internal] load build definition from envgym.dockerfile
+  #1 transferring dockerfile: 1.64kB done
+  #1 DONE 0.0s
+  #2 [internal] load metadata for docker.io/library/python:3.10-slim
+  #2 DONE 0.3s
+  #3 [internal] load .dockerignore
+  #3 transferring context: 174B done
+  #3 DONE 0.0s
+  #4 [1/9] FROM docker.io/library/python:3.10-slim@sha256:cdbf8193cee2e31639ea8ea85ffdd8fa5cce98ee9abfde96ea5f329490048831
+  #4 CACHED
+  #5 [internal] load build context
+  #5 transferring context: 1.83kB done
+  #5 DONE 0.0s
+  #6 [3/9] RUN apt-get update && apt-get install -y --no-install-recommends     git     curl     pandoc     && rm -rf /var/lib/apt/lists/*
+  #6 CACHED
+  #7 [4/9] RUN pip install --no-cache-dir uv
+  #7 CACHED
+  #8 [5/9] COPY DeepSeek-OCR-master/DeepSeek-OCR-master/DeepSeek-OCR-vllm/ /app/
+  #8 ERROR: failed to calculate checksum of ref 0b9611b8-8327-44ba-b8b3-8100abfef644::qfgxml0hzsob1om9l5r0c7jka: "/DeepSeek-OCR-master/DeepSeek-OCR-master/DeepSeek-OCR-vllm": not found
+  #9 [2/9] WORKDIR /app
+  #9 DONE 0.0s
+  ------
+   > [5/9] COPY DeepSeek-OCR-master/DeepSeek-OCR-master/DeepSeek-OCR-vllm/ /app/:
+  ------
+  envgym.dockerfile:18
+  --------------------
+    16 |     # Copy DeepSeek-OCR source code
+    17 |     # Assuming build context root contains DeepSeek-OCR-master/DeepSeek-OCR-master/DeepSeek-OCR-vllm/
+    18 | >>> COPY DeepSeek-OCR-master/DeepSeek-OCR-master/DeepSeek-OCR-vllm/ /app/
+    19 |     
+    20 |     # Copy requirements-lock.txt if available, else requirements.txt
+  --------------------
+  ERROR: failed to solve: failed to compute cache key: failed to calculate checksum of ref 0b9611b8-8327-44ba-b8b3-8100abfef644::qfgxml0hzsob1om9l5r0c7jka: "/DeepSeek-OCR-master/DeepSeek-OCR-master/DeepSeek-OCR-vllm": not found
+  === Runtime Log ===  
+  Runtime Status: Failed
+  Runtime Output:
+  Runtime Error:
+  === Execution End ===
+DOCKERFILE:
+  FROM python:3.10-slim
+  # Set working directory
+  WORKDIR /app
+  # Install system dependencies
+  RUN apt-get update && apt-get install -y --no-install-recommends \
+      git \
+      curl \
+      pandoc \
+      && rm -rf /var/lib/apt/lists/*
+  # Install UV (Universal Virtual environment manager)
+  RUN pip install --no-cache-dir uv
+  # Copy DeepSeek-OCR source code
+  # Assuming build context root contains DeepSeek-OCR-master/DeepSeek-OCR-master/DeepSeek-OCR-vllm/
+  COPY DeepSeek-OCR-master/DeepSeek-OCR-master/DeepSeek-OCR-vllm/ /app/
+  # Copy requirements-lock.txt if available, else requirements.txt
+  # Prefer requirements-lock.txt if present in source
+  COPY requirements-lock.txt /app/requirements-lock.txt
+  COPY requirements.txt /app/requirements.txt
+  # Install Python dependencies
+  # Use requirements-lock.txt if present, otherwise requirements.txt
+  RUN if [ -f /app/requirements-lock.txt ]; then \
+          uv pip install --no-cache-dir -r /app/requirements-lock.txt; \
+      else \
+          uv pip install --no-cache-dir -r /app/requirements.txt; \
+      fi
+  # Ensure CPU-only torch and torchvision versions are installed in requirements files
+  # Create models and outputs directories
+  RUN mkdir -p /app/models /app/outputs
+  # Set PYTHONPATH environment variable to include /app source code
+  ENV PYTHONPATH=/app
+  # Set environment variable to disable GPU usage
+  ENV CUDA_VISIBLE_DEVICES=""
+  # Expose port 8000 for API server
+  EXPOSE 8000
+  # Default shell
+  CMD ["/bin/bash"]
+  # Provide entrypoint script to start server manually or use CMD override
+  # The user can run: python3 start_server.py inside container after shell start
+--- End of Iteration 1 ---
+
+=== Iteration 2 - [2026-05-01 10:49:14] ===
+PLAN:
+  === ADJUSTED ENVIRONMENT SETUP PLAN (GPU-LESS AMD64 LINUX) ===
+  **Context:**  
+  - Host architecture: x86_64 (AMD64) Linux-compatible base images only  
+  - No NVIDIA GPU detected → **No CUDA, no NVIDIA drivers, no GPU runtime needed**  
+  - Docker version 28.1.1 supports BuildKit/buildx, no GPU build support (`--gpus` flag not applicable)  
+  - Use standard Linux instructions with overlay2 storage driver compatibility  
+  - Working directory is local Linux path; no special volume mount adjustments needed  
+  - Paths inside container remain Linux-style  
+  - Adjust software and container setup to CPU-only environment  
+  ---
+  ### 1. DOWNLOADS NEEDED (UPDATED):
+  - **Docker** (latest stable version, already installed 28.1.1)  
+    - **Do NOT install NVIDIA Container Toolkit or CUDA drivers/toolkit** since no GPU is present  
+    - Docker Compose v2 or compatible (already supported)  
+  - **Python 3.8+** (Recommended 3.10)  
+  - **Git** (latest stable)  
+  - **UV** (Universal Virtual environment manager)  
+  - **Pandoc** (latest stable) for document conversion  
+  - **curl** available inside container for healthcheck (verify or install as needed)  
+  - **No NVIDIA GPU drivers or CUDA Toolkit installation required**  
+  - Python libraries as listed remain the same (core API, image/PDF processing, utilities, Hugging Face, vLLM, optional VLM dependencies)  
+  **Dependencies notes:**  
+  - The optional VLM dependencies (`torch`, `torchvision`, `timm`) must be installed with CPU-only variants (no `+cu121` CUDA tags). Use CPU wheels from PyPI or specify CPU versions explicitly to avoid CUDA dependencies.  
+  - For example, install `torch==2.5.1+cpu` or just `torch==2.5.1` if CPU-only wheel is default; **do NOT install CUDA-specific torch wheels**.  
+  - Update `requirements.txt` or Dockerfile installs accordingly to CPU-compatible versions of these packages.  
+  ---
+  ### 2. FILES TO CREATE (UPDATED):
+  - **`docker-compose.yml`**:  
+    - Remove `runtime: nvidia` (no GPU runtime)  
+    - Remove `deploy.resources.reservations.devices` section that requests NVIDIA GPUs  
+    - Keep service name `deepseek-ocr`, container named `deepseek-ocr-vllm`  
+    - Keep volumes mounts (`./models` → `/app/models`, `./outputs` → `/app/outputs`)  
+    - Environment variables inside container remain:  
+      - `CUDA_VISIBLE_DEVICES=""` or unset (empty string to disable GPU usage)  
+      - `MODEL_PATH=/app/models/deepseek-ai/DeepSeek-OCR`  
+      - `MAX_CONCURRENCY=5`  
+      - `GPU_MEMORY_UTILIZATION=0.85` (can keep, but note no GPU memory usage on CPU-only)  
+    - Restart policy: `unless-stopped`  
+    - Healthcheck unchanged (curl to `http://localhost:8000/health`)  
+    - Remove any GPU-specific deploy or resource reservation keys to avoid Docker warnings/errors  
+  - **`Dockerfile`**:  
+    - Use CPU-friendly base image, e.g. `python:3.10-slim` or similar lightweight Debian/Ubuntu-based image compatible with x86_64  
+      - **Do NOT use `vllm/vllm-openai:v0.8.5` base image if it assumes GPU/CUDA support**; instead, use a base image that does not require GPU or CUDA  
+    - Copy DeepSeek-OCR source code from `DeepSeek-OCR-master/DeepSeek-OCR-master/DeepSeek-OCR-vllm/` as before (ensure path correctness)  
+    - Install all Python dependencies from `requirements-lock.txt` with the following changes:  
+      - For optional VLM dependencies, install CPU-only torch and torchvision versions (without CUDA extensions)  
+      - Avoid installing CUDA Toolkit or NVIDIA drivers inside container  
+    - Set `PYTHONPATH` environment variable as before  
+    - Expose port 8000  
+    - Set entrypoint as before (`python3 start_server.py`)  
+    - Create `/app/models` and `/app/outputs` directories inside container  
+  - **`.dockerignore`** and **`.gitignore`** files remain unchanged as specified, placed at root of repository  
+  - **`.env`** file (optional):  
+    - Set `CUDA_VISIBLE_DEVICES=""` or omit entirely to reflect no GPU available  
+    - Other environment variables remain the same  
+  - **`requirements.txt`** (updated):  
+    - Pin all packages as per `requirements-lock.txt`  
+    - For optional VLM dependencies: specify CPU-only versions of `torch` and `torchvision` (e.g., `torch==2.5.1`, `torchvision==0.20.1`, no `+cu121`)  
+    - Include comments or instructions to install CPU variants when no GPU is available  
+  - Configuration shell scripts (`setup_env.sh`, `setup_env.bat`) updated accordingly:  
+    - Set `CUDA_VISIBLE_DEVICES=""` explicitly or unset  
+    - Export other environment variables unchanged  
+    - Ensure `PYTHONPATH` reflects correct local source path  
+  - Model weights directory structure unchanged  
+  - Source code path correctness check remains necessary  
+  ---
+  ### 3. NECESSARY TEST CASES IN THE CODEBASE (UNCHANGED):
+  - All tests remain valid  
+  - Add emphasis on testing **CPU-only fallback and performance** since no GPU present  
+  - Verify that optional VLM enrichment runs correctly using CPU-only torch if enabled  
+  - Confirm healthcheck and service startup without GPU or CUDA errors  
+  ---
+  ### 4. COMPLETE TODO LIST (UPDATED):
+  1. **Install Required Software:**  
+     - Docker (already installed 28.1.1) and Docker Compose v2 (already supported)  
+     - **Do NOT install NVIDIA Container Toolkit, CUDA drivers, or CUDA Toolkit**  
+     - Python 3.10+ and Git  
+     - Pandoc  
+     - UV environment manager  
+     - Confirm `curl` is present in container base image or plan to install manually in Dockerfile  
+  2. **Clone Repository:**  
+     - As before, clone `SciDOCX` repo  
+     - Clone or add `DeepSeek-OCR` repo separately or as submodule at `DeepSeek-OCR/`  
+  3. **Add `.dockerignore` and `.gitignore`:**  
+     - As specified, no changes  
+  4. **Prepare Python Dependencies:**  
+     - Adjust `requirements.txt` to pin CPU-only versions of torch and torchvision for optional VLM dependencies  
+     - For example:  
+       ```
+       # Optional VLM dependencies (CPU-only)
+       torch==2.5.1
+       torchvision==0.20.1
+       timm==1.0.21
+       ```  
+     - Install all dependencies with `uv pip install -r requirements.txt` locally and inside Docker build  
+  5. **Download Model Weights:**  
+     - No changes  
+  6. **Set Environment Variables:**  
+     - Set `CUDA_VISIBLE_DEVICES=""` explicitly to disable GPU usage  
+     - Others unchanged  
+  7. **Build and Launch Setup:**  
+     - **Docker Build and Run:**  
+       - Use updated `Dockerfile` with CPU-friendly base image (e.g., `python:3.10-slim`)  
+       - Remove GPU runtime and device reservation from `docker-compose.yml`  
+       - Build and run container as usual:  
+         ```bash
+         docker compose build
+         docker compose up -d
+         ```  
+       - Verify container runs without GPU errors  
+       - Verify healthcheck endpoint reachable at `http://localhost:8000/health`  
+       - Confirm environment variables inside container (check `CUDA_VISIBLE_DEVICES=""`)  
+       - Confirm exposed port 8000 matches API server port  
+       - Confirm `.dockerignore` exclusions work (check build context size)  
+     - **Local Python Environment:**  
+       - `uv pip install -r requirements.txt` with CPU-only dependencies  
+       - Clone DeepSeek-OCR repo if needed  
+       - Run API server locally (default port 8001)  
+       - Verify server starts without errors and healthcheck endpoint reachable  
+  8. **Verify Model Loading and Inference:**  
+     - Run sample PDF processing as before  
+  9. **Run Batch Processing:**  
+     - No changes  
+  10. **Test GPU Fallback:**  
+      - Now default operation is CPU-only; verify no GPU-related errors occur  
+      - Confirm that running with `CUDA_VISIBLE_DEVICES=""` or unset works gracefully  
+  11. **Error Handling Validation:**  
+      - No changes  
+  12. **Test New Environment Variables:**  
+      - `MAX_CONCURRENCY` and `GPU_MEMORY_UTILIZATION` still effective for concurrency and resource control (note GPU memory utilization is irrelevant on CPU but can be kept for code compatibility)  
+  13. **Test Optional VLM Features:**  
+      - Ensure optional VLM dependencies installed as CPU-only versions  
+      - Run enrichment pipeline and verify correctness  
+  14. **Dependency Compatibility & Performance Validation:**  
+      - Confirm no conflicts with CPU-only torch and torchvision versions  
+      - Monitor performance and resource usage on CPU  
+  15. **Documentation & Scripts:**  
+      - Update documentation to reflect no GPU usage and CPU-only setup  
+      - Provide notes on installing CPU-only torch wheels  
+      - Update `setup_env.sh` and `.env` to reflect `CUDA_VISIBLE_DEVICES=""`  
+  16. **Optional: Evaluation Framework Setup:**  
+      - No changes  
+  17. **Final Verification:**  
+      - Confirm Dockerfile uses CPU-only base image and no GPU runtime  
+      - Confirm Docker Compose YAML has no GPU device reservations or runtime settings  
+      - Confirm environment variables set properly (`CUDA_VISIBLE_DEVICES=""`)  
+      - Confirm all pipelines run without GPU or CUDA dependencies  
+      - Confirm API port consistency (container port 8000, local server port 8001)  
+      - Confirm container healthcheck passes  
+      - Confirm `.dockerignore` and `.gitignore` exclude files as expected  
+      - Confirm upstream DeepSeek-OCR code cloned separately and not committed inside repo  
+  ---
+  ### SUMMARY OF KEY ADJUSTMENTS:
+  | Aspect                  | Original Plan                             | Adjusted Plan (No GPU)                           |
+  |-------------------------|------------------------------------------|-------------------------------------------------|
+  | Base Docker Image       | `vllm/vllm-openai:v0.8.5` (CUDA-enabled) | Use official CPU-only base image (e.g., `python:3.10-slim`) |
+  | Docker Compose `runtime`| `nvidia` (GPU runtime)                    | Remove runtime setting (default runtime)         |
+  | Docker Compose `deploy.resources` | Reserve NVIDIA GPUs                | Remove GPU device reservation                    |
+  | CUDA Drivers/Toolkit    | Install CUDA 12.1 and NVIDIA drivers      | **Do not install CUDA or NVIDIA drivers**         |
+  | CUDA_VISIBLE_DEVICES    | `0` (GPU device 0)                        | Set to empty string `""` or unset to disable GPU |
+  | Optional VLM deps       | CUDA-enabled torch/torchvision wheels (`+cu121`) | Use CPU-only torch/torchvision wheels             |
+  | Environment variables   | Include GPU-specific vars                  | Set `CUDA_VISIBLE_DEVICES=""`, others unchanged  |
+  | Healthcheck & Ports     | Port 8000 exposed, healthcheck on localhost:8000 | No change                                        |
+  | `requirements.txt`      | CUDA-enabled packages in optional deps    | CPU-only variants for torch/torchvision           |
+  | Build context & ignores | No change                                 | No change                                         |
+  | Scripts and docs        | GPU instructions included                  | Remove GPU instructions, add CPU-specific notes   |
+  ---
+  This adjusted plan ensures full compatibility with your hardware environment (no NVIDIA GPU, AMD64 Linux), avoids unnecessary CUDA and GPU dependencies, and maintains all functional features of DeepSeek-OCR and vLLM pipelines on CPU-only infrastructure.
+NEXT:
+  current progress  
+  - Base image set to `python:3.10-slim` aligned with CPU-only environment  
+  - System dependencies (`git`, `curl`, `pandoc`) installed with cleanup  
+  - `uv` installed via pip  
+  - Source code and config files copied to `/app`  
+  - Conditional install of Python dependencies using `uv pip install` from `requirements-lock.txt` or `requirements.txt` attempted but failed with exit code 2  
+  - Created required directories including `/app/models` and output folders  
+  - `PYTHONPATH` and `CUDA_VISIBLE_DEVICES` environment variables set correctly  
+  - Port 8000 exposed  
+  - Default command set to bash  
+  next step  
+  - Investigate and fix failure in the Python dependencies installation step: verify presence and correctness of `requirements-lock.txt` and `requirements.txt` in `/app` after copy  
+  - Confirm that `uv` CLI commands are executable as expected in the shell environment within the Dockerfile build context  
+  - Consider replacing `uv pip install` with a direct `pip install` command to isolate whether `uv` invocation causes the failure  
+  - Add debugging steps (e.g., list files in `/app`, check Python and pip versions, run `uv --version`) before the install step to diagnose  
+  - Ensure CPU-only compatible `requirements.txt` or `requirements-lock.txt` are present and correctly formatted  
+  - After fixing install step, validate container startup and healthcheck functionality as per plan
+LOG:
+  === Docker Execution Log - 20260501_104910 ===
+  Dockerfile: envgym/envgym.dockerfile
+  Image Name: envgym_test_1777632539
+  === Build Log ===
+  Build Status: Failed
+  Build Output:
+  Build Error:
+  #0 building with "default" instance using docker driver
+  #1 [internal] load build definition from envgym.dockerfile
+  #1 transferring dockerfile: 1.10kB done
+  #1 DONE 0.0s
+  #2 [internal] load metadata for docker.io/library/python:3.10-slim
+  #2 DONE 0.1s
+  #3 [internal] load .dockerignore
+  #3 transferring context: 174B done
+  #3 DONE 0.0s
+  #4 [1/7] FROM docker.io/library/python:3.10-slim@sha256:cdbf8193cee2e31639ea8ea85ffdd8fa5cce98ee9abfde96ea5f329490048831
+  #4 DONE 0.0s
+  #5 [2/7] WORKDIR /app
+  #5 CACHED
+  #6 [internal] load build context
+  #6 transferring context: 118.67kB 0.0s done
+  #6 DONE 0.0s
+  #7 [3/7] RUN apt-get update && apt-get install -y --no-install-recommends     git     curl     pandoc     && rm -rf /var/lib/apt/lists/*
+  #7 0.259 Hit:1 http://deb.debian.org/debian trixie InRelease
+  #7 0.259 Get:2 http://deb.debian.org/debian trixie-updates InRelease [47.3 kB]
+  #7 0.264 Get:3 http://deb.debian.org/debian-security trixie-security InRelease [43.4 kB]
+  #7 0.289 Get:4 http://deb.debian.org/debian trixie/main amd64 Packages [9671 kB]
+  #7 0.365 Get:5 http://deb.debian.org/debian trixie-updates/main amd64 Packages [5412 B]
+  #7 0.365 Get:6 http://deb.debian.org/debian-security trixie-security/main amd64 Packages [130 kB]
+  #7 1.069 Fetched 9897 kB in 1s (11.7 MB/s)
+  #7 1.069 Reading package lists...
+  #7 1.564 Reading package lists...
+  #7 2.041 Building dependency tree...
+  #7 2.133 Reading state information...
+  #7 2.267 The following additional packages will be installed:
+  #7 2.267   git-man libbrotli1 libcom-err2 libcurl3t64-gnutls libcurl4t64 liberror-perl
+  #7 2.267   libexpat1 libgdbm-compat4t64 libgnutls30t64 libgssapi-krb5-2 libidn2-0
+  #7 2.267   libk5crypto3 libkeyutils1 libkrb5-3 libkrb5support0 libldap2 liblua5.4-0
+  #7 2.267   libnghttp2-14 libnghttp3-9 libngtcp2-16 libngtcp2-crypto-gnutls8 libnuma1
+  #7 2.267   libp11-kit0 libperl5.40 libpsl5t64 librtmp1 libsasl2-2 libsasl2-modules-db
+  #7 2.267   libssh2-1t64 libtasn1-6 libunistring5 libyaml-0-2 pandoc-data perl
+  #7 2.268   perl-modules-5.40
+  #7 2.269 Suggested packages:
+  #7 2.269   gettext-base git-doc git-email git-gui gitk gitweb git-cvs git-mediawiki
+  #7 2.269   git-svn gnutls-bin krb5-doc krb5-user sensible-utils
+  #7 2.269   texlive-latex-recommended texlive-xetex texlive-luatex pandoc-citeproc
+  #7 2.269   texlive-latex-extra context wkhtmltopdf librsvg2-bin groff ghc nodejs php
+  #7 2.269   python ruby r-base-core libjs-mathjax libjs-katex
+  #7 2.269   citation-style-language-styles perl-doc libterm-readline-gnu-perl
+  #7 2.269   | libterm-readline-perl-perl make libtap-harness-archive-perl
+  #7 2.269 Recommended packages:
+  #7 2.269   bash-completion patch less ssh-client krb5-locales libldap-common
+  #7 2.269   publicsuffix libsasl2-modules
+  #7 2.487 The following NEW packages will be installed:
+  #7 2.487   curl git git-man libbrotli1 libcom-err2 libcurl3t64-gnutls libcurl4t64
+  #7 2.487   liberror-perl libexpat1 libgdbm-compat4t64 libgnutls30t64 libgssapi-krb5-2
+  #7 2.487   libidn2-0 libk5crypto3 libkeyutils1 libkrb5-3 libkrb5support0 libldap2
+  #7 2.487   liblua5.4-0 libnghttp2-14 libnghttp3-9 libngtcp2-16 libngtcp2-crypto-gnutls8
+  #7 2.487   libnuma1 libp11-kit0 libperl5.40 libpsl5t64 librtmp1 libsasl2-2
+  #7 2.488   libsasl2-modules-db libssh2-1t64 libtasn1-6 libunistring5 libyaml-0-2 pandoc
+  #7 2.488   pandoc-data perl perl-modules-5.40
+  #7 2.535 0 upgraded, 38 newly installed, 0 to remove and 0 not upgraded.
+  #7 2.535 Need to get 51.4 MB of archives.
+  #7 2.535 After this operation, 321 MB of additional disk space will be used.
+  #7 2.535 Get:1 http://deb.debian.org/debian trixie/main amd64 libexpat1 amd64 2.7.1-2 [108 kB]
+  #7 2.543 Get:2 http://deb.debian.org/debian trixie/main amd64 perl-modules-5.40 all 5.40.1-6 [3019 kB]
+  #7 2.566 Get:3 http://deb.debian.org/debian trixie/main amd64 libgdbm-compat4t64 amd64 1.24-2 [50.3 kB]
+  #7 2.566 Get:4 http://deb.debian.org/debian trixie/main amd64 libperl5.40 amd64 5.40.1-6 [4341 kB]
+  #7 2.585 Get:5 http://deb.debian.org/debian trixie/main amd64 perl amd64 5.40.1-6 [267 kB]
+  #7 2.586 Get:6 http://deb.debian.org/debian trixie/main amd64 libbrotli1 amd64 1.1.0-2+b7 [307 kB]
+  #7 2.588 Get:7 http://deb.debian.org/debian trixie/main amd64 libkrb5support0 amd64 1.21.3-5 [33.0 kB]
+  #7 2.588 Get:8 http://deb.debian.org/debian trixie/main amd64 libcom-err2 amd64 1.47.2-3+b10 [25.0 kB]
+  #7 2.588 Get:9 http://deb.debian.org/debian trixie/main amd64 libk5crypto3 amd64 1.21.3-5 [81.5 kB]
+  #7 2.595 Get:10 http://deb.debian.org/debian trixie/main amd64 libkeyutils1 amd64 1.6.3-6 [9456 B]
+  #7 2.595 Get:11 http://deb.debian.org/debian trixie/main amd64 libkrb5-3 amd64 1.21.3-5 [326 kB]
+  #7 2.597 Get:12 http://deb.debian.org/debian trixie/main amd64 libgssapi-krb5-2 amd64 1.21.3-5 [138 kB]
+  #7 2.598 Get:13 http://deb.debian.org/debian trixie/main amd64 libunistring5 amd64 1.3-2 [477 kB]
+  #7 2.601 Get:14 http://deb.debian.org/debian trixie/main amd64 libidn2-0 amd64 2.3.8-2 [109 kB]
+  #7 2.602 Get:15 http://deb.debian.org/debian trixie/main amd64 libsasl2-modules-db amd64 2.1.28+dfsg1-9 [19.8 kB]
+  #7 2.602 Get:16 http://deb.debian.org/debian trixie/main amd64 libsasl2-2 amd64 2.1.28+dfsg1-9 [57.5 kB]
+  #7 2.602 Get:17 http://deb.debian.org/debian trixie/main amd64 libldap2 amd64 2.6.10+dfsg-1 [194 kB]
+  #7 2.604 Get:18 http://deb.debian.org/debian trixie/main amd64 libnghttp2-14 amd64 1.64.0-1.1 [76.0 kB]
+  #7 2.604 Get:19 http://deb.debian.org/debian trixie/main amd64 libnghttp3-9 amd64 1.8.0-1 [67.7 kB]
+  #7 2.605 Get:20 http://deb.debian.org/debian trixie/main amd64 libpsl5t64 amd64 0.21.2-1.1+b1 [57.2 kB]
+  #7 2.605 Get:21 http://deb.debian.org/debian trixie/main amd64 libp11-kit0 amd64 0.25.5-3 [425 kB]
+  #7 2.608 Get:22 http://deb.debian.org/debian trixie/main amd64 libtasn1-6 amd64 4.20.0-2 [49.9 kB]
+  #7 2.608 Get:23 http://deb.debian.org/debian trixie/main amd64 libgnutls30t64 amd64 3.8.9-3+deb13u2 [1468 kB]
+  #7 2.615 Get:24 http://deb.debian.org/debian trixie/main amd64 librtmp1 amd64 2.4+20151223.gitfa8646d.1-2+b5 [58.8 kB]
+  #7 2.615 Get:25 http://deb.debian.org/debian trixie/main amd64 libssh2-1t64 amd64 1.11.1-1 [245 kB]
+  #7 2.616 Get:26 http://deb.debian.org/debian trixie/main amd64 libcurl4t64 amd64 8.14.1-2+deb13u2 [391 kB]
+  #7 2.618 Get:27 http://deb.debian.org/debian trixie/main amd64 curl amd64 8.14.1-2+deb13u2 [270 kB]
+  #7 2.619 Get:28 http://deb.debian.org/debian-security trixie-security/main amd64 libngtcp2-16 amd64 1.11.0-1+deb13u1 [132 kB]
+  #7 2.620 Get:29 http://deb.debian.org/debian-security trixie-security/main amd64 libngtcp2-crypto-gnutls8 amd64 1.11.0-1+deb13u1 [29.5 kB]
+  #7 2.620 Get:30 http://deb.debian.org/debian trixie/main amd64 libcurl3t64-gnutls amd64 8.14.1-2+deb13u2 [383 kB]
+  #7 2.622 Get:31 http://deb.debian.org/debian trixie/main amd64 liberror-perl all 0.17030-1 [26.9 kB]
+  #7 2.622 Get:32 http://deb.debian.org/debian trixie/main amd64 git-man all 1:2.47.3-0+deb13u1 [2205 kB]
+  #7 2.632 Get:33 http://deb.debian.org/debian trixie/main amd64 git amd64 1:2.47.3-0+deb13u1 [8862 kB]
+  #7 2.670 Get:34 http://deb.debian.org/debian trixie/main amd64 liblua5.4-0 amd64 5.4.7-1+b2 [147 kB]
+  #7 2.671 Get:35 http://deb.debian.org/debian trixie/main amd64 libnuma1 amd64 2.0.19-1 [22.2 kB]
+  #7 2.671 Get:36 http://deb.debian.org/debian trixie/main amd64 libyaml-0-2 amd64 0.2.5-2 [52.5 kB]
+  #7 2.671 Get:37 http://deb.debian.org/debian trixie/main amd64 pandoc-data all 3.1.11.1-3 [459 kB]
+  #7 2.674 Get:38 http://deb.debian.org/debian trixie/main amd64 pandoc amd64 3.1.11.1+ds-2 [26.4 MB]
+  #7 2.935 debconf: unable to initialize frontend: Dialog
+  #7 2.935 debconf: (TERM is not set, so the dialog frontend is not usable.)
+  #7 2.935 debconf: falling back to frontend: Readline
+  #7 2.935 debconf: unable to initialize frontend: Readline
+  #7 2.935 debconf: (Can't locate Term/ReadLine.pm in @INC (you may need to install the Term::ReadLine module) (@INC entries checked: /etc/perl /usr/local/lib/x86_64-linux-gnu/perl/5.40.1 /usr/local/share/perl/5.40.1 /usr/lib/x86_64-linux-gnu/perl5/5.40 /usr/share/perl5 /usr/lib/x86_64-linux-gnu/perl-base /usr/lib/x86_64-linux-gnu/perl/5.40 /usr/share/perl/5.40 /usr/local/lib/site_perl) at /usr/share/perl5/Debconf/FrontEnd/Readline.pm line 8, <STDIN> line 38.)
+  #7 2.935 debconf: falling back to frontend: Teletype
+  #7 2.943 debconf: unable to initialize frontend: Teletype
+  #7 2.943 debconf: (This frontend requires a controlling tty.)
+  #7 2.943 debconf: falling back to frontend: Noninteractive
+  #7 3.933 Fetched 51.4 MB in 0s (163 MB/s)
+  #7 3.956 Selecting previously unselected package libexpat1:amd64.
+  #7 3.956 (Reading database ... 
+  (Reading database ... 5%
+  (Reading database ... 10%
+  (Reading database ... 15%
+  (Reading database ... 20%
+  (Reading database ... 25%
+  (Reading database ... 30%
+  (Reading database ... 35%
+  (Reading database ... 40%
+  (Reading database ... 45%
+  (Reading database ... 50%
+  (Reading database ... 55%
+  (Reading database ... 60%
+  (Reading database ... 65%
+  (Reading database ... 70%
+  (Reading database ... 75%
+  (Reading database ... 80%
+  (Reading database ... 85%
+  (Reading database ... 90%
+  (Reading database ... 95%
+  (Reading database ... 100%
+  (Reading database ... 5645 files and directories currently installed.)
+  #7 3.960 Preparing to unpack .../00-libexpat1_2.7.1-2_amd64.deb ...
+  #7 3.961 Unpacking libexpat1:amd64 (2.7.1-2) ...
+  #7 3.997 Selecting previously unselected package perl-modules-5.40.
+  #7 3.998 Preparing to unpack .../01-perl-modules-5.40_5.40.1-6_all.deb ...
+  #7 3.999 Unpacking perl-modules-5.40 (5.40.1-6) ...
+  #7 4.188 Selecting previously unselected package libgdbm-compat4t64:amd64.
+  #7 4.190 Preparing to unpack .../02-libgdbm-compat4t64_1.24-2_amd64.deb ...
+  #7 4.190 Unpacking libgdbm-compat4t64:amd64 (1.24-2) ...
+  #7 4.215 Selecting previously unselected package libperl5.40:amd64.
+  #7 4.217 Preparing to unpack .../03-libperl5.40_5.40.1-6_amd64.deb ...
+  #7 4.218 Unpacking libperl5.40:amd64 (5.40.1-6) ...
+  #7 4.432 Selecting previously unselected package perl.
+  #7 4.434 Preparing to unpack .../04-perl_5.40.1-6_amd64.deb ...
+  #7 4.434 Unpacking perl (5.40.1-6) ...
+  #7 4.474 Selecting previously unselected package libbrotli1:amd64.
+  #7 4.475 Preparing to unpack .../05-libbrotli1_1.1.0-2+b7_amd64.deb ...
+  #7 4.476 Unpacking libbrotli1:amd64 (1.1.0-2+b7) ...
+  #7 4.518 Selecting previously unselected package libkrb5support0:amd64.
+  #7 4.519 Preparing to unpack .../06-libkrb5support0_1.21.3-5_amd64.deb ...
+  #7 4.520 Unpacking libkrb5support0:amd64 (1.21.3-5) ...
+  #7 4.542 Selecting previously unselected package libcom-err2:amd64.
+  #7 4.543 Preparing to unpack .../07-libcom-err2_1.47.2-3+b10_amd64.deb ...
+  #7 4.544 Unpacking libcom-err2:amd64 (1.47.2-3+b10) ...
+  #7 4.566 Selecting previously unselected package libk5crypto3:amd64.
+  #7 4.568 Preparing to unpack .../08-libk5crypto3_1.21.3-5_amd64.deb ...
+  #7 4.569 Unpacking libk5crypto3:amd64 (1.21.3-5) ...
+  #7 4.603 Selecting previously unselected package libkeyutils1:amd64.
+  #7 4.604 Preparing to unpack .../09-libkeyutils1_1.6.3-6_amd64.deb ...
+  #7 4.605 Unpacking libkeyutils1:amd64 (1.6.3-6) ...
+  #7 4.627 Selecting previously unselected package libkrb5-3:amd64.
+  #7 4.629 Preparing to unpack .../10-libkrb5-3_1.21.3-5_amd64.deb ...
+  #7 4.629 Unpacking libkrb5-3:amd64 (1.21.3-5) ...
+  #7 4.673 Selecting previously unselected package libgssapi-krb5-2:amd64.
+  #7 4.674 Preparing to unpack .../11-libgssapi-krb5-2_1.21.3-5_amd64.deb ...
+  #7 4.675 Unpacking libgssapi-krb5-2:amd64 (1.21.3-5) ...
+  #7 4.708 Selecting previously unselected package libunistring5:amd64.
+  #7 4.710 Preparing to unpack .../12-libunistring5_1.3-2_amd64.deb ...
+  #7 4.711 Unpacking libunistring5:amd64 (1.3-2) ...
+  #7 4.763 Selecting previously unselected package libidn2-0:amd64.
+  #7 4.764 Preparing to unpack .../13-libidn2-0_2.3.8-2_amd64.deb ...
+  #7 4.765 Unpacking libidn2-0:amd64 (2.3.8-2) ...
+  #7 4.795 Selecting previously unselected package libsasl2-modules-db:amd64.
+  #7 4.797 Preparing to unpack .../14-libsasl2-modules-db_2.1.28+dfsg1-9_amd64.deb ...
+  #7 4.798 Unpacking libsasl2-modules-db:amd64 (2.1.28+dfsg1-9) ...
+  #7 4.819 Selecting previously unselected package libsasl2-2:amd64.
+  #7 4.820 Preparing to unpack .../15-libsasl2-2_2.1.28+dfsg1-9_amd64.deb ...
+  #7 4.821 Unpacking libsasl2-2:amd64 (2.1.28+dfsg1-9) ...
+  #7 4.849 Selecting previously unselected package libldap2:amd64.
+  #7 4.851 Preparing to unpack .../16-libldap2_2.6.10+dfsg-1_amd64.deb ...
+  #7 4.851 Unpacking libldap2:amd64 (2.6.10+dfsg-1) ...
+  #7 4.886 Selecting previously unselected package libnghttp2-14:amd64.
+  #7 4.887 Preparing to unpack .../17-libnghttp2-14_1.64.0-1.1_amd64.deb ...
+  #7 4.888 Unpacking libnghttp2-14:amd64 (1.64.0-1.1) ...
+  #7 4.915 Selecting previously unselected package libnghttp3-9:amd64.
+  #7 4.916 Preparing to unpack .../18-libnghttp3-9_1.8.0-1_amd64.deb ...
+  #7 4.917 Unpacking libnghttp3-9:amd64 (1.8.0-1) ...
+  #7 4.946 Selecting previously unselected package libpsl5t64:amd64.
+  #7 4.947 Preparing to unpack .../19-libpsl5t64_0.21.2-1.1+b1_amd64.deb ...
+  #7 4.947 Unpacking libpsl5t64:amd64 (0.21.2-1.1+b1) ...
+  #7 4.973 Selecting previously unselected package libp11-kit0:amd64.
+  #7 4.974 Preparing to unpack .../20-libp11-kit0_0.25.5-3_amd64.deb ...
+  #7 4.975 Unpacking libp11-kit0:amd64 (0.25.5-3) ...
+  #7 5.016 Selecting previously unselected package libtasn1-6:amd64.
+  #7 5.016 Preparing to unpack .../21-libtasn1-6_4.20.0-2_amd64.deb ...
+  #7 5.017 Unpacking libtasn1-6:amd64 (4.20.0-2) ...
+  #7 5.042 Selecting previously unselected package libgnutls30t64:amd64.
+  #7 5.043 Preparing to unpack .../22-libgnutls30t64_3.8.9-3+deb13u2_amd64.deb ...
+  #7 5.044 Unpacking libgnutls30t64:amd64 (3.8.9-3+deb13u2) ...
+  #7 5.114 Selecting previously unselected package librtmp1:amd64.
+  #7 5.115 Preparing to unpack .../23-librtmp1_2.4+20151223.gitfa8646d.1-2+b5_amd64.deb ...
+  #7 5.116 Unpacking librtmp1:amd64 (2.4+20151223.gitfa8646d.1-2+b5) ...
+  #7 5.142 Selecting previously unselected package libssh2-1t64:amd64.
+  #7 5.144 Preparing to unpack .../24-libssh2-1t64_1.11.1-1_amd64.deb ...
+  #7 5.145 Unpacking libssh2-1t64:amd64 (1.11.1-1) ...
+  #7 5.180 Selecting previously unselected package libcurl4t64:amd64.
+  #7 5.181 Preparing to unpack .../25-libcurl4t64_8.14.1-2+deb13u2_amd64.deb ...
+  #7 5.182 Unpacking libcurl4t64:amd64 (8.14.1-2+deb13u2) ...
+  #7 5.222 Selecting previously unselected package curl.
+  #7 5.224 Preparing to unpack .../26-curl_8.14.1-2+deb13u2_amd64.deb ...
+  #7 5.224 Unpacking curl (8.14.1-2+deb13u2) ...
+  #7 5.261 Selecting previously unselected package libngtcp2-16:amd64.
+  #7 5.263 Preparing to unpack .../27-libngtcp2-16_1.11.0-1+deb13u1_amd64.deb ...
+  #7 5.264 Unpacking libngtcp2-16:amd64 (1.11.0-1+deb13u1) ...
+  #7 5.295 Selecting previously unselected package libngtcp2-crypto-gnutls8:amd64.
+  #7 5.297 Preparing to unpack .../28-libngtcp2-crypto-gnutls8_1.11.0-1+deb13u1_amd64.deb ...
+  #7 5.298 Unpacking libngtcp2-crypto-gnutls8:amd64 (1.11.0-1+deb13u1) ...
+  #7 5.322 Selecting previously unselected package libcurl3t64-gnutls:amd64.
+  #7 5.323 Preparing to unpack .../29-libcurl3t64-gnutls_8.14.1-2+deb13u2_amd64.deb ...
+  #7 5.324 Unpacking libcurl3t64-gnutls:amd64 (8.14.1-2+deb13u2) ...
+  #7 5.367 Selecting previously unselected package liberror-perl.
+  #7 5.368 Preparing to unpack .../30-liberror-perl_0.17030-1_all.deb ...
+  #7 5.369 Unpacking liberror-perl (0.17030-1) ...
+  #7 5.390 Selecting previously unselected package git-man.
+  #7 5.392 Preparing to unpack .../31-git-man_1%3a2.47.3-0+deb13u1_all.deb ...
+  #7 5.393 Unpacking git-man (1:2.47.3-0+deb13u1) ...
+  #7 5.457 Selecting previously unselected package git.
+  #7 5.459 Preparing to unpack .../32-git_1%3a2.47.3-0+deb13u1_amd64.deb ...
+  #7 5.469 Unpacking git (1:2.47.3-0+deb13u1) ...
+  #7 5.717 Selecting previously unselected package liblua5.4-0:amd64.
+  #7 5.719 Preparing to unpack .../33-liblua5.4-0_5.4.7-1+b2_amd64.deb ...
+  #7 5.719 Unpacking liblua5.4-0:amd64 (5.4.7-1+b2) ...
+  #7 5.757 Selecting previously unselected package libnuma1:amd64.
+  #7 5.758 Preparing to unpack .../34-libnuma1_2.0.19-1_amd64.deb ...
+  #7 5.759 Unpacking libnuma1:amd64 (2.0.19-1) ...
+  #7 5.782 Selecting previously unselected package libyaml-0-2:amd64.
+  #7 5.784 Preparing to unpack .../35-libyaml-0-2_0.2.5-2_amd64.deb ...
+  #7 5.784 Unpacking libyaml-0-2:amd64 (0.2.5-2) ...
+  #7 5.811 Selecting previously unselected package pandoc-data.
+  #7 5.812 Preparing to unpack .../36-pandoc-data_3.1.11.1-3_all.deb ...
+  #7 5.813 Unpacking pandoc-data (3.1.11.1-3) ...
+  #7 5.857 Selecting previously unselected package pandoc.
+  #7 5.857 Preparing to unpack .../37-pandoc_3.1.11.1+ds-2_amd64.deb ...
+  #7 5.858 Unpacking pandoc (3.1.11.1+ds-2) ...
+  #7 6.472 Setting up libexpat1:amd64 (2.7.1-2) ...
+  #7 6.474 Setting up libkeyutils1:amd64 (1.6.3-6) ...
+  #7 6.476 Setting up libgdbm-compat4t64:amd64 (1.24-2) ...
+  #7 6.478 Setting up libyaml-0-2:amd64 (0.2.5-2) ...
+  #7 6.480 Setting up libbrotli1:amd64 (1.1.0-2+b7) ...
+  #7 6.482 Setting up libnghttp2-14:amd64 (1.64.0-1.1) ...
+  #7 6.484 Setting up libcom-err2:amd64 (1.47.2-3+b10) ...
+  #7 6.486 Setting up libkrb5support0:amd64 (1.21.3-5) ...
+  #7 6.488 Setting up libsasl2-modules-db:amd64 (2.1.28+dfsg1-9) ...
+  #7 6.490 Setting up libp11-kit0:amd64 (0.25.5-3) ...
+  #7 6.491 Setting up libunistring5:amd64 (1.3-2) ...
+  #7 6.493 Setting up libk5crypto3:amd64 (1.21.3-5) ...
+  #7 6.494 Setting up libsasl2-2:amd64 (2.1.28+dfsg1-9) ...
+  #7 6.496 Setting up libnghttp3-9:amd64 (1.8.0-1) ...
+  #7 6.498 Setting up libnuma1:amd64 (2.0.19-1) ...
+  #7 6.500 Setting up perl-modules-5.40 (5.40.1-6) ...
+  #7 6.501 Setting up libtasn1-6:amd64 (4.20.0-2) ...
+  #7 6.503 Setting up liblua5.4-0:amd64 (5.4.7-1+b2) ...
+  #7 6.505 Setting up git-man (1:2.47.3-0+deb13u1) ...
+  #7 6.506 Setting up libngtcp2-16:amd64 (1.11.0-1+deb13u1) ...
+  #7 6.508 Setting up libkrb5-3:amd64 (1.21.3-5) ...
+  #7 6.510 Setting up libssh2-1t64:amd64 (1.11.1-1) ...
+  #7 6.512 Setting up pandoc-data (3.1.11.1-3) ...
+  #7 6.513 Setting up libldap2:amd64 (2.6.10+dfsg-1) ...
+  #7 6.515 Setting up libidn2-0:amd64 (2.3.8-2) ...
+  #7 6.517 Setting up libperl5.40:amd64 (5.40.1-6) ...
+  #7 6.519 Setting up perl (5.40.1-6) ...
+  #7 6.526 Setting up pandoc (3.1.11.1+ds-2) ...
+  #7 6.528 Setting up libgssapi-krb5-2:amd64 (1.21.3-5) ...
+  #7 6.531 Setting up libgnutls30t64:amd64 (3.8.9-3+deb13u2) ...
+  #7 6.533 Setting up libpsl5t64:amd64 (0.21.2-1.1+b1) ...
+  #7 6.535 Setting up liberror-perl (0.17030-1) ...
+  #7 6.537 Setting up librtmp1:amd64 (2.4+20151223.gitfa8646d.1-2+b5) ...
+  #7 6.539 Setting up libngtcp2-crypto-gnutls8:amd64 (1.11.0-1+deb13u1) ...
+  #7 6.540 Setting up libcurl4t64:amd64 (8.14.1-2+deb13u2) ...
+  #7 6.542 Setting up libcurl3t64-gnutls:amd64 (8.14.1-2+deb13u2) ...
+  #7 6.544 Setting up git (1:2.47.3-0+deb13u1) ...
+  #7 6.555 Setting up curl (8.14.1-2+deb13u2) ...
+  #7 6.557 Processing triggers for libc-bin (2.41-12+deb13u2) ...
+  #7 DONE 7.3s
+  #8 [4/7] RUN pip install --no-cache-dir uv
+  #8 1.967 Collecting uv
+  #8 2.021   Downloading uv-0.11.8-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (24.8 MB)
+  #8 2.209      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 24.8/24.8 MB 336.5 MB/s eta 0:00:00
+  #8 2.312 Installing collected packages: uv
+  #8 2.605 Successfully installed uv-0.11.8
+  #8 2.605 WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv
+  #8 2.688 
+  #8 2.688 [notice] A new release of pip is available: 23.0.1 -> 26.1
+  #8 2.688 [notice] To update, run: pip install --upgrade pip
+  #8 DONE 3.0s
+  #9 [5/7] COPY . /app/
+  #9 DONE 0.0s
+  #10 [6/7] RUN if [ -f /app/requirements-lock.txt ]; then         uv pip install --no-cache-dir -r /app/requirements-lock.txt;     else         uv pip install --no-cache-dir -r /app/requirements.txt;     fi
+  #10 0.335 error: No virtual environment found; run `uv venv` to create an environment, or pass `--system` to install into a non-virtual environment
+  #10 ERROR: process "/bin/sh -c if [ -f /app/requirements-lock.txt ]; then         uv pip install --no-cache-dir -r /app/requirements-lock.txt;     else         uv pip install --no-cache-dir -r /app/requirements.txt;     fi" did not complete successfully: exit code: 2
+  ------
+   > [6/7] RUN if [ -f /app/requirements-lock.txt ]; then         uv pip install --no-cache-dir -r /app/requirements-lock.txt;     else         uv pip install --no-cache-dir -r /app/requirements.txt;     fi:
+  0.335 error: No virtual environment found; run `uv venv` to create an environment, or pass `--system` to install into a non-virtual environment
+  ------
+  envgym.dockerfile:20
+  --------------------
+    19 |     # Install Python dependencies using uv and prefer requirements-lock.txt if present
+    20 | >>> RUN if [ -f /app/requirements-lock.txt ]; then \
+    21 | >>>         uv pip install --no-cache-dir -r /app/requirements-lock.txt; \
+    22 | >>>     else \
+    23 | >>>         uv pip install --no-cache-dir -r /app/requirements.txt; \
+    24 | >>>     fi
+    25 |     
+  --------------------
+  ERROR: failed to solve: process "/bin/sh -c if [ -f /app/requirements-lock.txt ]; then         uv pip install --no-cache-dir -r /app/requirements-lock.txt;     else         uv pip install --no-cache-dir -r /app/requirements.txt;     fi" did not complete successfully: exit code: 2
+  === Runtime Log ===  
+  Runtime Status: Failed
+  Runtime Output:
+  Runtime Error:
+  === Execution End ===
+DOCKERFILE:
+  FROM python:3.10-slim
+  # Set working directory to repository root
+  WORKDIR /app
+  # Install system dependencies
+  RUN apt-get update && apt-get install -y --no-install-recommends \
+      git \
+      curl \
+      pandoc \
+      && rm -rf /var/lib/apt/lists/*
+  # Install UV (Universal Virtual environment manager)
+  RUN pip install --no-cache-dir uv
+  # Copy application source code and config files
+  COPY . /app/
+  # Install Python dependencies using uv and prefer requirements-lock.txt if present
+  RUN if [ -f /app/requirements-lock.txt ]; then \
+          uv pip install --no-cache-dir -r /app/requirements-lock.txt; \
+      else \
+          uv pip install --no-cache-dir -r /app/requirements.txt; \
+      fi
+  # Create models and outputs directories if not existing
+  RUN mkdir -p /app/models /app/data/output /app/data/mmrag-output
+  # Set PYTHONPATH environment variable to include /app source code
+  ENV PYTHONPATH=/app
+  # Set environment variable to disable GPU usage
+  ENV CUDA_VISIBLE_DEVICES=""
+  # Expose port 8000 for API server
+  EXPOSE 8000
+  # Default shell
+  CMD ["/bin/bash"]
+--- End of Iteration 2 ---
+
+=== Iteration 3 - [2026-05-01 10:49:36] ===
+PLAN:
+  === ADJUSTED ENVIRONMENT SETUP PLAN (GPU-LESS AMD64 LINUX) ===
+  **Context:**  
+  - Host architecture: x86_64 (AMD64) Linux-compatible base images only  
+  - No NVIDIA GPU detected → **No CUDA, no NVIDIA drivers, no GPU runtime needed**  
+  - Docker version 28.1.1 supports BuildKit/buildx, no GPU build support (`--gpus` flag not applicable)  
+  - Use standard Linux instructions with overlay2 storage driver compatibility  
+  - Working directory is local Linux path; no special volume mount adjustments needed  
+  - Paths inside container remain Linux-style  
+  - Adjust software and container setup to CPU-only environment  
+  ---
+  ### 1. DOWNLOADS NEEDED (UPDATED):
+  - **Docker** (latest stable version, already installed 28.1.1)  
+    - **Do NOT install NVIDIA Container Toolkit or CUDA drivers/toolkit** since no GPU is present  
+    - Docker Compose v2 or compatible (already supported)  
+  - **Python 3.8+** (Recommended 3.10)  
+  - **Git** (latest stable)  
+  - **UV** (Universal Virtual environment manager)  
+  - **Pandoc** (latest stable) for document conversion  
+  - **curl** available inside container for healthcheck (verify or install as needed)  
+  - **No NVIDIA GPU drivers or CUDA Toolkit installation required**  
+  - Python libraries as listed remain the same (core API, image/PDF processing, utilities, Hugging Face, vLLM, optional VLM dependencies)  
+  **Dependencies notes:**  
+  - The optional VLM dependencies (`torch`, `torchvision`, `timm`) must be installed with CPU-only variants (no `+cu121` CUDA tags). Use CPU wheels from PyPI or specify CPU versions explicitly to avoid CUDA dependencies.  
+  - For example, install `torch==2.5.1+cpu` or just `torch==2.5.1` if CPU-only wheel is default; **do NOT install CUDA-specific torch wheels**.  
+  - Update `requirements.txt` or Dockerfile installs accordingly to CPU-compatible versions of these packages.  
+  ---
+  ### 2. FILES TO CREATE (UPDATED):
+  - **`docker-compose.yml`**:  
+    - Remove `runtime: nvidia` (no GPU runtime)  
+    - Remove `deploy.resources.reservations.devices` section that requests NVIDIA GPUs  
+    - Keep service name `deepseek-ocr`, container named `deepseek-ocr-vllm`  
+    - Keep volumes mounts (`./models` → `/app/models`, `./outputs` → `/app/outputs`)  
+    - Environment variables inside container remain:  
+      - `CUDA_VISIBLE_DEVICES=""` or unset (empty string to disable GPU usage)  
+      - `MODEL_PATH=/app/models/deepseek-ai/DeepSeek-OCR`  
+      - `MAX_CONCURRENCY=5`  
+      - `GPU_MEMORY_UTILIZATION=0.85` (can keep, but note no GPU memory usage on CPU-only)  
+    - Restart policy: `unless-stopped`  
+    - Healthcheck unchanged (curl to `http://localhost:8000/health`)  
+    - Remove any GPU-specific deploy or resource reservation keys to avoid Docker warnings/errors  
+  - **`Dockerfile`**:  
+    - Use CPU-friendly base image, e.g. `python:3.10-slim` or similar lightweight Debian/Ubuntu-based image compatible with x86_64  
+      - **Do NOT use `vllm/vllm-openai:v0.8.5` base image if it assumes GPU/CUDA support**; instead, use a base image that does not require GPU or CUDA  
+    - Copy DeepSeek-OCR source code from `DeepSeek-OCR-master/DeepSeek-OCR-master/DeepSeek-OCR-vllm/` as before (ensure path correctness)  
+    - Install all Python dependencies from `requirements-lock.txt` with the following changes:  
+      - For optional VLM dependencies, install CPU-only torch and torchvision versions (without CUDA extensions)  
+      - Avoid installing CUDA Toolkit or NVIDIA drivers inside container  
+    - Set `PYTHONPATH` environment variable as before  
+    - Expose port 8000  
+    - Set entrypoint as before (`python3 start_server.py`)  
+    - Create `/app/models` and `/app/outputs` directories inside container  
+  - **`.dockerignore`** and **`.gitignore`** files remain unchanged as specified, placed at root of repository  
+  - **`.env`** file (optional):  
+    - Set `CUDA_VISIBLE_DEVICES=""` or omit entirely to reflect no GPU available  
+    - Other environment variables remain the same  
+  - **`requirements.txt`** (updated):  
+    - Pin all packages as per `requirements-lock.txt`  
+    - For optional VLM dependencies: specify CPU-only versions of `torch` and `torchvision` (e.g., `torch==2.5.1`, `torchvision==0.20.1`, no `+cu121`)  
+    - Include comments or instructions to install CPU variants when no GPU is available  
+  - Configuration shell scripts (`setup_env.sh`, `setup_env.bat`) updated accordingly:  
+    - Set `CUDA_VISIBLE_DEVICES=""` explicitly or unset  
+    - Export other environment variables unchanged  
+    - Ensure `PYTHONPATH` reflects correct local source path  
+  - Model weights directory structure unchanged  
+  - Source code path correctness check remains necessary  
+  ---
+  ### 3. NECESSARY TEST CASES IN THE CODEBASE (UNCHANGED):
+  - All tests remain valid  
+  - Add emphasis on testing **CPU-only fallback and performance** since no GPU present  
+  - Verify that optional VLM enrichment runs correctly using CPU-only torch if enabled  
+  - Confirm healthcheck and service startup without GPU or CUDA errors  
+  ---
+  ### 4. COMPLETE TODO LIST (UPDATED):
+  1. **Install Required Software:**  
+     - Docker (already installed 28.1.1) and Docker Compose v2 (already supported)  
+     - **Do NOT install NVIDIA Container Toolkit, CUDA drivers, or CUDA Toolkit**  
+     - Python 3.10+ and Git  
+     - Pandoc  
+     - UV environment manager  
+     - Confirm `curl` is present in container base image or plan to install manually in Dockerfile  
+  2. **Clone Repository:**  
+     - As before, clone `SciDOCX` repo  
+     - Clone or add `DeepSeek-OCR` repo separately or as submodule at `DeepSeek-OCR/`  
+  3. **Add `.dockerignore` and `.gitignore`:**  
+     - As specified, no changes  
+  4. **Prepare Python Dependencies:**  
+     - Adjust `requirements.txt` to pin CPU-only versions of torch and torchvision for optional VLM dependencies  
+     - For example:  
+       ```
+       # Optional VLM dependencies (CPU-only)
+       torch==2.5.1
+       torchvision==0.20.1
+       timm==1.0.21
+       ```  
+     - Install all dependencies with `uv pip install -r requirements.txt` locally and inside Docker build  
+  5. **Download Model Weights:**  
+     - No changes  
+  6. **Set Environment Variables:**  
+     - Set `CUDA_VISIBLE_DEVICES=""` explicitly to disable GPU usage  
+     - Others unchanged  
+  7. **Build and Launch Setup:**  
+     - **Docker Build and Run:**  
+       - Use updated `Dockerfile` with CPU-friendly base image (e.g., `python:3.10-slim`)  
+       - Remove GPU runtime and device reservation from `docker-compose.yml`  
+       - Build and run container as usual:  
+         ```bash
+         docker compose build
+         docker compose up -d
+         ```  
+       - Verify container runs without GPU errors  
+       - Verify healthcheck endpoint reachable at `http://localhost:8000/health`  
+       - Confirm environment variables inside container (check `CUDA_VISIBLE_DEVICES=""`)  
+       - Confirm exposed port 8000 matches API server port  
+       - Confirm `.dockerignore` exclusions work (check build context size)  
+     - **Local Python Environment:**  
+       - `uv pip install -r requirements.txt` with CPU-only dependencies  
+       - Clone DeepSeek-OCR repo if needed  
+       - Run API server locally (default port 8001)  
+       - Verify server starts without errors and healthcheck endpoint reachable  
+  8. **Verify Model Loading and Inference:**  
+     - Run sample PDF processing as before  
+  9. **Run Batch Processing:**  
+     - No changes  
+  10. **Test GPU Fallback:**  
+      - Now default operation is CPU-only; verify no GPU-related errors occur  
+      - Confirm that running with `CUDA_VISIBLE_DEVICES=""` or unset works gracefully  
+  11. **Error Handling Validation:**  
+      - No changes  
+  12. **Test New Environment Variables:**  
+      - `MAX_CONCURRENCY` and `GPU_MEMORY_UTILIZATION` still effective for concurrency and resource control (note GPU memory utilization is irrelevant on CPU but can be kept for code compatibility)  
+  13. **Test Optional VLM Features:**  
+      - Ensure optional VLM dependencies installed as CPU-only versions  
+      - Run enrichment pipeline and verify correctness  
+  14. **Dependency Compatibility & Performance Validation:**  
+      - Confirm no conflicts with CPU-only torch and torchvision versions  
+      - Monitor performance and resource usage on CPU  
+  15. **Documentation & Scripts:**  
+      - Update documentation to reflect no GPU usage and CPU-only setup  
+      - Provide notes on installing CPU-only torch wheels  
+      - Update `setup_env.sh` and `.env` to reflect `CUDA_VISIBLE_DEVICES=""`  
+  16. **Optional: Evaluation Framework Setup:**  
+      - No changes  
+  17. **Final Verification:**  
+      - Confirm Dockerfile uses CPU-only base image and no GPU runtime  
+      - Confirm Docker Compose YAML has no GPU device reservations or runtime settings  
+      - Confirm environment variables set properly (`CUDA_VISIBLE_DEVICES=""`)  
+      - Confirm all pipelines run without GPU or CUDA dependencies  
+      - Confirm API port consistency (container port 8000, local server port 8001)  
+      - Confirm container healthcheck passes  
+      - Confirm `.dockerignore` and `.gitignore` exclude files as expected  
+      - Confirm upstream DeepSeek-OCR code cloned separately and not committed inside repo  
+  ---
+  ### SUMMARY OF KEY ADJUSTMENTS:
+  | Aspect                  | Original Plan                             | Adjusted Plan (No GPU)                           |
+  |-------------------------|------------------------------------------|-------------------------------------------------|
+  | Base Docker Image       | `vllm/vllm-openai:v0.8.5` (CUDA-enabled) | Use official CPU-only base image (e.g., `python:3.10-slim`) |
+  | Docker Compose `runtime`| `nvidia` (GPU runtime)                    | Remove runtime setting (default runtime)         |
+  | Docker Compose `deploy.resources` | Reserve NVIDIA GPUs                | Remove GPU device reservation                    |
+  | CUDA Drivers/Toolkit    | Install CUDA 12.1 and NVIDIA drivers      | **Do not install CUDA or NVIDIA drivers**         |
+  | CUDA_VISIBLE_DEVICES    | `0` (GPU device 0)                        | Set to empty string `""` or unset to disable GPU |
+  | Optional VLM deps       | CUDA-enabled torch/torchvision wheels (`+cu121`) | Use CPU-only torch/torchvision wheels             |
+  | Environment variables   | Include GPU-specific vars                  | Set `CUDA_VISIBLE_DEVICES=""`, others unchanged  |
+  | Healthcheck & Ports     | Port 8000 exposed, healthcheck on localhost:8000 | No change                                        |
+  | `requirements.txt`      | CUDA-enabled packages in optional deps    | CPU-only variants for torch/torchvision           |
+  | Build context & ignores | No change                                 | No change                                         |
+  | Scripts and docs        | GPU instructions included                  | Remove GPU instructions, add CPU-specific notes   |
+  ---
+  This adjusted plan ensures full compatibility with your hardware environment (no NVIDIA GPU, AMD64 Linux), avoids unnecessary CUDA and GPU dependencies, and maintains all functional features of DeepSeek-OCR and vLLM pipelines on CPU-only infrastructure.
+NEXT:
+  current progress  
+  - Base image updated to `python:3.10-slim` suitable for CPU-only environment.  
+  - System dependencies (git, curl, pandoc) and UV installed.  
+  - Source code and config files copied into `/app`.  
+  - Python version and pip verified.  
+  - Python dependencies installation attempts with `requirements-lock.txt` or `requirements.txt`.  
+  - Environment variable `CUDA_VISIBLE_DEVICES=""` set to disable GPU.  
+  - Necessary directories created.  
+  - Port 8000 exposed.  
+  - Default command set to bash for manual interaction.  
+  - Build failed due to attempt to install GPU-specific torch wheel `torch==2.5.1+cu121` which is incompatible with Python 3.10 and CPU-only setup.  
+  next step  
+  - Update `requirements-lock.txt` and/or `requirements.txt` to specify CPU-only versions of torch and torchvision without CUDA tags (e.g., `torch==2.5.1`, `torchvision==0.20.1`).  
+  - Remove any CUDA-specific package versions from dependency files.  
+  - Rebuild Docker image after dependency files are corrected.  
+  - Optionally change CMD to start the API server (`python3 start_server.py`) instead of bash for container runtime.  
+  - Verify that the container builds successfully and runs without GPU or CUDA-related errors.
+LOG:
+  === Docker Execution Log - 20260501_104932 ===
+  Dockerfile: envgym/envgym.dockerfile
+  Image Name: envgym_test_1777632560
+  === Build Log ===
+  Build Status: Failed
+  Build Output:
+  Build Error:
+  #0 building with "default" instance using docker driver
+  #1 [internal] load build definition from envgym.dockerfile
+  #1 transferring dockerfile: 1.25kB done
+  #1 DONE 0.0s
+  #2 [internal] load metadata for docker.io/library/python:3.10-slim
+  #2 DONE 0.1s
+  #3 [internal] load .dockerignore
+  #3 transferring context: 174B done
+  #3 DONE 0.0s
+  #4 [1/8] FROM docker.io/library/python:3.10-slim@sha256:cdbf8193cee2e31639ea8ea85ffdd8fa5cce98ee9abfde96ea5f329490048831
+  #4 DONE 0.0s
+  #5 [internal] load build context
+  #5 transferring context: 100.87kB done
+  #5 DONE 0.0s
+  #6 [2/8] WORKDIR /app
+  #6 CACHED
+  #7 [3/8] RUN apt-get update && apt-get install -y --no-install-recommends     git     curl     pandoc     && rm -rf /var/lib/apt/lists/*
+  #7 CACHED
+  #8 [4/8] RUN pip install --no-cache-dir uv
+  #8 CACHED
+  #9 [5/8] COPY . /app/
+  #9 DONE 0.0s
+  #10 [6/8] RUN ls -l /app/requirements*.txt && python --version && pip --version && uv --version
+  #10 0.214 -rw-rw-r-- 1 root root 1127 May  1 10:42 /app/requirements-lock.txt
+  #10 0.214 -rw-rw-r-- 1 root root  611 May  1 10:42 /app/requirements.txt
+  #10 0.216 Python 3.10.20
+  #10 0.419 pip 23.0.1 from /usr/local/lib/python3.10/site-packages/pip (python 3.10)
+  #10 0.458 uv 0.11.8 (x86_64-unknown-linux-gnu)
+  #10 DONE 0.5s
+  #11 [7/8] RUN if [ -f /app/requirements-lock.txt ]; then         pip install --no-cache-dir -r /app/requirements-lock.txt;     else         pip install --no-cache-dir -r /app/requirements.txt;     fi
+  #11 0.678 Collecting accelerate==1.11.0
+  #11 0.732   Downloading accelerate-1.11.0-py3-none-any.whl (375 kB)
+  #11 0.760      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 375.8/375.8 kB 16.0 MB/s eta 0:00:00
+  #11 0.784 Collecting addict==2.4.0
+  #11 0.788   Downloading addict-2.4.0-py3-none-any.whl (3.8 kB)
+  #11 0.801 Collecting annotated-doc==0.0.3
+  #11 0.806   Downloading annotated_doc-0.0.3-py3-none-any.whl (5.5 kB)
+  #11 0.821 Collecting annotated-types==0.7.0
+  #11 0.826   Downloading annotated_types-0.7.0-py3-none-any.whl (13 kB)
+  #11 0.861 Collecting anyio==4.11.0
+  #11 0.866   Downloading anyio-4.11.0-py3-none-any.whl (109 kB)
+  #11 0.870      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 109.1/109.1 kB 32.9 MB/s eta 0:00:00
+  #11 0.903 Collecting certifi==2025.10.5
+  #11 0.908   Downloading certifi-2025.10.5-py3-none-any.whl (163 kB)
+  #11 0.914      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 163.3/163.3 kB 36.6 MB/s eta 0:00:00
+  #11 1.155 Collecting cffi==2.0.0
+  #11 1.160   Downloading cffi-2.0.0-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (216 kB)
+  #11 1.168      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 216.5/216.5 kB 35.0 MB/s eta 0:00:00
+  #11 1.396 Collecting charset-normalizer==3.4.4
+  #11 1.403   Downloading charset_normalizer-3.4.4-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (153 kB)
+  #11 1.408      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 153.6/153.6 kB 43.0 MB/s eta 0:00:00
+  #11 1.442 Collecting click==8.3.0
+  #11 1.446   Downloading click-8.3.0-py3-none-any.whl (107 kB)
+  #11 1.449      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 107.3/107.3 kB 107.8 MB/s eta 0:00:00
+  #11 1.475 Collecting colorama==0.4.6
+  #11 1.480   Downloading colorama-0.4.6-py2.py3-none-any.whl (25 kB)
+  #11 1.931 Collecting cryptography==46.0.3
+  #11 1.939   Downloading cryptography-46.0.3-cp38-abi3-manylinux_2_34_x86_64.whl (4.5 MB)
+  #11 2.005      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4.5/4.5 MB 69.5 MB/s eta 0:00:00
+  #11 2.044 Collecting deprecated==1.3.1
+  #11 2.049   Downloading deprecated-1.3.1-py2.py3-none-any.whl (11 kB)
+  #11 2.062 Collecting easydict==1.13
+  #11 2.067   Downloading easydict-1.13-py3-none-any.whl (6.8 kB)
+  #11 2.093 Collecting ecdsa==0.19.1
+  #11 2.099   Downloading ecdsa-0.19.1-py2.py3-none-any.whl (150 kB)
+  #11 2.101      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 150.6/150.6 kB 345.1 MB/s eta 0:00:00
+  #11 2.121 Collecting einops==0.8.1
+  #11 2.126   Downloading einops-0.8.1-py3-none-any.whl (64 kB)
+  #11 2.128      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 64.4/64.4 kB 343.7 MB/s eta 0:00:00
+  #11 2.150 Collecting exceptiongroup==1.3.0
+  #11 2.155   Downloading exceptiongroup-1.3.0-py3-none-any.whl (16 kB)
+  #11 2.258 Collecting fastapi==0.120.2
+  #11 2.264   Downloading fastapi-0.120.2-py3-none-any.whl (108 kB)
+  #11 2.266      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 108.4/108.4 kB 364.5 MB/s eta 0:00:00
+  #11 2.305 Collecting filelock==3.19.1
+  #11 2.310   Downloading filelock-3.19.1-py3-none-any.whl (15 kB)
+  #11 2.351 Collecting fsspec==2025.9.0
+  #11 2.355   Downloading fsspec-2025.9.0-py3-none-any.whl (199 kB)
+  #11 2.358      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 199.3/199.3 kB 394.0 MB/s eta 0:00:00
+  #11 2.375 Collecting h11==0.16.0
+  #11 2.380   Downloading h11-0.16.0-py3-none-any.whl (37 kB)
+  #11 2.443 Collecting httptools==0.7.1
+  #11 2.449   Downloading httptools-0.7.1-cp310-cp310-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (440 kB)
+  #11 2.455      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 440.9/440.9 kB 125.1 MB/s eta 0:00:00
+  #11 2.555 Collecting huggingface-hub==0.36.0
+  #11 2.559   Downloading huggingface_hub-0.36.0-py3-none-any.whl (566 kB)
+  #11 2.565      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 566.1/566.1 kB 142.7 MB/s eta 0:00:00
+  #11 2.589 Collecting idna==3.11
+  #11 2.594   Downloading idna-3.11-py3-none-any.whl (71 kB)
+  #11 2.595      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 71.0/71.0 kB 354.8 MB/s eta 0:00:00
+  #11 2.611 Collecting img2pdf==0.6.1
+  #11 2.618   Downloading img2pdf-0.6.1.tar.gz (106 kB)
+  #11 2.620      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 106.5/106.5 kB 363.8 MB/s eta 0:00:00
+  #11 2.631   Preparing metadata (setup.py): started
+  #11 2.900   Preparing metadata (setup.py): finished with status 'done'
+  #11 2.932 Collecting jinja2==3.1.6
+  #11 2.937   Downloading jinja2-3.1.6-py3-none-any.whl (134 kB)
+  #11 2.939      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 134.9/134.9 kB 395.7 MB/s eta 0:00:00
+  #11 3.433 Collecting lxml==6.0.2
+  #11 3.439   Downloading lxml-6.0.2-cp310-cp310-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl (5.3 MB)
+  #11 3.471      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 5.3/5.3 MB 173.7 MB/s eta 0:00:00
+  #11 3.599 Collecting markupsafe==2.1.5
+  #11 3.603   Downloading MarkupSafe-2.1.5-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (25 kB)
+  #11 3.626 Collecting mpmath==1.3.0
+  #11 3.630   Downloading mpmath-1.3.0-py3-none-any.whl (536 kB)
+  #11 3.634      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 536.2/536.2 kB 395.8 MB/s eta 0:00:00
+  #11 3.670 Collecting networkx==3.3
+  #11 3.675   Downloading networkx-3.3-py3-none-any.whl (1.7 MB)
+  #11 3.684      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.7/1.7 MB 239.0 MB/s eta 0:00:00
+  #11 4.153 Collecting numpy==2.1.2
+  #11 4.161   Downloading numpy-2.1.2-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (16.3 MB)
+  #11 4.218      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 16.3/16.3 MB 290.0 MB/s eta 0:00:00
+  #11 4.291 Collecting packaging==25.0
+  #11 4.296   Downloading packaging-25.0-py3-none-any.whl (66 kB)
+  #11 4.298      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 66.5/66.5 kB 340.2 MB/s eta 0:00:00
+  #11 5.102 Collecting pikepdf==10.0.0
+  #11 5.109   Downloading pikepdf-10.0.0-cp310-cp310-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (2.6 MB)
+  #11 5.145      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.6/2.6 MB 80.0 MB/s eta 0:00:00
+  #11 5.539 Collecting pillow==11.3.0
+  #11 5.544   Downloading pillow-11.3.0-cp310-cp310-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (6.6 MB)
+  #11 5.567      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 6.6/6.6 MB 310.4 MB/s eta 0:00:00
+  #11 5.732 Collecting psutil==7.1.2
+  #11 5.737   Downloading psutil-7.1.2-cp36-abi3-manylinux2010_x86_64.manylinux_2_12_x86_64.manylinux_2_28_x86_64.whl (258 kB)
+  #11 5.739      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 258.7/258.7 kB 406.1 MB/s eta 0:00:00
+  #11 5.771 Collecting pyasn1==0.6.1
+  #11 5.775   Downloading pyasn1-0.6.1-py3-none-any.whl (83 kB)
+  #11 5.777      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 83.1/83.1 kB 356.7 MB/s eta 0:00:00
+  #11 5.792 Collecting pycparser==2.23
+  #11 5.797   Downloading pycparser-2.23-py3-none-any.whl (118 kB)
+  #11 5.799      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 118.1/118.1 kB 359.7 MB/s eta 0:00:00
+  #11 6.110 Collecting pydantic==2.12.3
+  #11 6.115   Downloading pydantic-2.12.3-py3-none-any.whl (462 kB)
+  #11 6.118      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 462.4/462.4 kB 400.8 MB/s eta 0:00:00
+  #11 7.829 Collecting pydantic-core==2.41.4
+  #11 7.835   Downloading pydantic_core-2.41.4-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (2.1 MB)
+  #11 7.842      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.1/2.1 MB 415.0 MB/s eta 0:00:00
+  #11 8.207 Collecting pymupdf==1.26.5
+  #11 8.213   Downloading pymupdf-1.26.5-cp39-abi3-manylinux_2_28_x86_64.whl (24.1 MB)
+  #11 8.295      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 24.1/24.1 MB 318.3 MB/s eta 0:00:00
+  #11 8.380 Collecting pypandoc==1.15
+  #11 8.384   Downloading pypandoc-1.15-py3-none-any.whl (21 kB)
+  #11 8.409 Collecting python-dotenv==1.2.1
+  #11 8.414   Downloading python_dotenv-1.2.1-py3-none-any.whl (21 kB)
+  #11 8.433 Collecting python-jose==3.5.0
+  #11 8.438   Downloading python_jose-3.5.0-py2.py3-none-any.whl (34 kB)
+  #11 8.459 Collecting python-multipart==0.0.20
+  #11 8.464   Downloading python_multipart-0.0.20-py3-none-any.whl (24 kB)
+  #11 8.544 Collecting pyyaml==6.0.3
+  #11 8.549   Downloading pyyaml-6.0.3-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (770 kB)
+  #11 8.553      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 770.3/770.3 kB 439.3 MB/s eta 0:00:00
+  #11 9.510 Collecting regex==2025.10.23
+  #11 9.516   Downloading regex-2025.10.23-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (791 kB)
+  #11 9.520      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 791.5/791.5 kB 406.5 MB/s eta 0:00:00
+  #11 9.564 Collecting requests==2.32.5
+  #11 9.569   Downloading requests-2.32.5-py3-none-any.whl (64 kB)
+  #11 9.571      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 64.7/64.7 kB 341.9 MB/s eta 0:00:00
+  #11 9.592 Collecting rsa==4.9.1
+  #11 9.597   Downloading rsa-4.9.1-py3-none-any.whl (34 kB)
+  #11 9.870 Collecting safetensors==0.6.2
+  #11 9.876   Downloading safetensors-0.6.2-cp38-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (485 kB)
+  #11 9.879      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 485.8/485.8 kB 395.4 MB/s eta 0:00:00
+  #11 9.987 Collecting sentencepiece==0.2.1
+  #11 9.994   Downloading sentencepiece-0.2.1-cp310-cp310-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (1.4 MB)
+  #11 10.00      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.4/1.4 MB 357.1 MB/s eta 0:00:00
+  #11 10.02 Collecting six==1.17.0
+  #11 10.03   Downloading six-1.17.0-py2.py3-none-any.whl (11 kB)
+  #11 10.04 Collecting sniffio==1.3.1
+  #11 10.05   Downloading sniffio-1.3.1-py3-none-any.whl (10 kB)
+  #11 10.10 Collecting starlette==0.49.1
+  #11 10.10   Downloading starlette-0.49.1-py3-none-any.whl (74 kB)
+  #11 10.10      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 74.2/74.2 kB 354.5 MB/s eta 0:00:00
+  #11 10.13 Collecting sympy==1.13.1
+  #11 10.14   Downloading sympy-1.13.1-py3-none-any.whl (6.2 MB)
+  #11 10.16      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 6.2/6.2 MB 386.3 MB/s eta 0:00:00
+  #11 10.22 Collecting timm==1.0.21
+  #11 10.22   Downloading timm-1.0.21-py3-none-any.whl (2.5 MB)
+  #11 10.24      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.5/2.5 MB 162.2 MB/s eta 0:00:00
+  #11 10.59 Collecting tokenizers==0.22.1
+  #11 10.60   Downloading tokenizers-0.22.1-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (3.3 MB)
+  #11 10.61      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 3.3/3.3 MB 407.3 MB/s eta 0:00:00
+  #11 10.74 ERROR: Ignored the following versions that require a different python version: 1.19.4 Requires-Python >=3.5, <3.9; 2.3.0 Requires-Python >=3.11; 2.3.1 Requires-Python >=3.11; 2.3.2 Requires-Python >=3.11; 2.3.3 Requires-Python >=3.11; 2.3.4 Requires-Python >=3.11; 2.3.5 Requires-Python >=3.11; 2.4.0 Requires-Python >=3.11; 2.4.0rc1 Requires-Python >=3.11; 2.4.1 Requires-Python >=3.11; 2.4.2 Requires-Python >=3.11; 2.4.3 Requires-Python >=3.11; 2.4.4 Requires-Python >=3.11; 3.5 Requires-Python >=3.11; 3.5rc0 Requires-Python >=3.11; 3.6 Requires-Python >=3.11; 3.6.1 Requires-Python !=3.14.1,>=3.11; 3.6rc0 Requires-Python >=3.11
+  #11 10.74 ERROR: Could not find a version that satisfies the requirement torch==2.5.1+cu121 (from versions: 1.11.0, 1.12.0, 1.12.1, 1.13.0, 1.13.1, 2.0.0, 2.0.1, 2.1.0, 2.1.1, 2.1.2, 2.2.0, 2.2.1, 2.2.2, 2.3.0, 2.3.1, 2.4.0, 2.4.1, 2.5.0, 2.5.1, 2.6.0, 2.7.0, 2.7.1, 2.8.0, 2.9.0, 2.9.1, 2.10.0, 2.11.0)
+  #11 10.74 ERROR: No matching distribution found for torch==2.5.1+cu121
+  #11 10.82 
+  #11 10.82 [notice] A new release of pip is available: 23.0.1 -> 26.1
+  #11 10.82 [notice] To update, run: pip install --upgrade pip
+  #11 ERROR: process "/bin/sh -c if [ -f /app/requirements-lock.txt ]; then         pip install --no-cache-dir -r /app/requirements-lock.txt;     else         pip install --no-cache-dir -r /app/requirements.txt;     fi" did not complete successfully: exit code: 1
+  ------
+   > [7/8] RUN if [ -f /app/requirements-lock.txt ]; then         pip install --no-cache-dir -r /app/requirements-lock.txt;     else         pip install --no-cache-dir -r /app/requirements.txt;     fi:
+  10.24      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.5/2.5 MB 162.2 MB/s eta 0:00:00
+  10.59 Collecting tokenizers==0.22.1
+  10.60   Downloading tokenizers-0.22.1-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (3.3 MB)
+  10.61      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 3.3/3.3 MB 407.3 MB/s eta 0:00:00
+  10.74 ERROR: Ignored the following versions that require a different python version: 1.19.4 Requires-Python >=3.5, <3.9; 2.3.0 Requires-Python >=3.11; 2.3.1 Requires-Python >=3.11; 2.3.2 Requires-Python >=3.11; 2.3.3 Requires-Python >=3.11; 2.3.4 Requires-Python >=3.11; 2.3.5 Requires-Python >=3.11; 2.4.0 Requires-Python >=3.11; 2.4.0rc1 Requires-Python >=3.11; 2.4.1 Requires-Python >=3.11; 2.4.2 Requires-Python >=3.11; 2.4.3 Requires-Python >=3.11; 2.4.4 Requires-Python >=3.11; 3.5 Requires-Python >=3.11; 3.5rc0 Requires-Python >=3.11; 3.6 Requires-Python >=3.11; 3.6.1 Requires-Python !=3.14.1,>=3.11; 3.6rc0 Requires-Python >=3.11
+  10.74 ERROR: Could not find a version that satisfies the requirement torch==2.5.1+cu121 (from versions: 1.11.0, 1.12.0, 1.12.1, 1.13.0, 1.13.1, 2.0.0, 2.0.1, 2.1.0, 2.1.1, 2.1.2, 2.2.0, 2.2.1, 2.2.2, 2.3.0, 2.3.1, 2.4.0, 2.4.1, 2.5.0, 2.5.1, 2.6.0, 2.7.0, 2.7.1, 2.8.0, 2.9.0, 2.9.1, 2.10.0, 2.11.0)
+  10.74 ERROR: No matching distribution found for torch==2.5.1+cu121
+  10.82 
+  10.82 [notice] A new release of pip is available: 23.0.1 -> 26.1
+  10.82 [notice] To update, run: pip install --upgrade pip
+  ------
+  envgym.dockerfile:23
+  --------------------
+    22 |     # Install Python dependencies using pip directly (bypassing uv) and prefer requirements-lock.txt if present
+    23 | >>> RUN if [ -f /app/requirements-lock.txt ]; then \
+    24 | >>>         pip install --no-cache-dir -r /app/requirements-lock.txt; \
+    25 | >>>     else \
+    26 | >>>         pip install --no-cache-dir -r /app/requirements.txt; \
+    27 | >>>     fi
+    28 |     
+  --------------------
+  ERROR: failed to solve: process "/bin/sh -c if [ -f /app/requirements-lock.txt ]; then         pip install --no-cache-dir -r /app/requirements-lock.txt;     else         pip install --no-cache-dir -r /app/requirements.txt;     fi" did not complete successfully: exit code: 1
+  === Runtime Log ===  
+  Runtime Status: Failed
+  Runtime Output:
+  Runtime Error:
+  === Execution End ===
+DOCKERFILE:
+  FROM python:3.10-slim
+  # Set working directory to repository root
+  WORKDIR /app
+  # Install system dependencies
+  RUN apt-get update && apt-get install -y --no-install-recommends \
+      git \
+      curl \
+      pandoc \
+      && rm -rf /var/lib/apt/lists/*
+  # Install UV (Universal Virtual environment manager)
+  RUN pip install --no-cache-dir uv
+  # Copy application source code and config files
+  COPY . /app/
+  # Debug info to verify files and versions
+  RUN ls -l /app/requirements*.txt && python --version && pip --version && uv --version
+  # Install Python dependencies using pip directly (bypassing uv) and prefer requirements-lock.txt if present
+  RUN if [ -f /app/requirements-lock.txt ]; then \
+          pip install --no-cache-dir -r /app/requirements-lock.txt; \
+      else \
+          pip install --no-cache-dir -r /app/requirements.txt; \
+      fi
+  # Create models and outputs directories if not existing
+  RUN mkdir -p /app/models /app/data/output /app/data/mmrag-output
+  # Set PYTHONPATH environment variable to include /app source code
+  ENV PYTHONPATH=/app
+  # Set environment variable to disable GPU usage
+  ENV CUDA_VISIBLE_DEVICES=""
+  # Expose port 8000 for API server
+  EXPOSE 8000
+  # Default shell
+  CMD ["/bin/bash"]
+--- End of Iteration 3 ---
+
+=== Iteration 4 - [2026-05-01 10:51:42] ===
+PLAN:
+  === ADJUSTED ENVIRONMENT SETUP PLAN (GPU-LESS AMD64 LINUX) ===
+  **Context:**  
+  - Host architecture: x86_64 (AMD64) Linux-compatible base images only  
+  - No NVIDIA GPU detected → **No CUDA, no NVIDIA drivers, no GPU runtime needed**  
+  - Docker version 28.1.1 supports BuildKit/buildx, no GPU build support (`--gpus` flag not applicable)  
+  - Use standard Linux instructions with overlay2 storage driver compatibility  
+  - Working directory is local Linux path; no special volume mount adjustments needed  
+  - Paths inside container remain Linux-style  
+  - Adjust software and container setup to CPU-only environment  
+  ---
+  ### 1. DOWNLOADS NEEDED (UPDATED):
+  - **Docker** (latest stable version, already installed 28.1.1)  
+    - **Do NOT install NVIDIA Container Toolkit or CUDA drivers/toolkit** since no GPU is present  
+    - Docker Compose v2 or compatible (already supported)  
+  - **Python 3.8+** (Recommended 3.10)  
+  - **Git** (latest stable)  
+  - **UV** (Universal Virtual environment manager)  
+  - **Pandoc** (latest stable) for document conversion  
+  - **curl** available inside container for healthcheck (verify or install as needed)  
+  - **No NVIDIA GPU drivers or CUDA Toolkit installation required**  
+  - Python libraries as listed remain the same (core API, image/PDF processing, utilities, Hugging Face, vLLM, optional VLM dependencies)  
+  **Dependencies notes:**  
+  - The optional VLM dependencies (`torch`, `torchvision`, `timm`) must be installed with CPU-only variants (no `+cu121` CUDA tags). Use CPU wheels from PyPI or specify CPU versions explicitly to avoid CUDA dependencies.  
+  - For example, install `torch==2.5.1+cpu` or just `torch==2.5.1` if CPU-only wheel is default; **do NOT install CUDA-specific torch wheels**.  
+  - Update `requirements.txt` or Dockerfile installs accordingly to CPU-compatible versions of these packages.  
+  ---
+  ### 2. FILES TO CREATE (UPDATED):
+  - **`docker-compose.yml`**:  
+    - Remove `runtime: nvidia` (no GPU runtime)  
+    - Remove `deploy.resources.reservations.devices` section that requests NVIDIA GPUs  
+    - Keep service name `deepseek-ocr`, container named `deepseek-ocr-vllm`  
+    - Keep volumes mounts (`./models` → `/app/models`, `./outputs` → `/app/outputs`)  
+    - Environment variables inside container remain:  
+      - `CUDA_VISIBLE_DEVICES=""` or unset (empty string to disable GPU usage)  
+      - `MODEL_PATH=/app/models/deepseek-ai/DeepSeek-OCR`  
+      - `MAX_CONCURRENCY=5`  
+      - `GPU_MEMORY_UTILIZATION=0.85` (can keep, but note no GPU memory usage on CPU-only)  
+    - Restart policy: `unless-stopped`  
+    - Healthcheck unchanged (curl to `http://localhost:8000/health`)  
+    - Remove any GPU-specific deploy or resource reservation keys to avoid Docker warnings/errors  
+  - **`Dockerfile`**:  
+    - Use CPU-friendly base image, e.g. `python:3.10-slim` or similar lightweight Debian/Ubuntu-based image compatible with x86_64  
+      - **Do NOT use `vllm/vllm-openai:v0.8.5` base image if it assumes GPU/CUDA support**; instead, use a base image that does not require GPU or CUDA  
+    - Copy DeepSeek-OCR source code from `DeepSeek-OCR-master/DeepSeek-OCR-master/DeepSeek-OCR-vllm/` as before (ensure path correctness)  
+    - Install all Python dependencies from `requirements-lock.txt` with the following changes:  
+      - For optional VLM dependencies, install CPU-only torch and torchvision versions (without CUDA extensions)  
+      - Avoid installing CUDA Toolkit or NVIDIA drivers inside container  
+    - Set `PYTHONPATH` environment variable as before  
+    - Expose port 8000  
+    - Set entrypoint as before (`python3 start_server.py`)  
+    - Create `/app/models` and `/app/outputs` directories inside container  
+  - **`.dockerignore`** and **`.gitignore`** files remain unchanged as specified, placed at root of repository  
+  - **`.env`** file (optional):  
+    - Set `CUDA_VISIBLE_DEVICES=""` or omit entirely to reflect no GPU available  
+    - Other environment variables remain the same  
+  - **`requirements.txt`** (updated):  
+    - Pin all packages as per `requirements-lock.txt`  
+    - For optional VLM dependencies: specify CPU-only versions of `torch` and `torchvision` (e.g., `torch==2.5.1`, `torchvision==0.20.1`, no `+cu121`)  
+    - Include comments or instructions to install CPU variants when no GPU is available  
+  - Configuration shell scripts (`setup_env.sh`, `setup_env.bat`) updated accordingly:  
+    - Set `CUDA_VISIBLE_DEVICES=""` explicitly or unset  
+    - Export other environment variables unchanged  
+    - Ensure `PYTHONPATH` reflects correct local source path  
+  - Model weights directory structure unchanged  
+  - Source code path correctness check remains necessary  
+  ---
+  ### 3. NECESSARY TEST CASES IN THE CODEBASE (UNCHANGED):
+  - All tests remain valid  
+  - Add emphasis on testing **CPU-only fallback and performance** since no GPU present  
+  - Verify that optional VLM enrichment runs correctly using CPU-only torch if enabled  
+  - Confirm healthcheck and service startup without GPU or CUDA errors  
+  ---
+  ### 4. COMPLETE TODO LIST (UPDATED):
+  1. **Install Required Software:**  
+     - Docker (already installed 28.1.1) and Docker Compose v2 (already supported)  
+     - **Do NOT install NVIDIA Container Toolkit, CUDA drivers, or CUDA Toolkit**  
+     - Python 3.10+ and Git  
+     - Pandoc  
+     - UV environment manager  
+     - Confirm `curl` is present in container base image or plan to install manually in Dockerfile  
+  2. **Clone Repository:**  
+     - As before, clone `SciDOCX` repo  
+     - Clone or add `DeepSeek-OCR` repo separately or as submodule at `DeepSeek-OCR/`  
+  3. **Add `.dockerignore` and `.gitignore`:**  
+     - As specified, no changes  
+  4. **Prepare Python Dependencies:**  
+     - Adjust `requirements.txt` to pin CPU-only versions of torch and torchvision for optional VLM dependencies  
+     - For example:  
+       ```
+       # Optional VLM dependencies (CPU-only)
+       torch==2.5.1
+       torchvision==0.20.1
+       timm==1.0.21
+       ```  
+     - Install all dependencies with `uv pip install -r requirements.txt` locally and inside Docker build  
+  5. **Download Model Weights:**  
+     - No changes  
+  6. **Set Environment Variables:**  
+     - Set `CUDA_VISIBLE_DEVICES=""` explicitly to disable GPU usage  
+     - Others unchanged  
+  7. **Build and Launch Setup:**  
+     - **Docker Build and Run:**  
+       - Use updated `Dockerfile` with CPU-friendly base image (e.g., `python:3.10-slim`)  
+       - Remove GPU runtime and device reservation from `docker-compose.yml`  
+       - Build and run container as usual:  
+         ```bash
+         docker compose build
+         docker compose up -d
+         ```  
+       - Verify container runs without GPU errors  
+       - Verify healthcheck endpoint reachable at `http://localhost:8000/health`  
+       - Confirm environment variables inside container (check `CUDA_VISIBLE_DEVICES=""`)  
+       - Confirm exposed port 8000 matches API server port  
+       - Confirm `.dockerignore` exclusions work (check build context size)  
+     - **Local Python Environment:**  
+       - `uv pip install -r requirements.txt` with CPU-only dependencies  
+       - Clone DeepSeek-OCR repo if needed  
+       - Run API server locally (default port 8001)  
+       - Verify server starts without errors and healthcheck endpoint reachable  
+  8. **Verify Model Loading and Inference:**  
+     - Run sample PDF processing as before  
+  9. **Run Batch Processing:**  
+     - No changes  
+  10. **Test GPU Fallback:**  
+      - Now default operation is CPU-only; verify no GPU-related errors occur  
+      - Confirm that running with `CUDA_VISIBLE_DEVICES=""` or unset works gracefully  
+  11. **Error Handling Validation:**  
+      - No changes  
+  12. **Test New Environment Variables:**  
+      - `MAX_CONCURRENCY` and `GPU_MEMORY_UTILIZATION` still effective for concurrency and resource control (note GPU memory utilization is irrelevant on CPU but can be kept for code compatibility)  
+  13. **Test Optional VLM Features:**  
+      - Ensure optional VLM dependencies installed as CPU-only versions  
+      - Run enrichment pipeline and verify correctness  
+  14. **Dependency Compatibility & Performance Validation:**  
+      - Confirm no conflicts with CPU-only torch and torchvision versions  
+      - Monitor performance and resource usage on CPU  
+  15. **Documentation & Scripts:**  
+      - Update documentation to reflect no GPU usage and CPU-only setup  
+      - Provide notes on installing CPU-only torch wheels  
+      - Update `setup_env.sh` and `.env` to reflect `CUDA_VISIBLE_DEVICES=""`  
+  16. **Optional: Evaluation Framework Setup:**  
+      - No changes  
+  17. **Final Verification:**  
+      - Confirm Dockerfile uses CPU-only base image and no GPU runtime  
+      - Confirm Docker Compose YAML has no GPU device reservations or runtime settings  
+      - Confirm environment variables set properly (`CUDA_VISIBLE_DEVICES=""`)  
+      - Confirm all pipelines run without GPU or CUDA dependencies  
+      - Confirm API port consistency (container port 8000, local server port 8001)  
+      - Confirm container healthcheck passes  
+      - Confirm `.dockerignore` and `.gitignore` exclude files as expected  
+      - Confirm upstream DeepSeek-OCR code cloned separately and not committed inside repo  
+  ---
+  ### SUMMARY OF KEY ADJUSTMENTS:
+  | Aspect                  | Original Plan                             | Adjusted Plan (No GPU)                           |
+  |-------------------------|------------------------------------------|-------------------------------------------------|
+  | Base Docker Image       | `vllm/vllm-openai:v0.8.5` (CUDA-enabled) | Use official CPU-only base image (e.g., `python:3.10-slim`) |
+  | Docker Compose `runtime`| `nvidia` (GPU runtime)                    | Remove runtime setting (default runtime)         |
+  | Docker Compose `deploy.resources` | Reserve NVIDIA GPUs                | Remove GPU device reservation                    |
+  | CUDA Drivers/Toolkit    | Install CUDA 12.1 and NVIDIA drivers      | **Do not install CUDA or NVIDIA drivers**         |
+  | CUDA_VISIBLE_DEVICES    | `0` (GPU device 0)                        | Set to empty string `""` or unset to disable GPU |
+  | Optional VLM deps       | CUDA-enabled torch/torchvision wheels (`+cu121`) | Use CPU-only torch/torchvision wheels             |
+  | Environment variables   | Include GPU-specific vars                  | Set `CUDA_VISIBLE_DEVICES=""`, others unchanged  |
+  | Healthcheck & Ports     | Port 8000 exposed, healthcheck on localhost:8000 | No change                                        |
+  | `requirements.txt`      | CUDA-enabled packages in optional deps    | CPU-only variants for torch/torchvision           |
+  | Build context & ignores | No change                                 | No change                                         |
+  | Scripts and docs        | GPU instructions included                  | Remove GPU instructions, add CPU-specific notes   |
+  ---
+  This adjusted plan ensures full compatibility with your hardware environment (no NVIDIA GPU, AMD64 Linux), avoids unnecessary CUDA and GPU dependencies, and maintains all functional features of DeepSeek-OCR and vLLM pipelines on CPU-only infrastructure.
+NEXT:
+  current progress  
+  - Dockerfile uses `python:3.10-slim` CPU-only base image as per plan.  
+  - System packages git, curl, pandoc installed.  
+  - UV installed via pip.  
+  - Source code copied to `/app`.  
+  - Python dependencies installed from `requirements-lock.txt` or `requirements.txt` with CPU-only torch and torchvision versions substituted by sed.  
+  - Directories `/app/models`, `/app/data/output`, and `/app/data/mmrag-output` created (note: `/app/outputs` missing as per plan).  
+  - `PYTHONPATH` set to `/app`.  
+  - `CUDA_VISIBLE_DEVICES` set to empty string to disable GPU usage.  
+  - Port 8000 exposed.  
+  - Default command is bash shell (no entrypoint or start server command set).  
+  next step  
+  - Modify Dockerfile to set entrypoint or CMD to start the API server, e.g., `CMD ["python3", "start_server.py"]` as specified.  
+  - Adjust directory creation to include `/app/outputs` instead of `/app/data/output` to match volume mount and plan.  
+  - Confirm the copied source code path correctness, ensure DeepSeek-OCR source is properly copied as per plan.  
+  - Verify curl presence or installation for healthcheck inside container (already installed).  
+  - Remove any unnecessary directories or fix paths to align with plan (`/app/outputs` vs `/app/data/output`).  
+  - Optionally, add healthcheck command in Dockerfile if desired (currently handled by docker-compose).
+STATUS:
+  SUCCESS
+LOG:
+  === Docker Execution Log - 20260501_105138 ===
+  Dockerfile: envgym/envgym.dockerfile
+  Image Name: envgym_test_1777632583
+  === Build Log ===
+  Build Status: Success
+  Build Output:
+  Build Error:
+  #0 building with "default" instance using docker driver
+  #1 [internal] load build definition from envgym.dockerfile
+  #1 transferring dockerfile: 1.60kB done
+  #1 DONE 0.0s
+  #2 [internal] load metadata for docker.io/library/python:3.10-slim
+  #2 DONE 0.1s
+  #3 [internal] load .dockerignore
+  #3 transferring context: 174B done
+  #3 DONE 0.0s
+  #4 [1/8] FROM docker.io/library/python:3.10-slim@sha256:cdbf8193cee2e31639ea8ea85ffdd8fa5cce98ee9abfde96ea5f329490048831
+  #4 DONE 0.0s
+  #5 [internal] load build context
+  #5 transferring context: 129.19kB done
+  #5 DONE 0.0s
+  #6 [2/8] WORKDIR /app
+  #6 CACHED
+  #7 [3/8] RUN apt-get update && apt-get install -y --no-install-recommends     git     curl     pandoc     && rm -rf /var/lib/apt/lists/*
+  #7 CACHED
+  #8 [4/8] RUN pip install --no-cache-dir uv
+  #8 CACHED
+  #9 [5/8] COPY . /app/
+  #9 DONE 0.0s
+  #10 [6/8] RUN ls -l /app/requirements*.txt && python --version && pip --version && uv --version
+  #10 0.204 -rw-rw-r-- 1 root root 1127 May  1 10:42 /app/requirements-lock.txt
+  #10 0.204 -rw-rw-r-- 1 root root  611 May  1 10:42 /app/requirements.txt
+  #10 0.206 Python 3.10.20
+  #10 0.401 pip 23.0.1 from /usr/local/lib/python3.10/site-packages/pip (python 3.10)
+  #10 0.439 uv 0.11.8 (x86_64-unknown-linux-gnu)
+  #10 DONE 0.5s
+  #11 [7/8] RUN if [ -f /app/requirements-lock.txt ]; then         sed -i 's/torch==2.5.1+cu121/torch==2.5.1/g' /app/requirements-lock.txt &&         sed -i 's/torchvision==0.20.1+cu121/torchvision==0.20.1/g' /app/requirements-lock.txt &&         pip install --no-cache-dir -r /app/requirements-lock.txt;     else         sed -i 's/torch==2.5.1+cu121/torch==2.5.1/g' /app/requirements.txt &&         sed -i 's/torchvision==0.20.1+cu121/torchvision==0.20.1/g' /app/requirements.txt &&         pip install --no-cache-dir -r /app/requirements.txt;     fi
+  #11 0.646 Collecting accelerate==1.11.0
+  #11 0.701   Downloading accelerate-1.11.0-py3-none-any.whl (375 kB)
+  #11 0.728      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 375.8/375.8 kB 17.1 MB/s eta 0:00:00
+  #11 0.750 Collecting addict==2.4.0
+  #11 0.755   Downloading addict-2.4.0-py3-none-any.whl (3.8 kB)
+  #11 0.769 Collecting annotated-doc==0.0.3
+  #11 0.774   Downloading annotated_doc-0.0.3-py3-none-any.whl (5.5 kB)
+  #11 0.788 Collecting annotated-types==0.7.0
+  #11 0.793   Downloading annotated_types-0.7.0-py3-none-any.whl (13 kB)
+  #11 0.828 Collecting anyio==4.11.0
+  #11 0.832   Downloading anyio-4.11.0-py3-none-any.whl (109 kB)
+  #11 0.836      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 109.1/109.1 kB 49.4 MB/s eta 0:00:00
+  #11 0.869 Collecting certifi==2025.10.5
+  #11 0.873   Downloading certifi-2025.10.5-py3-none-any.whl (163 kB)
+  #11 0.878      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 163.3/163.3 kB 45.3 MB/s eta 0:00:00
+  #11 1.120 Collecting cffi==2.0.0
+  #11 1.125   Downloading cffi-2.0.0-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (216 kB)
+  #11 1.132      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 216.5/216.5 kB 41.3 MB/s eta 0:00:00
+  #11 1.362 Collecting charset-normalizer==3.4.4
+  #11 1.368   Downloading charset_normalizer-3.4.4-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (153 kB)
+  #11 1.373      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 153.6/153.6 kB 46.7 MB/s eta 0:00:00
+  #11 1.407 Collecting click==8.3.0
+  #11 1.411   Downloading click-8.3.0-py3-none-any.whl (107 kB)
+  #11 1.414      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 107.3/107.3 kB 347.9 MB/s eta 0:00:00
+  #11 1.438 Collecting colorama==0.4.6
+  #11 1.442   Downloading colorama-0.4.6-py2.py3-none-any.whl (25 kB)
+  #11 1.896 Collecting cryptography==46.0.3
+  #11 1.902   Downloading cryptography-46.0.3-cp38-abi3-manylinux_2_34_x86_64.whl (4.5 MB)
+  #11 1.969      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4.5/4.5 MB 69.1 MB/s eta 0:00:00
+  #11 2.007 Collecting deprecated==1.3.1
+  #11 2.011   Downloading deprecated-1.3.1-py2.py3-none-any.whl (11 kB)
+  #11 2.025 Collecting easydict==1.13
+  #11 2.029   Downloading easydict-1.13-py3-none-any.whl (6.8 kB)
+  #11 2.052 Collecting ecdsa==0.19.1
+  #11 2.058   Downloading ecdsa-0.19.1-py2.py3-none-any.whl (150 kB)
+  #11 2.060      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 150.6/150.6 kB 379.3 MB/s eta 0:00:00
+  #11 2.080 Collecting einops==0.8.1
+  #11 2.085   Downloading einops-0.8.1-py3-none-any.whl (64 kB)
+  #11 2.087      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 64.4/64.4 kB 310.7 MB/s eta 0:00:00
+  #11 2.107 Collecting exceptiongroup==1.3.0
+  #11 2.112   Downloading exceptiongroup-1.3.0-py3-none-any.whl (16 kB)
+  #11 2.215 Collecting fastapi==0.120.2
+  #11 2.222   Downloading fastapi-0.120.2-py3-none-any.whl (108 kB)
+  #11 2.223      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 108.4/108.4 kB 360.4 MB/s eta 0:00:00
+  #11 2.263 Collecting filelock==3.19.1
+  #11 2.268   Downloading filelock-3.19.1-py3-none-any.whl (15 kB)
+  #11 2.307 Collecting fsspec==2025.9.0
+  #11 2.312   Downloading fsspec-2025.9.0-py3-none-any.whl (199 kB)
+  #11 2.314      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 199.3/199.3 kB 375.5 MB/s eta 0:00:00
+  #11 2.330 Collecting h11==0.16.0
+  #11 2.335   Downloading h11-0.16.0-py3-none-any.whl (37 kB)
+  #11 2.397 Collecting httptools==0.7.1
+  #11 2.401   Downloading httptools-0.7.1-cp310-cp310-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (440 kB)
+  #11 2.407      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 440.9/440.9 kB 125.3 MB/s eta 0:00:00
+  #11 2.506 Collecting huggingface-hub==0.36.0
+  #11 2.511   Downloading huggingface_hub-0.36.0-py3-none-any.whl (566 kB)
+  #11 2.516      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 566.1/566.1 kB 144.3 MB/s eta 0:00:00
+  #11 2.540 Collecting idna==3.11
+  #11 2.545   Downloading idna-3.11-py3-none-any.whl (71 kB)
+  #11 2.547      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 71.0/71.0 kB 345.0 MB/s eta 0:00:00
+  #11 2.563 Collecting img2pdf==0.6.1
+  #11 2.569   Downloading img2pdf-0.6.1.tar.gz (106 kB)
+  #11 2.571      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 106.5/106.5 kB 331.8 MB/s eta 0:00:00
+  #11 2.582   Preparing metadata (setup.py): started
+  #11 2.850   Preparing metadata (setup.py): finished with status 'done'
+  #11 2.880 Collecting jinja2==3.1.6
+  #11 2.885   Downloading jinja2-3.1.6-py3-none-any.whl (134 kB)
+  #11 2.887      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 134.9/134.9 kB 348.6 MB/s eta 0:00:00
+  #11 3.389 Collecting lxml==6.0.2
+  #11 3.396   Downloading lxml-6.0.2-cp310-cp310-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl (5.3 MB)
+  #11 3.427      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 5.3/5.3 MB 178.1 MB/s eta 0:00:00
+  #11 3.555 Collecting markupsafe==2.1.5
+  #11 3.560   Downloading MarkupSafe-2.1.5-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (25 kB)
+  #11 3.582 Collecting mpmath==1.3.0
+  #11 3.587   Downloading mpmath-1.3.0-py3-none-any.whl (536 kB)
+  #11 3.590      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 536.2/536.2 kB 411.1 MB/s eta 0:00:00
+  #11 3.629 Collecting networkx==3.3
+  #11 3.634   Downloading networkx-3.3-py3-none-any.whl (1.7 MB)
+  #11 3.642      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.7/1.7 MB 244.1 MB/s eta 0:00:00
+  #11 4.108 Collecting numpy==2.1.2
+  #11 4.115   Downloading numpy-2.1.2-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (16.3 MB)
+  #11 4.165      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 16.3/16.3 MB 366.8 MB/s eta 0:00:00
+  #11 4.237 Collecting packaging==25.0
+  #11 4.242   Downloading packaging-25.0-py3-none-any.whl (66 kB)
+  #11 4.244      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 66.5/66.5 kB 322.5 MB/s eta 0:00:00
+  #11 5.043 Collecting pikepdf==10.0.0
+  #11 5.051   Downloading pikepdf-10.0.0-cp310-cp310-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (2.6 MB)
+  #11 5.060      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.6/2.6 MB 366.9 MB/s eta 0:00:00
+  #11 5.456 Collecting pillow==11.3.0
+  #11 5.464   Downloading pillow-11.3.0-cp310-cp310-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (6.6 MB)
+  #11 5.483      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 6.6/6.6 MB 378.8 MB/s eta 0:00:00
+  #11 5.648 Collecting psutil==7.1.2
+  #11 5.655   Downloading psutil-7.1.2-cp36-abi3-manylinux2010_x86_64.manylinux_2_12_x86_64.manylinux_2_28_x86_64.whl (258 kB)
+  #11 5.657      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 258.7/258.7 kB 374.7 MB/s eta 0:00:00
+  #11 5.691 Collecting pyasn1==0.6.1
+  #11 5.696   Downloading pyasn1-0.6.1-py3-none-any.whl (83 kB)
+  #11 5.698      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 83.1/83.1 kB 354.0 MB/s eta 0:00:00
+  #11 5.715 Collecting pycparser==2.23
+  #11 5.720   Downloading pycparser-2.23-py3-none-any.whl (118 kB)
+  #11 5.722      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 118.1/118.1 kB 370.8 MB/s eta 0:00:00
+  #11 6.035 Collecting pydantic==2.12.3
+  #11 6.040   Downloading pydantic-2.12.3-py3-none-any.whl (462 kB)
+  #11 6.044      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 462.4/462.4 kB 380.1 MB/s eta 0:00:00
+  #11 7.763 Collecting pydantic-core==2.41.4
+  #11 7.771   Downloading pydantic_core-2.41.4-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (2.1 MB)
+  #11 7.778      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.1/2.1 MB 404.5 MB/s eta 0:00:00
+  #11 8.144 Collecting pymupdf==1.26.5
+  #11 8.150   Downloading pymupdf-1.26.5-cp39-abi3-manylinux_2_28_x86_64.whl (24.1 MB)
+  #11 8.220      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 24.1/24.1 MB 361.8 MB/s eta 0:00:00
+  #11 8.298 Collecting pypandoc==1.15
+  #11 8.302   Downloading pypandoc-1.15-py3-none-any.whl (21 kB)
+  #11 8.328 Collecting python-dotenv==1.2.1
+  #11 8.332   Downloading python_dotenv-1.2.1-py3-none-any.whl (21 kB)
+  #11 8.352 Collecting python-jose==3.5.0
+  #11 8.357   Downloading python_jose-3.5.0-py2.py3-none-any.whl (34 kB)
+  #11 8.379 Collecting python-multipart==0.0.20
+  #11 8.384   Downloading python_multipart-0.0.20-py3-none-any.whl (24 kB)
+  #11 8.461 Collecting pyyaml==6.0.3
+  #11 8.466   Downloading pyyaml-6.0.3-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (770 kB)
+  #11 8.469      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 770.3/770.3 kB 431.4 MB/s eta 0:00:00
+  #11 9.427 Collecting regex==2025.10.23
+  #11 9.435   Downloading regex-2025.10.23-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (791 kB)
+  #11 9.439      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 791.5/791.5 kB 407.6 MB/s eta 0:00:00
+  #11 9.483 Collecting requests==2.32.5
+  #11 9.492   Downloading requests-2.32.5-py3-none-any.whl (64 kB)
+  #11 9.494      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 64.7/64.7 kB 265.9 MB/s eta 0:00:00
+  #11 9.516 Collecting rsa==4.9.1
+  #11 9.521   Downloading rsa-4.9.1-py3-none-any.whl (34 kB)
+  #11 9.795 Collecting safetensors==0.6.2
+  #11 9.800   Downloading safetensors-0.6.2-cp38-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (485 kB)
+  #11 9.803      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 485.8/485.8 kB 383.0 MB/s eta 0:00:00
+  #11 9.908 Collecting sentencepiece==0.2.1
+  #11 9.912   Downloading sentencepiece-0.2.1-cp310-cp310-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (1.4 MB)
+  #11 9.917      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.4/1.4 MB 401.9 MB/s eta 0:00:00
+  #11 9.938 Collecting six==1.17.0
+  #11 9.943   Downloading six-1.17.0-py2.py3-none-any.whl (11 kB)
+  #11 9.958 Collecting sniffio==1.3.1
+  #11 9.962   Downloading sniffio-1.3.1-py3-none-any.whl (10 kB)
+  #11 10.01 Collecting starlette==0.49.1
+  #11 10.02   Downloading starlette-0.49.1-py3-none-any.whl (74 kB)
+  #11 10.02      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 74.2/74.2 kB 347.2 MB/s eta 0:00:00
+  #11 10.05 Collecting sympy==1.13.1
+  #11 10.05   Downloading sympy-1.13.1-py3-none-any.whl (6.2 MB)
+  #11 10.08      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 6.2/6.2 MB 270.1 MB/s eta 0:00:00
+  #11 10.14 Collecting timm==1.0.21
+  #11 10.14   Downloading timm-1.0.21-py3-none-any.whl (2.5 MB)
+  #11 10.15      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.5/2.5 MB 357.4 MB/s eta 0:00:00
+  #11 10.50 Collecting tokenizers==0.22.1
+  #11 10.51   Downloading tokenizers-0.22.1-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (3.3 MB)
+  #11 10.52      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 3.3/3.3 MB 338.9 MB/s eta 0:00:00
+  #11 10.64 Collecting torch==2.5.1
+  #11 10.65   Downloading torch-2.5.1-cp310-cp310-manylinux1_x86_64.whl (906.4 MB)
+  #11 13.51      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 906.4/906.4 MB 377.9 MB/s eta 0:00:00
+  #11 15.68 Collecting torchvision==0.20.1
+  #11 15.69   Downloading torchvision-0.20.1-cp310-cp310-manylinux1_x86_64.whl (7.2 MB)
+  #11 15.73      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 7.2/7.2 MB 207.4 MB/s eta 0:00:00
+  #11 15.81 Collecting tqdm==4.67.1
+  #11 15.81   Downloading tqdm-4.67.1-py3-none-any.whl (78 kB)
+  #11 15.82      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 78.5/78.5 kB 325.4 MB/s eta 0:00:00
+  #11 15.90 Collecting transformers==4.57.1
+  #11 15.91   Downloading transformers-4.57.1-py3-none-any.whl (12.0 MB)
+  #11 15.94      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 12.0/12.0 MB 383.3 MB/s eta 0:00:00
+  #11 16.01 Collecting typing-extensions==4.15.0
+  #11 16.01   Downloading typing_extensions-4.15.0-py3-none-any.whl (44 kB)
+  #11 16.02      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 44.6/44.6 kB 291.7 MB/s eta 0:00:00
+  #11 16.03 Collecting typing-inspection==0.4.2
+  #11 16.04   Downloading typing_inspection-0.4.2-py3-none-any.whl (14 kB)
+  #11 16.09 Collecting urllib3==2.5.0
+  #11 16.09   Downloading urllib3-2.5.0-py3-none-any.whl (129 kB)
+  #11 16.09      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 129.8/129.8 kB 337.0 MB/s eta 0:00:00
+  #11 16.14 Collecting uvicorn==0.38.0
+  #11 16.14   Downloading uvicorn-0.38.0-py3-none-any.whl (68 kB)
+  #11 16.14      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 68.1/68.1 kB 306.7 MB/s eta 0:00:00
+  #11 16.42 Collecting watchfiles==1.1.1
+  #11 16.43   Downloading watchfiles-1.1.1-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (455 kB)
+  #11 16.43      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 455.6/455.6 kB 349.5 MB/s eta 0:00:00
+  #11 16.64 Collecting websockets==15.0.1
+  #11 16.64   Downloading websockets-15.0.1-cp310-cp310-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl (181 kB)
+  #11 16.64      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 181.6/181.6 kB 344.5 MB/s eta 0:00:00
+  #11 17.15 Collecting wrapt==2.0.0
+  #11 17.16   Downloading wrapt-2.0.0-cp310-cp310-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (113 kB)
+  #11 17.16      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 113.6/113.6 kB 306.7 MB/s eta 0:00:00
+  #11 17.62 Collecting hf-xet<2.0.0,>=1.1.3
+  #11 17.62   Downloading hf_xet-1.4.3-cp37-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (4.2 MB)
+  #11 17.63      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4.2/4.2 MB 365.4 MB/s eta 0:00:00
+  #11 18.08 Collecting nvidia-cuda-runtime-cu12==12.4.127
+  #11 18.09   Downloading nvidia_cuda_runtime_cu12-12.4.127-py3-none-manylinux2014_x86_64.whl (883 kB)
+  #11 18.09      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 883.7/883.7 kB 364.4 MB/s eta 0:00:00
+  #11 18.12 Collecting nvidia-cublas-cu12==12.4.5.8
+  #11 18.13   Downloading nvidia_cublas_cu12-12.4.5.8-py3-none-manylinux2014_x86_64.whl (363.4 MB)
+  #11 19.28      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 363.4/363.4 MB 260.1 MB/s eta 0:00:00
+  #11 20.10 Collecting nvidia-nccl-cu12==2.21.5
+  #11 20.11   Downloading nvidia_nccl_cu12-2.21.5-py3-none-manylinux2014_x86_64.whl (188.7 MB)
+  #11 20.62      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 188.7/188.7 MB 376.0 MB/s eta 0:00:00
+  #11 21.06 Collecting nvidia-nvtx-cu12==12.4.127
+  #11 21.06   Downloading nvidia_nvtx_cu12-12.4.127-py3-none-manylinux2014_x86_64.whl (99 kB)
+  #11 21.07      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 99.1/99.1 kB 330.1 MB/s eta 0:00:00
+  #11 21.09 Collecting nvidia-curand-cu12==10.3.5.147
+  #11 21.09   Downloading nvidia_curand_cu12-10.3.5.147-py3-none-manylinux2014_x86_64.whl (56.3 MB)
+  #11 21.25      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 56.3/56.3 MB 375.9 MB/s eta 0:00:00
+  #11 21.40 Collecting nvidia-cudnn-cu12==9.1.0.70
+  #11 21.41   Downloading nvidia_cudnn_cu12-9.1.0.70-py3-none-manylinux2014_x86_64.whl (664.8 MB)
+  #11 23.47      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 664.8/664.8 MB 352.9 MB/s eta 0:00:00
+  #11 24.96 Collecting nvidia-cufft-cu12==11.2.1.3
+  #11 24.97   Downloading nvidia_cufft_cu12-11.2.1.3-py3-none-manylinux2014_x86_64.whl (211.5 MB)
+  #11 25.57      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 211.5/211.5 MB 277.2 MB/s eta 0:00:00
+  #11 26.07 Collecting nvidia-nvjitlink-cu12==12.4.127
+  #11 26.07   Downloading nvidia_nvjitlink_cu12-12.4.127-py3-none-manylinux2014_x86_64.whl (21.1 MB)
+  #11 26.14      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 21.1/21.1 MB 352.8 MB/s eta 0:00:00
+  #11 26.21 Collecting nvidia-cuda-cupti-cu12==12.4.127
+  #11 26.22   Downloading nvidia_cuda_cupti_cu12-12.4.127-py3-none-manylinux2014_x86_64.whl (13.8 MB)
+  #11 26.26      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 13.8/13.8 MB 368.2 MB/s eta 0:00:00
+  #11 26.31 Collecting nvidia-cuda-nvrtc-cu12==12.4.127
+  #11 26.31   Downloading nvidia_cuda_nvrtc_cu12-12.4.127-py3-none-manylinux2014_x86_64.whl (24.6 MB)
+  #11 26.38      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 24.6/24.6 MB 391.2 MB/s eta 0:00:00
+  #11 26.46 Collecting nvidia-cusparse-cu12==12.3.1.170
+  #11 26.47   Downloading nvidia_cusparse_cu12-12.3.1.170-py3-none-manylinux2014_x86_64.whl (207.5 MB)
+  #11 27.06      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 207.5/207.5 MB 376.1 MB/s eta 0:00:00
+  #11 27.55 Collecting nvidia-cusolver-cu12==11.6.1.9
+  #11 27.56   Downloading nvidia_cusolver_cu12-11.6.1.9-py3-none-manylinux2014_x86_64.whl (127.9 MB)
+  #11 27.94      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 127.9/127.9 MB 303.3 MB/s eta 0:00:00
+  #11 28.26 Collecting triton==3.1.0
+  #11 28.27   Downloading triton-3.1.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (209.5 MB)
+  #11 28.84      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 209.5/209.5 MB 375.1 MB/s eta 0:00:00
+  #11 29.98 Building wheels for collected packages: img2pdf
+  #11 29.98   Building wheel for img2pdf (setup.py): started
+  #11 30.18   Building wheel for img2pdf (setup.py): finished with status 'done'
+  #11 30.18   Created wheel for img2pdf: filename=img2pdf-0.6.1-py3-none-any.whl size=51100 sha256=e0754264a3ed89e3eabe76f8acebc2d41e0d587bf2def572ce2c69aec1c02f29
+  #11 30.18   Stored in directory: /tmp/pip-ephem-wheel-cache-_cb3sccl/wheels/f9/07/5a/089ac4e2f9f5c198f72d4d3b6a5d1a11b2ce7a38d13cc76437
+  #11 30.19 Successfully built img2pdf
+  #11 31.34 Installing collected packages: mpmath, easydict, addict, wrapt, websockets, urllib3, typing-extensions, tqdm, sympy, sniffio, six, sentencepiece, safetensors, regex, pyyaml, python-multipart, python-dotenv, pypandoc, pymupdf, pycparser, pyasn1, psutil, pillow, packaging, nvidia-nvtx-cu12, nvidia-nvjitlink-cu12, nvidia-nccl-cu12, nvidia-curand-cu12, nvidia-cufft-cu12, nvidia-cuda-runtime-cu12, nvidia-cuda-nvrtc-cu12, nvidia-cuda-cupti-cu12, nvidia-cublas-cu12, numpy, networkx, markupsafe, lxml, idna, httptools, hf-xet, h11, fsspec, filelock, einops, colorama, click, charset-normalizer, certifi, annotated-types, annotated-doc, uvicorn, typing-inspection, triton, rsa, requests, pydantic-core, nvidia-cusparse-cu12, nvidia-cudnn-cu12, jinja2, exceptiongroup, ecdsa, deprecated, cffi, python-jose, pydantic, pikepdf, nvidia-cusolver-cu12, huggingface-hub, cryptography, anyio, watchfiles, torch, tokenizers, starlette, img2pdf, transformers, torchvision, fastapi, accelerate, timm
+  #11 79.38 Successfully installed accelerate-1.11.0 addict-2.4.0 annotated-doc-0.0.3 annotated-types-0.7.0 anyio-4.11.0 certifi-2025.10.5 cffi-2.0.0 charset-normalizer-3.4.4 click-8.3.0 colorama-0.4.6 cryptography-46.0.3 deprecated-1.3.1 easydict-1.13 ecdsa-0.19.1 einops-0.8.1 exceptiongroup-1.3.0 fastapi-0.120.2 filelock-3.19.1 fsspec-2025.9.0 h11-0.16.0 hf-xet-1.4.3 httptools-0.7.1 huggingface-hub-0.36.0 idna-3.11 img2pdf-0.6.1 jinja2-3.1.6 lxml-6.0.2 markupsafe-2.1.5 mpmath-1.3.0 networkx-3.3 numpy-2.1.2 nvidia-cublas-cu12-12.4.5.8 nvidia-cuda-cupti-cu12-12.4.127 nvidia-cuda-nvrtc-cu12-12.4.127 nvidia-cuda-runtime-cu12-12.4.127 nvidia-cudnn-cu12-9.1.0.70 nvidia-cufft-cu12-11.2.1.3 nvidia-curand-cu12-10.3.5.147 nvidia-cusolver-cu12-11.6.1.9 nvidia-cusparse-cu12-12.3.1.170 nvidia-nccl-cu12-2.21.5 nvidia-nvjitlink-cu12-12.4.127 nvidia-nvtx-cu12-12.4.127 packaging-25.0 pikepdf-10.0.0 pillow-11.3.0 psutil-7.1.2 pyasn1-0.6.1 pycparser-2.23 pydantic-2.12.3 pydantic-core-2.41.4 pymupdf-1.26.5 pypandoc-1.15 python-dotenv-1.2.1 python-jose-3.5.0 python-multipart-0.0.20 pyyaml-6.0.3 regex-2025.10.23 requests-2.32.5 rsa-4.9.1 safetensors-0.6.2 sentencepiece-0.2.1 six-1.17.0 sniffio-1.3.1 starlette-0.49.1 sympy-1.13.1 timm-1.0.21 tokenizers-0.22.1 torch-2.5.1 torchvision-0.20.1 tqdm-4.67.1 transformers-4.57.1 triton-3.1.0 typing-extensions-4.15.0 typing-inspection-0.4.2 urllib3-2.5.0 uvicorn-0.38.0 watchfiles-1.1.1 websockets-15.0.1 wrapt-2.0.0
+  #11 79.38 WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv
+  #11 79.47 
+  #11 79.47 [notice] A new release of pip is available: 23.0.1 -> 26.1
+  #11 79.47 [notice] To update, run: pip install --upgrade pip
+  #11 DONE 89.2s
+  #12 [8/8] RUN mkdir -p /app/models /app/data/output /app/data/mmrag-output
+  #12 DONE 0.3s
+  #13 exporting to image
+  #13 exporting layers
+  #13 exporting layers 23.9s done
+  #13 writing image sha256:930077fdf1b2a88bf24935aeadecaa83ffe7499f6e2e34ee2341b133425a3459 done
+  #13 naming to docker.io/library/envgym_test_1777632583 done
+  #13 DONE 24.0s
+  === Runtime Log ===  
+  Runtime Status: Success
+  Runtime Output:
+  Runtime Error:
+  === Execution End ===
+DOCKERFILE:
+  FROM python:3.10-slim
+  # Set working directory to repository root
+  WORKDIR /app
+  # Install system dependencies
+  RUN apt-get update && apt-get install -y --no-install-recommends \
+      git \
+      curl \
+      pandoc \
+      && rm -rf /var/lib/apt/lists/*
+  # Install UV (Universal Virtual environment manager)
+  RUN pip install --no-cache-dir uv
+  # Copy application source code and config files
+  COPY . /app/
+  # Debug info to verify files and versions
+  RUN ls -l /app/requirements*.txt && python --version && pip --version && uv --version
+  # Install Python dependencies using pip directly (bypassing uv) and prefer requirements-lock.txt if present
+  RUN if [ -f /app/requirements-lock.txt ]; then \
+          sed -i 's/torch==2.5.1+cu121/torch==2.5.1/g' /app/requirements-lock.txt && \
+          sed -i 's/torchvision==0.20.1+cu121/torchvision==0.20.1/g' /app/requirements-lock.txt && \
+          pip install --no-cache-dir -r /app/requirements-lock.txt; \
+      else \
+          sed -i 's/torch==2.5.1+cu121/torch==2.5.1/g' /app/requirements.txt && \
+          sed -i 's/torchvision==0.20.1+cu121/torchvision==0.20.1/g' /app/requirements.txt && \
+          pip install --no-cache-dir -r /app/requirements.txt; \
+      fi
+  # Create models and outputs directories if not existing
+  RUN mkdir -p /app/models /app/data/output /app/data/mmrag-output
+  # Set PYTHONPATH environment variable to include /app source code
+  ENV PYTHONPATH=/app
+  # Set environment variable to disable GPU usage
+  ENV CUDA_VISIBLE_DEVICES=""
+  # Expose port 8000 for API server
+  EXPOSE 8000
+  # Default shell
+  CMD ["/bin/bash"]
+--- End of Iteration 4 ---
+

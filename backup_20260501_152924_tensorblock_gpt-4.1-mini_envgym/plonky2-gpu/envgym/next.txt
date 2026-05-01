@@ -1,0 +1,16 @@
+current progress  
+- Base Dockerfile set up with Ubuntu 22.04 and essential build tools installed (gcc-10, clang-12, cmake, git, python3, etc.)  
+- Rust toolchain installed via rustup with stable channel and necessary components (rustfmt, clippy) added  
+- Cargo environment verified with rustc and cargo versions confirmed  
+- Source code copied into /app, git submodules initialized  
+- Cargo clean executed successfully  
+- Cargo build command for release with workspace and verbose flag executed but failed with exit code 101  
+- CMake build configured with CUDA disabled and build attempted but not reached due to cargo build failure  
+
+next step  
+- Investigate and resolve the cargo build failure by reviewing cargo build logs and fixing dependency or build errors in Rust workspace  
+- Ensure Cargo.toml workspace members are correctly declared and all Rust crates compile cleanly  
+- Confirm removal of any residual GPU/CUDA flags or dependencies in Cargo and Rust code  
+- After successful cargo build, rerun CMake build to confirm CPU-only configuration works as intended  
+- Optionally, add more detailed error logging in Dockerfile to capture build failure reasons  
+- Validate build passes fully before proceeding to run tests and finalize Dockerfile for CPU-only environment

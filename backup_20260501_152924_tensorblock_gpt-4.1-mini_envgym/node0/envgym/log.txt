@@ -1,0 +1,29 @@
+=== Docker Execution Log - 20260501_104253 ===
+Dockerfile: envgym/envgym.dockerfile
+Image Name: envgym_test_1777632154
+
+=== Build Log ===
+Build Status: Failed
+Build Error:
+1.369   │ exit code: 1
+1.369   ╰─> No available output.
+1.369
+1.369   note: This error originates from a subprocess, and is likely not a problem with pip.
+1.369 ERROR: Failed to build 'git+https://github.com/learning-at-home/hivemind.git@v0.7.44' when git checkout -q v0.7.44
+------
+envgym.dockerfile:64
+--------------------
+62 |     RUN rustc --version && cargo --version && rustup show
+63 |
+64 | >>> RUN python3.11 -m pip install --upgrade git+https://github.com/learning-at-home/hivemind.git@v0.7.44
+65 |
+66 |     RUN python3.11 -m pip install . --verbose
+--------------------
+ERROR: failed to solve: process "/bin/sh -c python3.11 -m pip install --upgrade git+https://github.com/learning-at-home/hivemind.git@v0.7.44" did not complete successfully: exit code: 1
+
+=== Runtime Log ===  
+Runtime Status: Failed
+Runtime Error:
+
+
+=== Execution End ===

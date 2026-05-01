@@ -1,0 +1,29 @@
+=== Docker Execution Log - 20260501_073748 ===
+Dockerfile: envgym/envgym.dockerfile
+Image Name: envgym_test_1777621066
+
+=== Build Log ===
+Build Status: Failed
+Build Error:
+--------------------
+47 |
+48 | >>> RUN set -e && \
+49 | >>>     source $CONDA_DIR/etc/profile.d/conda.sh && \
+50 | >>>     conda create -y -n kilosort python=3.10 && \
+51 | >>>     conda activate kilosort && \
+52 | >>>     pip install --upgrade pip setuptools wheel && \
+53 | >>>     pip install 'numpy>=1.20.0' scipy scikit-learn tqdm numba faiss-cpu && \
+54 | >>>     conda install -y -c pytorch cpuonly pytorch && \
+55 | >>>     conda install -y pyqt matplotlib && \
+56 | >>>     pip install pyqtgraph>=0.13.0 qtpy && \
+57 | >>>     pip install sphinx>=3.0 sphinxcontrib-apidoc nbsphinx myst_parser sphinx_rtd_theme && \
+58 | >>>     pip install pytest pytest-cov pytest-xvfb py && \
+59 | >>>     pip install .[gui] && \
+60 | >>>     pip install -r docs/requirements.txt
+
+=== Runtime Log ===  
+Runtime Status: Failed
+Runtime Error:
+
+
+=== Execution End ===

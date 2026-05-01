@@ -1,0 +1,21 @@
+current progress  
+- Base image set to ubuntu:20.04 (CPU-compatible, amd64)  
+- System dependencies installed with CPU-only libraries, no GPU drivers  
+- Miniconda3 installed with conda version pinned to 4.10.3 or higher  
+- Working directory set to /app (short path)  
+- Repository files copied into /app  
+- Conda base updated and environment created from environment.yaml with python 3.9 explicitly installed  
+- Pip, setuptools, wheel upgraded inside conda environment  
+- All pip packages from requirements.txt installed (including CPU TensorFlow as per requirements)  
+- U-Time package installed via setup.py within activated conda environment  
+- Container default shell set to bash with conda environment auto-activated  
+- Environment variables for CPU parallelism (OMP_NUM_THREADS=48, MKL_NUM_THREADS=48) set  
+
+next step  
+- Verify that TensorFlow installed is CPU-only by adding a test RUN command in Dockerfile that executes `python -c "import tensorflow as tf; print(tf.test.is_built_with_cuda())"` and confirm output is False  
+- Remove redundant or conflicting conda python installation step (avoid installing python=3.9 after environment creation if already specified in environment.yaml) to prevent environment conflicts  
+- Ensure conda environment activation commands in RUN instructions are consistent and robust (source conda.sh and activate environment in single RUN step)  
+- Add verification steps for installed package versions (python, conda, pip, numpy) within Dockerfile build or as test scripts  
+- Consider cleaning up conda/pip caches after installation to reduce image size  
+- Test the built image by running `ut --help` and a sample `ut` command inside the container to confirm CPU-only operation and no GPU errors  
+- Document environment variable usage for CPU parallelism within the Dockerfile or container runtime instructions

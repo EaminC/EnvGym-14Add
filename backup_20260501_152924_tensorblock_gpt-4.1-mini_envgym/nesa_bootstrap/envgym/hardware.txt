@@ -1,0 +1,6 @@
+- Working Directory: /home/cc/EnvGym/data/20260501_071208_tensorblock_gpt-4.1-mini/nesa_bootstrap; project under /home/cc/EnvGym/data/20260501_071208_tensorblock_gpt-4.1-mini
+- Architecture: x86_64; recommended --platform=linux/amd64
+- Base Image: x86_64 compatible base images (e.g., ubuntu, debian, alpine amd64 tags)
+- GPU: No NVIDIA GPU detected; no CUDA base image needed
+- Instruction Notes: Use CPU-optimized instructions; no GPU-specific setup; verify file paths relative to /home/cc/EnvGym/data/20260501_071208_tensorblock_gpt-4.1-mini/nesa_bootstrap for COPY/ADD
+- Docker Version: 28.1.1; supports BuildKit and Buildx; no native GPU build support required due to lack of NVIDIA GPU

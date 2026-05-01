@@ -1,0 +1,207 @@
+=== ADJUSTED ENVIRONMENT SETUP PLAN ===
+
+**Note:** This plan is adjusted to a CPU-only environment without NVIDIA GPUs, based on hardware info provided. GPU-related steps, dependencies, and configurations are removed or modified accordingly.
+
+---
+
+1. DOWNLOADS NEEDED:  
+   - Operating System: Ubuntu LTS 22.04 (recommended)  
+   - Python: version >= 3.10.x (environment config uses Python 3.12, recommend installing 3.12 or compatible with virtual environment setup)  
+   - Python pip: version > 21.06  
+   - Docker CE: version > 19.03.5 (your Docker version 28.1.1 is compatible)  
+   - **No NVIDIA Container Toolkit or GPU Driver required** (remove nvidia-container-toolkit, nvidia-container-runtime, nvidia-docker2, and NVIDIA GPU driver dependencies)  
+   - Git (to clone the repository)  
+   - jq or envsubst utility on host system (for environment variable substitution in nginx config files)  
+   - wget (required by quickstart_launcher.sh for downloading NGC CLI)  
+   - MongoDB Docker image (mongo:latest) – pulled automatically via docker-compose  
+   - SeaweedFS Docker image (chrislusf/seaweedfs:latest) – pulled automatically via docker-compose if SeaweedFS profile enabled  
+   - Nginx Docker image (nginx:alpine) – pulled automatically via docker-compose  
+   - TAO API Docker images and related images pulled automatically or built locally as per environment variables; **use CPU-optimized or non-GPU tags if available**:  
+     - IMAGE_TAO_API: nvcr.io/nvidia/tao/tao-toolkit:6.26.3-cosmos-rl (check for CPU-compatible variant or fallback to CPU mode if GPU images are used)  
+     - IMAGE_TAO_PYTORCH: nvcr.io/nvidia/tao/tao-toolkit:6.26.3-pyt  
+     - IMAGE_TAO_DEPLOY: nvcr.io/nvidia/tao/tao-toolkit:6.26.3-deploy  
+     - IMAGE_VILA: nvcr.io/ea-tlt/tao_ea/vila_fine_tuning_inf:latest  
+     - IMAGE_TAO_DS: nvcr.io/nvidia/tao/tao-toolkit:6.26.3-data-services  
+     - IMAGE_COSMOS_RL: nvcr.io/nvidia/tao/tao-toolkit:6.26.3-cosmos-rl  
+     - **Verify these images support CPU-only usage or provide CPU fallbacks; if no CPU variants exist, consider building local CPU-compatible images or consult TAO documentation for CPU mode usage**  
+   - Environment variables and image tags must be consistent with versions specified in `setup/tao-docker-compose/config.env`  
+   - Optional: Python virtual environment tools (e.g., venv or conda) for managing Python 3.12 environment  
+   - Optional: Additional tools/utilities as required by TAO launcher, notebooks, or quickstart_launcher.sh script  
+   - **New dependencies introduced by quickstart_launcher.sh:**  
+     - Jupyter (installed via pip if missing during quickstart_launcher.sh install)  
+     - NGC CLI (downloaded via wget if not present)  
+   - **New dependencies:**  
+     - SeaweedFS S3 configuration file `s3-config.json` for S3-compatible object storage access  
+     - `secrets.json` file containing API keys for NGC and pretrained models (PTM) services  
+   - **New configuration file dependency:**  
+     - `.gitignore` file in repository root to exclude `.ipynb_checkpoints`, `.vscode`, `*.pyc` files  
+
+---
+
+2. FILES TO CREATE:  
+   - `~/.bashrc` or shell profile: No NVIDIA-specific environment variables needed; remove any NVIDIA runtime environment variables  
+   - Docker daemon configuration file (e.g., `/etc/docker/daemon.json`): Remove NVIDIA runtime as default; keep default runtime configuration  
+   - `quickstart_launcher.sh` script in `setup/` folder (no changes required, but it must handle absence of NVIDIA GPU gracefully)  
+   - Jupyter notebook environment configuration (requirements.txt or conda file) updated for Python 3.12  
+   - TAO-specific config files as per repo  
+   - `README_ENV_SETUP.md` (optional)  
+   - Docker Compose configuration file: `setup/tao-docker-compose/docker-compose.yml`  
+     - Remove any GPU device request configurations (`--gpus` flags or `runtime: nvidia` directives) from services  
+     - Confirm services include mongodb, seaweedfs (if enabled), nginx, and TAO API containers  
+     - Ensure `secrets.json` and `s3-config.json` files exist and are mounted correctly  
+   - `setup/tao-docker-compose/config.env`  
+     - Remove or comment out GPU-specific variables: NUM_GPU_PER_NODE (set to 0 or omit), MAX_GPU_PER_USER_REALTIME_INFER (set to 0 or omit)  
+     - Adjust or document that GPU-related environment variables are ignored or disabled in CPU-only mode  
+   - SSH keys directory `${HOME}/.ssh` for mounting into containers if needed  
+   - Optional: docker-compose `.env` file if used  
+   - `.gitignore` file in repository root with entries:  
+     - `.ipynb_checkpoints`  
+     - `.vscode`  
+     - `*.pyc`  
+   - Update error handling and validation scripts to:  
+     - Skip GPU checks and NVIDIA driver presence verification  
+     - Validate absence of GPU-related environment variables or handle accordingly  
+     - Check presence and correctness of `secrets.json`, `.gitignore`, and `quickstart_launcher.sh`  
+   - Volume definitions for persistent storage remain unchanged  
+   - nginx config files unchanged, with envsubst for ports and URLs  
+   - Ensure `quickstart_launcher.sh` executable and documented  
+
+---
+
+3. NECESSARY TEST CASES IN THE CODEBASE:  
+   - **Skip GPU accessibility and compatibility tests**  
+   - Docker container launch test: verify TAO containers start without GPU errors  
+   - MongoDB service test as usual  
+   - SeaweedFS services test (if enabled)  
+   - SeaweedFS S3 gateway authorization test  
+   - nginx reverse proxy test as usual  
+   - Python environment test with Python 3.12  
+   - REST API interaction test as usual  
+   - CLI launcher test, ensuring it handles no GPU scenario gracefully  
+   - Notebook execution test with Python 3.12, CPU-only  
+   - Data service test as usual  
+   - Error handling test: simulate GPU absence (expected) and verify no GPU-related error raised; check for other service failures  
+   - SSH keys mounting test as usual  
+   - Environment variable substitution test in nginx config as usual  
+   - Volume persistence test as usual  
+   - Validation test for deployment and runtime settings with GPU-related flags disabled or zeroed  
+   - Test GPU allocation limits: skip or verify set to zero/no allocation  
+   - Verification of `secrets.json` usage as usual  
+   - Validation of quickstart_launcher.sh robustness including no-GPU environment  
+   - Verification of `.gitignore` effectiveness as usual  
+
+---
+
+4. COMPLETE TODO LIST:  
+
+**Step 1: Verify system hardware**  
+- Confirm system has at least 16 GB RAM, 8-core CPU, 100 GB SSD space  
+- Confirm **no NVIDIA GPU present** (expected)  
+- Method: Run `lscpu`, `free -h`, confirm `nvidia-smi` not found or no GPUs detected  
+- Verification: No GPU detected, CPU architecture x86_64 verified  
+
+**Step 2: Install Ubuntu 22.04 LTS (if not already installed)**  
+- Verification: `lsb_release -a` returns Ubuntu 22.04  
+
+**Step 3: Skip NVIDIA GPU driver installation**  
+- No NVIDIA GPU present; do NOT install NVIDIA drivers or CUDA toolkit  
+- Verification: `nvidia-smi` absent or reports no devices  
+
+**Step 4: Install required Docker components**  
+- Docker CE already installed (version 28.1.1 compatible)  
+- No NVIDIA container toolkit installation or NVIDIA runtime configuration needed  
+- Docker daemon config: ensure default runtime is the standard Docker runtime  
+- Verification: Docker runs containers normally, no GPU runtime errors  
+
+**Step 5: Install Python 3.12 and pip > 21.06**  
+- Install Python 3.12 via apt, pyenv, or official installer  
+- Upgrade pip to > 21.06  
+- Optionally set up Python virtual environment at `/opt/venv/cosmos_rl` or as per PYTHON_BASE_PATH  
+- Verification: `python3 --version` shows 3.12, `pip --version` > 21.06  
+
+**Step 6: Clone TAO Tutorials repository**  
+- `git clone https://github.com/NVIDIA/tao_tutorials.git`  
+- Verify or create `.gitignore` with `.ipynb_checkpoints`, `.vscode`, `*.pyc`  
+- Verification: `.gitignore` effective as tested  
+
+**Step 7: Prepare Docker Compose environment**  
+- Go to `setup/tao-docker-compose`  
+- Verify `docker-compose.yml`: remove any GPU runtime or device requests  
+- Verify presence of:  
+  - `secrets.json` (with API keys, initially empty or valid) with secure permissions (chmod 600)  
+  - `nginx.conf` and `nginx_sites/default.conf` for proxy config  
+  - `config.env` with GPU variables removed or set to zero; other variables as per plan  
+  - `s3-config.json` mounted correctly  
+- Ensure SSH keys available for mounting if needed  
+- Verification: files present, permissions correct, no GPU runtime directives  
+
+**Step 8: Configure local storage and volumes**  
+- Confirm `/shared-storage/models` and other volume mounts exist and writable  
+- Verify `s3-config.json` accessible inside SeaweedFS s3 container  
+- Verification: volumes mounted and functional  
+
+**Step 9: Ensure presence and permissions of `quickstart_launcher.sh`**  
+- Placed under `setup/`  
+- Make executable: `chmod +x setup/quickstart_launcher.sh`  
+- Verification: runs with `--help`, `--install`, `--upgrade` without GPU errors  
+
+**Step 10: Launch TAO microservices via Docker Compose**  
+- Run `docker-compose up -d` (add `--profile seaweedfs` if enabled)  
+- Verification: all containers start without GPU-related errors; services listen on expected ports  
+
+**Step 11: Validate SeaweedFS S3 Gateway configuration**  
+- Test S3 operations using credentials in `s3-config.json`  
+- Verification: access as per roles defined  
+
+**Step 12: Validate TAO API and pretrained models API key usage**  
+- Place valid keys in `secrets.json` if available  
+- Restart TAO API containers  
+- Verification: authenticated API calls succeed or fallback gracefully if keys missing  
+
+**Step 13: Run `./setup/quickstart_launcher.sh`**  
+- Use `--install` and `--upgrade` flags to install/upgrade TAO CLI and dependencies  
+- Verification: no errors, Jupyter and NGC CLI installed if missing; handles CPU-only environment  
+
+**Step 14: Validate Jupyter notebook environment**  
+- Install dependencies for notebooks with Python 3.12  
+- Launch notebooks and verify no runtime errors (CPU mode)  
+
+**Step 15: Test TAO runtime modes**  
+- Test TAO via microservices, launcher CLI, containers, Python wheels, source code  
+- Verify CPU-only operation works as documented or supported  
+
+**Step 16: Test environment robustness and error handling**  
+- Simulate missing GPU (expected) and verify no GPU-related errors  
+- Test container failures gracefully handled  
+- Verify SSH keys mounted inside containers  
+- Verify environment variable substitution in nginx config  
+- Verify deployment flags effective with GPU disabled  
+- Verify S3 gateway authorization and TAO API keys usage as usual  
+- Verify quickstart_launcher.sh error handling and messages  
+
+**Step 17: Validate `.gitignore` functionality**  
+- Confirm `.gitignore` excludes `.ipynb_checkpoints`, `.vscode`, `*.pyc` files effectively  
+
+**Step 18: Set up error handling and documentation**  
+- Document GPU absence and CPU-only usage instructions clearly  
+- Update environment validation script to skip GPU checks but verify all other components  
+- Verify script detects readiness or issues accurately  
+
+**Step 19: Optional - Automate environment setup**  
+- Provide scripts or compose overrides for CPU-only environment setup  
+- Include quickstart_launcher.sh invocation  
+
+---
+
+**Summary of key adjustments:**  
+- All GPU-related installations, configurations, and runtime settings removed or disabled  
+- Docker Compose files cleaned from GPU runtime and device requests  
+- Environment variables related to GPU set to zero or omitted  
+- TAO Docker images verified or replaced with CPU-compatible variants if available  
+- Validation and error handling scripts adapted for CPU-only environment  
+- Paths and file locations remain unchanged, relative to `/home/cc/EnvGym/data/20260501_071208_tensorblock_gpt-4.1-mini/tao_tutorials`  
+- Docker version 28.1.1 compatible with plan; platform x86_64 used as recommended  
+- Python 3.12 used as per plan  
+- `.gitignore` and secrets/config files handled as described  
+
+This adjusted plan ensures the environment is fully functional and consistent with your hardware capabilities (CPU only, no NVIDIA GPU).

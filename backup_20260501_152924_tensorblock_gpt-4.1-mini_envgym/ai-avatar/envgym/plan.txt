@@ -1,0 +1,194 @@
+=== ADJUSTED ENVIRONMENT SETUP PLAN FOR AI-AVATAR PROJECT ON x86_64 LINUX CPU-ONLY HARDWARE ===
+
+---
+
+### 1. DOWNLOADS NEEDED:
+
+- Git (to clone the Fooocus repository)  
+- Python 3.10 (required version for Linux native, venv, and Conda environment installations)  
+- Conda or Miniconda (optional but recommended for Conda environment setup on Linux)  
+- CPU-only Python packages; **No Nvidia GPU Drivers or CUDA toolkit needed** (Nvidia GPU not available)  
+- **No AMD GPU Drivers needed** (no AMD GPU present)  
+- 7-Zip or equivalent decompression tool (for Windows .7z archive; likely not needed here but keep if Windows cross-use)  
+- Pip 23.0 (as specified in environment.yaml, to ensure updated Python package management)  
+- Packaging Python module (required by dependency management, specified in environment.yaml)  
+- (Optional) Visual C++ Redistributable not needed on Linux  
+- (Optional) Any software needed to enable or verify system swap/pagefile on Linux (recommended to ensure swap enabled with sufficient free space, 40GB+)  
+- Python packages specified in `requirements_versions.txt` with pinned versions (all compatible with Python 3.10 and Linux x86_64):  
+  - torchsde==0.2.5  
+  - einops==0.4.1  
+  - transformers==4.30.2  
+  - safetensors==0.3.1  
+  - accelerate==0.21.0  
+  - pyyaml==6.0  
+  - Pillow==9.2.0  
+  - scipy==1.9.3  
+  - tqdm==4.64.1  
+  - psutil==5.9.5  
+  - pytorch_lightning==1.9.4  
+  - omegaconf==2.2.3  
+  - gradio==3.41.2  
+  - pygit2==1.12.2  
+  - opencv-contrib-python==4.8.0.74  
+  - httpx==0.24.1  
+  - onnxruntime==1.16.3  
+  - timm==0.9.2  
+- Ensure package versions are tested for CPU-only usage (torch and pytorch_lightning will default to CPU mode)  
+- No additional GPU-specific downloads or drivers are required  
+
+---
+
+### 2. FILES TO CREATE:
+
+- `auth.json` in the root Fooocus directory (optional but recommended for enabling basic authentication)  
+  - Use example and replace default passwords with secure unique credentials  
+- `Fooocus/config.txt` (auto-generated after first launch)  
+- Language translation JSON files under `Fooocus/language/` (optional)  
+- (Optional) `.bat` files modification **not applicable for Linux**  
+- (Optional) Custom presets JSON files under `presets/` if modifying or adding presets  
+- `troubleshoot.md` (should be present in repo)  
+- `environment.yaml` (provided; ensure used for environment creation)  
+- `requirements_versions.txt` (provided; use for pinned versions installation)  
+
+---
+
+### 3. NECESSARY TEST CASES IN THE CODEBASE:
+
+- Verify environment setup and dependencies installation (Python packages, **CPU-only torch availability**)  
+- Confirm pip version 23.0 or compatible as per `environment.yaml`  
+- Confirm all packages from `requirements_versions.txt` installed exactly at specified versions  
+- Confirm `packaging` module installed and importable  
+- Test model automatic download and integrity verification  
+- Test GUI launch and accessibility on localhost and remote (`--listen` and `--share` modes)  
+- Validate prompt processing including GPT-2 based prompt expansion and prompt reweighting  
+- Test image generation pipeline for all presets (default, anime, realistic) in CPU mode  
+- Test inpainting and outpainting features  
+- Test multi-device selection fallback to CPU (no GPU present)  
+- Test language translation loading and UI changes when `--language` flag used  
+- Test authentication by `auth.json` if configured  
+- Test error handling for minimal system requirements and resource limitations (system RAM and swap)  
+- Test command line argument parsing and flags for expected behavior  
+- Test Conda environment creation with `environment.yaml` and install `requirements_versions.txt` packages to confirm pip 23.0 and packaging module presence  
+- Test pip package versions and compatibility with Python 3.10, environment.yaml dependencies, and CPU-only usage  
+- Test onnxruntime and pytorch_lightning functionality in CPU mode  
+- Test httpx and pygit2 modules functionality  
+
+---
+
+### 4. COMPLETE TODO LIST:
+
+1. **Verify hardware meets minimal requirements for CPU-only usage:**  
+   - Architecture: x86_64 compatible (confirmed)  
+   - GPU: None (CPU-only operation)  
+   - System RAM: Minimum 8GB, recommended 32GB or more for CPU-only performance  
+   - Ensure system swap/pagefile enabled with at least 40GB free space  
+   - GPU drivers installation skipped (no Nvidia or AMD GPU present)  
+
+2. Download and install necessary tools:  
+   - Install Git  
+   - Install Python 3.10 (if not installed)  
+   - Install Conda/Miniconda (optional but recommended)  
+   - Ensure pip upgraded to 23.0 (or use pinned version from `environment.yaml`)  
+   - Install decompression tool if needed for Windows archives (optional here)  
+
+3. Clone Fooocus repository:  
+   - Run:  
+     ```bash  
+     git clone https://github.com/lllyasviel/Fooocus.git  
+     cd Fooocus  
+     ```  
+
+4. Set up environment on Linux x86_64 with CPU-only:  
+
+   - **Using Conda (recommended):**  
+     ```bash  
+     conda env create -f environment.yaml  
+     conda activate fooocus  
+     pip install -r requirements_versions.txt  
+     ```  
+     - Confirm pip version is 23.0 as specified  
+     - Confirm `packaging` module installed  
+     - Confirm all pinned packages installed exactly  
+
+   - **Using Python venv:**  
+     ```bash  
+     python3 -m venv fooocus_env  
+     source fooocus_env/bin/activate  
+     pip install --upgrade pip==23.0  
+     pip install packaging  
+     pip install -r requirements_versions.txt  
+     ```  
+
+   - **Using native Python environment:**  
+     ```bash  
+     pip3 install --upgrade pip==23.0  
+     pip3 install packaging  
+     pip3 install -r requirements_versions.txt  
+     ```  
+
+5. **Skip AMD GPU user steps** (no AMD GPU available)  
+6. Download or allow automatic download of models on first run into `Fooocus/models/checkpoints` and other model folders  
+   - Manually download inpaint control model if using inpainting:  
+     `https://huggingface.co/lllyasviel/fooocus_inpaint/resolve/main/inpaint_v26.fooocus.patch` to `Fooocus/models/inpaint/`  
+7. Configure authentication (optional but recommended):  
+   - Create `auth.json` in root Fooocus directory with secure credentials  
+8. Verify installation and environment:  
+   - Run GUI:  
+     ```bash  
+     python entry_with_update.py  
+     ```  
+     or equivalent launch command  
+   - Confirm GUI launches without errors  
+   - Confirm models download successfully without corruption  
+   - Confirm system swap/pagefile enabled if "RuntimeError: CPUAllocator" occurs  
+   - Test image generation with simple prompt ("forest elf") on CPU  
+   - Confirm pip version 23.0 and `packaging` module presence  
+   - Confirm all pinned packages installed exactly as specified  
+9. (Optional) Configure localization by placing language JSON files under `Fooocus/language/` and launching with `--language` flag  
+10. (Optional) Edit `Fooocus/config.txt` after first run to customize paths, models, sampler, prompts, styles  
+11. (Optional) Modify and test CLI options as needed (`--listen`, `--share`, `--preset`, `--disable-offload-from-vram`)  
+12. Run comprehensive tests:  
+    - Generate images with all presets in CPU-only mode  
+    - Test inpainting/outpainting  
+    - Test prompt and face swap features  
+    - Test multi-prompt input and weights  
+    - Test remote UI access (`--listen`, `--share`)  
+    - Test error handling for insufficient RAM or swap  
+    - Test environment consistency with `environment.yaml` and `requirements_versions.txt`  
+    - Test authentication via `auth.json`  
+13. Document any platform-specific issues or adjustments (e.g., CPU-only runtime performance notes)  
+14. (Optional) Explore advanced/community forks if desired  
+
+---
+
+### Verification Methods (Adjusted for CPU-only Linux x86_64):
+
+- Confirm GUI loads without exceptions or errors on Linux x86_64 CPU-only  
+- Confirm model files exist and checksums valid  
+- Confirm image generation completes (expect longer runtime vs GPU, adjust expectations accordingly)  
+- Confirm prompt processing produces expected style and output  
+- Confirm no errors related to GPU memory or missing GPU dependencies  
+- Confirm remote UI access functions with `--listen` and `--share`  
+- Confirm authentication works as expected with configured `auth.json`  
+- Confirm language translations load correctly when requested  
+- Confirm pip version 23.0 and `packaging` module installed in all Python environments  
+- Confirm all packages from `requirements_versions.txt` installed at pinned versions, compatible with environment.yaml and Python 3.10  
+- Confirm onnxruntime and pytorch_lightning function in CPU-only mode  
+- Confirm no conflicts or version mismatches between environment.yaml and `requirements_versions.txt` packages  
+
+---
+
+### Summary of Key Adjustments Based on Hardware Info:
+
+- **No GPU drivers or CUDA/DirectML/ROCm required or installed**  
+- **CPU-only operation; packages and tests aligned accordingly**  
+- **Architecture confirmed x86_64 Linux compatible; no ARM or Mac MPS steps needed**  
+- **Conda and Python environment setup instructions tailored for Linux CPU-only**  
+- **Paths and files remain standard; working directory is `/home/cc/EnvGym/data/20260501_071208_tensorblock_gpt-4.1-mini/ai-avatar` (adjust commands accordingly when invoked)**  
+- **Docker environment usage (if applicable) should use Linux x86_64 base images without GPU passthrough**  
+- **Ensure swap/pagefile enabled with sufficient free space to avoid memory errors on CPU-only system**  
+- **Skip Windows `.bat` modifications and GPU-specific tweaks**  
+
+---
+
+This completes the adjusted environment setup plan optimized for your Linux x86_64 CPU-only hardware environment.

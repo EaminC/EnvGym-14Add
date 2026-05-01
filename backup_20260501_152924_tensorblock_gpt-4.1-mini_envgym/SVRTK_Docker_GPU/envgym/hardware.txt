@@ -1,0 +1,6 @@
+- Working Directory: /home/cc/EnvGym/data/20260501_071208_tensorblock_gpt-4.1-mini/SVRTK_Docker_GPU; project structure rooted here, likely host-mounted paths should use absolute paths from this directory  
+- Architecture: x86_64; recommended --platform=linux/amd64  
+- Base Image: x86_64 compatible images (e.g., ubuntu, debian, python:3.x-amd64)  
+- GPU: NVIDIA GPU not available; no CUDA or GPU-specific base images needed  
+- Instruction Notes: no GPU-specific Dockerfile instructions; use default CPU optimizations; large memory available, consider multi-stage builds for efficient layering; ensure mounting paths align with working directory  
+- Docker Version: 28.1.1; supports BuildKit and docker buildx; no GPU build support required (--gpus flag not needed)

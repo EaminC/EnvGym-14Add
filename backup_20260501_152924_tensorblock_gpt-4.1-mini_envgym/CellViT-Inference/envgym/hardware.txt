@@ -1,0 +1,6 @@
+- Working Directory: /home/cc/EnvGym/data/20260501_071208_tensorblock_gpt-4.1-mini/CellViT-Inference, project likely local source context for COPY/ADD steps  
+- Architecture: x86_64, recommended --platform=linux/amd64  
+- Base Image: amd64 Linux images, no ARM or other arch required  
+- GPU: No NVIDIA GPU detected, no CUDA or GPU-enabled base image needed  
+- Instruction Notes: Use overlay2 storage driver compatible instructions; no GPU build flags; large memory and CPU count do not affect Dockerfile syntax but allow for resource-heavy build steps; ensure paths relative to working directory  
+- Docker Version: 28.1.1, supports BuildKit and Docker Buildx, no native GPU build support since no NVIDIA GPU; use standard build commands without --gpus flag

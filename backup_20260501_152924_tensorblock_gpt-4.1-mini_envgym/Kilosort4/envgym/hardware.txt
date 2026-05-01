@@ -1,0 +1,6 @@
+- Working Directory: /home/cc/EnvGym/data/20260501_071208_tensorblock_gpt-4.1-mini/Kilosort4; project under user home, use COPY or ADD relative to this path
+- Architecture: x86_64; recommended --platform=linux/amd64
+- Base Image: x86_64 compatible official images (e.g., ubuntu, debian, python for amd64)
+- GPU: NVIDIA GPU not available; no CUDA base image required or recommended
+- Instruction Notes: No GPU-specific Dockerfile instructions needed; leverage overlay2 storage driver features; ensure file paths in Dockerfile match project structure under working directory
+- Docker Version: 28.1.1; supports BuildKit and modern Dockerfile features; --gpus flag not applicable due to absence of NVIDIA GPU

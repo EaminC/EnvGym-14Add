@@ -1,0 +1,248 @@
+=== ADJUSTED ENVIRONMENT SETUP PLAN BASED ON HARDWARE INFORMATION ===
+
+**Summary of hardware context:**  
+- CPU architecture: x86_64 (linux/amd64 platform recommended)  
+- No NVIDIA GPU present (no CUDA or GPU acceleration possible)  
+- Linux OS compatible images (Ubuntu 20.04/22.04 recommended)  
+- Docker version 28.1.1 with BuildKit, no GPU build support needed  
+- Working directory: `/home/cc/EnvGym/data/20260501_071208_tensorblock_gpt-4.1-mini/pdf-to-podcast`  
+- Project is CPU-focused; no GPU dependencies required or usable  
+- Paths in Dockerfiles and COPY/ADD directives must align with working directory and project structure  
+
+---
+
+### 1. DOWNLOADS NEEDED (Adjusted)
+
+- **Docker Engine and Docker Compose**  
+  - Use latest stable Docker and Compose plugin (v2.29.1+) for Linux x86_64  
+  - No special NVIDIA Container Toolkit installation needed (skip NVIDIA GPU toolkit)  
+- **Python environment**  
+  - Python 3.9+ recommended (3.11-slim base images used in PDFService and TTSService Dockerfiles remain compatible)  
+  - For PDFModelService API and Worker, base images are CUDA-enabled PyTorch images; since no GPU is present:  
+    - Consider adjusting or replacing these Dockerfiles to CPU-only PyTorch images if GPU cannot be used (see Step 8)  
+    - Alternatively, run GPU-enabled containers without GPU; may cause runtime errors or non-functional GPU-based ML inference — **recommend building CPU-only variants or disabling GPU features**  
+- **NVIDIA Container Toolkit**  
+  - **Skip installation entirely**  
+  - Remove or disable GPU runtime flags in Docker Compose to avoid startup errors  
+- **System build tools and utilities**  
+  - Install `build-essential`, `git`, `make`, `python3-venv`, `python3-pip` on host as per original plan  
+  - Ensure Dockerfiles that rely on `build-essential` continue to install necessary build tools  
+- **Python packages**  
+  - Install as before; no change needed  
+- **Message broker**  
+  - Redis remains required and unchanged  
+- **Docker volumes**  
+  - Create `nim_cache` volume as before, but note:  
+    - `local-nim` service requires GPU and NVIDIA runtime; **do not start this service on CPU-only hardware** unless replaced with CPU-only image or alternative  
+- **Shared package dependencies** remain unchanged  
+
+---
+
+### 2. FILES TO CREATE (Adjusted)
+
+- `.env` file:  
+  - Include environment variables as before  
+  - **Remove or comment out any NVIDIA GPU-specific variables if not used, e.g., `NVIDIA_API_KEY` and `NGC_API_KEY`, unless needed by non-GPU services**  
+- `docker-compose.yaml`:  
+  - **Remove or comment out GPU runtime and device reservation flags (`runtime: nvidia`, `deploy.resources.reservations.devices`) on all services**  
+  - **Remove or disable the `local-nim` service entirely or skip starting it** because it requires NVIDIA GPU  
+  - For PDFModelService API and Worker services:  
+    - Replace base images with CPU-only PyTorch images (e.g., `pytorch/pytorch:2.4.0-cpu` or equivalent) in Dockerfiles  
+    - Remove GPU-specific environment variables or flags  
+    - Remove `--gpus` or NVIDIA runtime flags if present  
+  - Volumes and networks remain unchanged  
+- Dockerfiles:  
+  - Create CPU-only variants of `services/PDFService/PDFModelService/Dockerfile.api` and `Dockerfile.worker` with CPU-compatible PyTorch base images  
+  - Update Dockerfiles to skip CUDA libraries installation if CPU-only images are used  
+- Other files (`models.json`, `.env`, `requirements.txt`, `tests/requirements-test.txt`) remain unchanged  
+- Shared package dirs remain unchanged  
+
+---
+
+### 3. NECESSARY TEST CASES IN THE CODEBASE (Adjusted)
+
+- All test cases remain relevant except:  
+  - Skip or disable GPU availability and CUDA-specific tests (e.g., inside PDFModelService API and Worker containers)  
+  - Skip `local-nim` service tests requiring GPU and NVIDIA runtime environment  
+  - Validate that PDFModelService API and Worker function correctly with CPU-only PyTorch images  
+- Validate all CPU-based functionality and service endpoints as per original plan  
+- Confirm no GPU-dependent features cause failures in CPU environment  
+
+---
+
+### 4. COMPLETE TODO LIST (Adjusted)
+
+**Step 1: Prepare system environment**  
+- Use Ubuntu 20.04 or 22.04 on x86_64 (recommended)  
+- Install required utilities:  
+  ```
+  sudo apt update && sudo apt upgrade -y
+  sudo apt install -y git make python3 python3-venv python3-pip build-essential
+  ```  
+- Verify Python 3.9+ with:  
+  ```
+  python3 --version
+  ```  
+
+**Step 2: Install Docker and Docker Compose**  
+- Follow official instructions for Linux x86_64 (no GPU support needed)  
+- Verify installations:  
+  ```
+  docker --version
+  docker compose version
+  ```  
+
+**Step 3: Skip NVIDIA Container Toolkit installation**  
+- No GPU detected; skip NVIDIA drivers and container toolkit installation  
+- Do not install or configure GPU runtime or `nvidia-docker2`  
+
+**Step 4: Clone the repository**  
+- As before:  
+  ```
+  git clone https://github.com/NVIDIA-AI-Blueprints/pdf-to-podcast
+  cd pdf-to-podcast
+  ```  
+
+**Step 5: Obtain API keys**  
+- Obtain ElevenLabs API key for TTSService  
+- Obtain NVIDIA NIM API key **only if using remote NIM API or other non-local GPU services**  
+- Since `local-nim` service requires GPU and will not be started, local NIM usage is optional and skipped  
+
+**Step 6: Create and set environment variables**  
+- Create `.env` file with required keys:  
+  ```
+  ELEVENLABS_API_KEY=your_elevenlabs_api_key_here
+  MAX_CONCURRENT_REQUESTS=1
+  MODEL_API_URL=http://pdf-api:8004
+  ```  
+- Omit or comment out NVIDIA API keys and any NIM-specific variables unless remote API usage is intended  
+- Add Redis URL and MinIO credentials as needed  
+- Ensure `.env` is in `.gitignore`  
+
+**Step 7: Create required Docker volumes**  
+- Create volumes as usual:  
+  ```
+  docker volume create redis_data
+  docker volume create pdf_temp
+  docker volume create minio_data
+  ```  
+- **Skip creating `nim_cache` volume if not using `local-nim` service**  
+
+**Step 8: Configure Docker Compose**  
+- Use updated `docker-compose.yaml` with these key adjustments:  
+  - Remove or comment out GPU runtime and device reservation flags on all services  
+  - Do **not** start `local-nim` service (exclude `--profile local` or comment out service)  
+  - Modify PDFModelService API and Worker Dockerfiles to CPU-only base images (e.g., `pytorch/pytorch:2.4.0-cpu`) and update the compose file to use these images  
+  - Ensure no `runtime: nvidia` or `--gpus` flags are present  
+- All other services and volumes remain unchanged  
+- Network and dependencies remain unchanged  
+
+**Step 9: Install Python dependencies and setup virtual environment**  
+- Create and activate venv:  
+  ```
+  python3 -m venv .venv
+  source .venv/bin/activate
+  ```  
+- Upgrade pip:  
+  ```
+  pip install --upgrade pip
+  ```  
+- Install core dependencies:  
+  ```
+  pip install -r requirements.txt
+  ```  
+- For PDFModelService local development, install CPU-compatible dependencies from adjusted `requirements.api.txt` and `requirements.worker.txt`  
+- For test environment:  
+  ```
+  pip install -r tests/requirements-test.txt
+  ```  
+- Run linter:  
+  ```
+  ruff .
+  ```  
+
+**Step 10: Build and start all services**  
+- Build Docker images with CPU-compatible Dockerfiles:  
+  ```
+  docker build -t agentservice:latest services/AgentService
+  docker build -t apiservice:latest services/APIService
+  docker build -t pdfservice:latest services/PDFService
+  docker build -t pdfmodelservice_api:latest services/PDFService/PDFModelService -f Dockerfile.api.cpu
+  docker build -t pdfmodelservice_worker:latest services/PDFService/PDFModelService -f Dockerfile.worker.cpu
+  docker build -t ttsservice:latest services/TTSService
+  ```  
+- Start services without `local-nim`:  
+  ```
+  docker compose up -d
+  ```  
+- Confirm running containers with `docker ps`:  
+  - AgentService, APIService, PDFService, PDFModelService API and Worker, TTSService, Redis, MinIO, Jaeger  
+- **Do not start `local-nim` service (no GPU available)**  
+
+**Step 11: Run test podcast generation and service tests**  
+- Activate venv:  
+  ```
+  source .venv/bin/activate
+  ```  
+- Ensure test dependencies installed  
+- Run tests as per original instructions, excluding GPU-specific tests and `local-nim` tests  
+- Validate all CPU-based service functionality  
+- Monitor logs:  
+  ```
+  docker compose logs
+  ```  
+
+**Step 12: Optional customization and development**  
+- Host PDF extraction or model services remotely if local GPU acceleration is not possible  
+- Adjust `MODEL_API_URL` accordingly  
+- Develop or maintain CPU-only Dockerfiles for PDFModelService API and Worker  
+- Use `jupyter lab` and Gradio as needed  
+- Develop OpenTelemetry tracing integration as per original plan  
+- Manage environment variables with `python-dotenv`  
+- Skip GPU assignment flags in compose file  
+- Skip `local-nim` service or replace with CPU-only alternative if available  
+
+**Step 13: Code quality and CI/CD**  
+- Run linting and formatting before commits:  
+  ```
+  make ruff
+  ```  
+- Run all applicable tests excluding GPU-dependent ones  
+- Follow contribution guidelines  
+
+**Step 14: Production readiness (if applicable)**  
+- SSL/TLS termination and certificate management as per original plan  
+- Secure API keys and sensitive data storage  
+- Test HTTPS deployment and monitor health  
+
+---
+
+### Verification methods (Adjusted)
+
+- Confirm all software versions meet requirements (Python ≥3.9, Docker 28.1.1, Compose ≥2.29.1)  
+- Confirm Docker Compose services start without errors, excluding `local-nim`  
+- Confirm no GPU runtime errors occur (no NVIDIA runtime flags used)  
+- Validate API keys (ElevenLabs, NVIDIA API if used remotely)  
+- Confirm podcast/audio file generation works with CPU-only PDFModelService  
+- Verify Swagger UI endpoints accessible at:  
+  - `http://localhost:8003/docs` (PDFService)  
+  - `http://localhost:8002/docs` (APIService)  
+  - `http://localhost:8004/docs` (PDFModelService API)  
+  - `http://localhost:8889/docs` (TTSService)  
+  - `http://localhost:8964` (AgentService)  
+- Confirm logs free of GPU or CUDA errors  
+- Confirm environment variables loaded correctly  
+- Confirm Python dependencies installed including `langchain-nvidia-ai-endpoints`  
+- Confirm test dependencies installed and usable  
+- Confirm `ruff` code style compliance  
+- Confirm JupyterLab launches if used  
+- Confirm Gradio UI if applicable  
+- Confirm Redis and MinIO persistence and connectivity  
+- Confirm Celery task processing in PDFModelService Worker (CPU)  
+- Confirm OpenTelemetry tracing data available in Jaeger UI  
+- Skip `nvidia-smi` and GPU availability checks (not applicable)  
+- Skip `local-nim` service API endpoint tests and cache persistence tests  
+
+---
+
+This completes the environment setup plan adjusted for CPU-only x86_64 hardware with no NVIDIA GPU presence. The key changes are the removal of all GPU-related components including NVIDIA Container Toolkit, `local-nim` service, and GPU runtime flags, plus adjustment or replacement of GPU-dependent Docker images (PDFModelService API and Worker) with CPU-only compatible images. All other services and dependencies remain unchanged.

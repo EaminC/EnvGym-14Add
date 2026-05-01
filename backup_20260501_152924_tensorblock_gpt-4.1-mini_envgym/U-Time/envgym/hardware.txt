@@ -1,0 +1,6 @@
+- Working Directory: /home/cc/EnvGym/data/20260501_071208_tensorblock_gpt-4.1-mini/U-Time; likely CPU-only workloads, no GPU dependencies indicated  
+- Architecture: x86_64; recommended --platform=linux/amd64  
+- Base Image: CPU-compatible Linux base images (e.g., ubuntu:20.04, debian, or python slim variants for amd64)  
+- GPU: NVIDIA GPU not available; no CUDA base image required  
+- Instruction Notes: Optimize for multi-core CPU (48 physical cores, 96 logical cores); no GPU-related Dockerfile instructions needed; use overlay2 storage driver compatible instructions; working directory path long—consider WORKDIR /app or relative paths inside container  
+- Docker Version: 28.1.1; supports BuildKit, Docker Compose v2.35.1; no native GPU build support since no NVIDIA GPU; use standard CPU build instructions

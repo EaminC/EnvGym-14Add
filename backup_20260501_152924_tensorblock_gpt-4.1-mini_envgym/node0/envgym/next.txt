@@ -1,0 +1,16 @@
+current progress  
+- Base image updated to ubuntu:22.04 with necessary system packages installed including python3.11 and cargo.  
+- Locale set to en_US.UTF-8.  
+- Pip upgraded and hatchling installed.  
+- Rust toolchain installed and verified (rustc, cargo, rustup).  
+- Attempted to install hivemind from GitHub commit v0.7.44 but failed during pip install step with no detailed error output.  
+- Docker build aborted at hivemind installation step; subsequent node0 package installation not reached.  
+
+next step  
+- Add verbose logging or debugging to the hivemind pip install command to capture detailed error messages (e.g., add `-v` or `--no-cache-dir`).  
+- Verify Rust toolchain and build dependencies are fully installed and compatible; consider installing any missing Rust components or system libraries required by hivemind.  
+- Confirm network access and GitHub repository availability during build.  
+- Optionally isolate hivemind installation in a separate RUN step for clearer failure diagnosis.  
+- Consider pinning hivemind version to a stable release if commit checkout causes issues.  
+- Ensure Python environment paths and permissions are correctly set for pip installs.  
+- After fixing hivemind installation, proceed with `pip install .` for node0 package.

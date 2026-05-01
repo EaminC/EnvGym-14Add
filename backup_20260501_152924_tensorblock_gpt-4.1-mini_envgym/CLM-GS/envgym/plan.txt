@@ -1,0 +1,246 @@
+=== ADJUSTED ENVIRONMENT SETUP PLAN (for CPU-only Linux x86_64 system) ===
+
+---
+
+**Summary:**  
+Your hardware environment is Linux x86_64 without an NVIDIA GPU. Consequently, CUDA, GPU drivers, and GPU-accelerated PyTorch builds are not applicable. The plan below is adjusted to fully support CPU-only operation, leveraging CPU training/offload modes, and ensuring compatibility with your hardware. Storage and memory requirements remain important and unchanged. This plan assumes no GPU acceleration and instructs necessary changes accordingly.
+
+---
+
+1. DOWNLOADS NEEDED (ADJUSTED FOR CPU-ONLY):
+
+- Git (latest stable version) for cloning the repository  
+- Conda (Anaconda or Miniconda) with Python 3.10 environment support  
+- **No NVIDIA GPU driver or CUDA Toolkit installation required** (remove all CUDA 12.4 and related dependencies)  
+- PyTorch 2.6.0 **CPU-only version** (install CPU-only PyTorch build)  
+- Additional Python packages: torchvision 0.21.0, torchaudio 2.6.0 (CPU-only builds if applicable)  
+- Python packages (via pip): tqdm, plyfile, psutil, numba, opencv-python, scipy, matplotlib, pandas, imageio, imageio-ffmpeg, requests, tabulate  
+- Build tools for compiling submodules (e.g., gcc/g++, setuptools) compatible with your Linux OS and x86_64 architecture  
+- Optional: Black code formatter (pip install black)  
+- Adequate local disk storage:  
+  - Minimum ~500GB free disk space recommended for MatrixCity BigCity dataset decoded images (as before)  
+  - At least 50GB free disk for models/outputs  
+  - Fast local disk strongly recommended especially for large datasets (avoid network filesystems)  
+- System memory:  
+  - Minimum 32GB RAM recommended for regular experiments  
+  - For large-scale datasets (BigCity 102M), 100GB+ CPU RAM recommended for pinned memory allocations  
+  - Mip360 and Rubble 4K datasets’ CPU RAM requirements remain unchanged  
+- Optional: bash shell for running example scripts  
+- Notes on offload strategies:  
+  - `--clm_offload` **can still be used** in CPU-only mode but CUDA kernels in `clm_kernels` are CUDA-based and require GPU presence; thus, **`--clm_offload` cannot be used on CPU-only systems** because it depends on CUDA and GPU drivers  
+  - `--naive_offload` uses CPU pinned memory but also depends on CUDA GPU for data transfer and training; thus, **`--naive_offload` is not applicable without GPU**  
+  - **Only `--no_offload` training strategy is feasible and supported on your CPU-only system** (full training on CPU without GPU offloading)  
+  - `--no_offload` uses `gsplat` rendering kernels which are native CPU-compatible (compiled submodules support CPU)  
+- Version compatibility requirements:  
+  - Python 3.10  
+  - PyTorch 2.6.0 CPU-only build  
+  - Compatible build tools (gcc/g++, make, python-dev headers) for compiling submodules  
+- Environment variables related to CUDA allocator config (`PYTORCH_CUDA_ALLOC_CONF`) are **not applicable** and should be omitted  
+
+---
+
+2. FILES TO CREATE (UNCHANGED):
+
+- `.condarc` (optional) for conda configuration  
+- `environment.yml` (optional) with Python 3.10 and all pip packages (adjust PyTorch and torchvision to CPU-only versions)  
+- `README.md`, `LICENSE.txt` as before  
+- Shell scripts for automation (same as before)  
+- Dataset experiment scripts (`release_scripts/bigcity.sh`, `mip360.sh`, `rubble4k.sh`) can be used with `--no_offload` only  
+- Documentation files remain the same  
+- Ensure inclusion and compilation of CPU-compatible submodules (`gsplat`, `clm_kernels` submodule compilation may fail or be skipped due to lack of CUDA; skip or disable `clm_kernels` build)  
+- Ensure `gaussian_model.py` and `engine.py` support `GaussianModelNoOffload` and no GPU dependencies  
+- Omit environment variable config for CUDA allocator  
+- Notes on large disk/memory requirements for datasets remain unchanged  
+
+---
+
+3. NECESSARY TEST CASES (ADJUSTED FOR CPU-ONLY):
+
+- Verify successful cloning with submodules (note: `clm_kernels` submodule may fail to build or be skipped)  
+- Test Python environment activation and package imports including CPU-only torch, torchvision, torchaudio, numba, opencv, etc.  
+- **Test that torch.cuda.is_available() returns False** and no CUDA version check is needed  
+- Test compilation and import of CPU-compatible submodules only (`gsplat`, `cpu-adam`, `fast-tsp`, `simple-knn`)  
+- Run small sanity training run using the `--no_offload` strategy on a small dataset (e.g., Mip360) with batch size 4 or smaller to verify pipeline correctness and environment setup  
+- Confirm microbatch pipelining and gradient accumulation run without errors on CPU  
+- Validate dataset loading and decoding mechanism as before  
+- **Skip all tests related to `--clm_offload` and `--naive_offload` strategies** (these require GPU and CUDA)  
+- Confirm training results and logs for `--no_offload` only  
+- Validate dataset decoding reuse and caching as before  
+- Validate results aggregation from logs for `--no_offload` runs  
+- Confirm no CUDA-related errors during training or submodule imports  
+
+---
+
+4. COMPLETE TODO LIST (ADJUSTED):
+
+**Step 1: Prepare Hardware and System**  
+- Confirm no NVIDIA GPU present; CUDA and GPU driver installation omitted  
+- Ensure system has minimum 32GB CPU RAM (≥100GB recommended for large BigCity experiments)  
+- Ensure adequate disk space as specified  
+- Install standard Linux build tools: gcc, g++, make, python3-dev headers  
+
+Verification:  
+- Confirm no `nvidia-smi` or GPU drivers installed (expected)  
+- Confirm CPU RAM availability (`free -h`)  
+- Confirm disk space (`df -h`)  
+
+---
+
+**Step 2: Install Conda and Create Python Environment**  
+- Install Miniconda or Anaconda (latest stable version for Linux x86_64)  
+- Create conda environment with Python 3.10:  
+  ```shell  
+  conda create -n clm_gs_cpu python=3.10 -y  
+  conda activate clm_gs_cpu  
+  ```  
+- Install CPU-only PyTorch 2.6.0 and related CPU-only torchvision and torchaudio packages:  
+  ```shell  
+  pip install torch==2.6.0+cpu torchvision==0.21.0+cpu torchaudio==2.6.0 --extra-index-url https://download.pytorch.org/whl/cpu  
+  ```  
+- Install other pip dependencies:  
+  ```shell  
+  pip install tqdm plyfile psutil numba opencv-python scipy matplotlib pandas imageio imageio-ffmpeg requests tabulate  
+  ```  
+
+Verification:  
+- Run `python -c "import torch; print(torch.__version__)"` and confirm CPU-only build (no CUDA)  
+- Run `python -c "import torch; print(torch.cuda.is_available())"` which should print `False`  
+
+---
+
+**Step 3: Clone Repository with Submodules**  
+- Clone with recursive submodules as before:  
+  ```shell  
+  git clone git@github.com:nyu-systems/CLM-GS.git --recursive  
+  cd CLM-GS  
+  ```  
+- If needed:  
+  ```shell  
+  git submodule update --init --recursive  
+  ```  
+
+Verification:  
+- Confirm all submodules cloned  
+- Note: `clm_kernels` submodule may not build without CUDA (skip build step for this submodule)  
+
+---
+
+**Step 4: Compile and Install Submodules**  
+- Install CPU-compatible submodules only:  
+  - Skip or disable `clm_kernels` installation due to CUDA dependency  
+  - Install other submodules normally:  
+  ```shell  
+  pip install --no-build-isolation submodules/cpu-adam  
+  pip install submodules/fast-tsp  
+  pip install --no-build-isolation submodules/gsplat  
+  pip install --no-build-isolation submodules/simple-knn  
+  ```  
+
+Verification:  
+- Confirm no compilation errors for CPU-compatible submodules  
+- Skip `clm_kernels` import or handle import failure gracefully in code  
+
+---
+
+**Step 5: Set Environment Variables**  
+- **Skip setting `PYTORCH_CUDA_ALLOC_CONF`** as no GPU CUDA allocator exists  
+
+Verification:  
+- Confirm environment variable unset or irrelevant  
+
+---
+
+**Step 6: Prepare Dataset(s)**  
+- Download and prepare datasets as per original instructions  
+- Use local fast disk storage for decoding images  
+- Decoding process unchanged  
+- Use only `--no_offload` training strategy for dataset experiments  
+
+Verification:  
+- Confirm dataset folder structures and decoded data presence  
+- Run dataset loading and decoding scripts  
+
+---
+
+**Step 7: Run Basic Training Command (Sanity Check)**  
+- Run small-scale training with `--no_offload` on small COLMAP dataset:  
+  ```shell  
+  python train.py -s <path_to_small_colmap_dataset> --no_offload --bsz 4  
+  ```  
+
+Verification:  
+- Confirm training starts and progresses on CPU without errors  
+- Monitor CPU RAM usage and process stability  
+
+---
+
+**Step 8: Run Dataset Experiments (Mip360, Rubble 4K, BigCity) with `--no_offload` only**  
+- Use existing scripts but modify them to only run `--no_offload` mode (remove or comment out calls with `clm_offload` or `naive_offload`)  
+- Example:  
+  ```shell  
+  CUDA_VISIBLE_DEVICES= bash release_scripts/mip360.sh /path/to/360_v2 no_offload  
+  CUDA_VISIBLE_DEVICES= bash release_scripts/rubble4k.sh /path/to/rubble-colmap no_offload 10m  
+  CUDA_VISIBLE_DEVICES= bash release_scripts/bigcity.sh /path/to/matrixcity/big_city/aerial/pose/all_blocks no_offload 25m  
+  ```  
+- Note: BigCity 102M scale likely not feasible on CPU-only system due to extreme memory and compute requirements; use smaller scales only  
+- Adjust batch sizes and prealloc_capacity to fit into CPU RAM limits  
+
+Verification:  
+- Confirm training runs without GPU or CUDA errors  
+- Confirm CPU RAM usage within system capacity  
+- Confirm outputs and checkpoints correctly saved  
+- Aggregate logs with `log2csv.py` as before  
+
+---
+
+**Step 9: Skip Offload Strategies Requiring CUDA/GPU**  
+- Do not run:  
+  - Any training with `--clm_offload` (requires CUDA kernels and GPU)  
+  - Any training with `--naive_offload` (CPU-GPU pinned memory transfers require GPU)  
+- Skip tests related to these strategies  
+
+---
+
+**Step 10: Optional - Format Codebase with Black**  
+- Install and run Black as before  
+
+---
+
+**Step 11: Document and Backup Environment**  
+- Export environment.yml reflecting CPU-only PyTorch:  
+  ```shell  
+  conda env export > environment.yml  
+  ```  
+- Document CPU-only setup, dataset paths, memory requirements, and that only `--no_offload` is supported  
+- Note about skipping CUDA-related environment variables and configurations  
+- Include reading of `strategies/no_offload/README.md` for baseline CPU/GPU training strategy (CPU-only in your case)  
+
+---
+
+**Step 12: Troubleshooting and Error Handling**  
+- If submodule compilation fails for `clm_kernels`, skip or disable it (not needed for CPU-only training)  
+- If PyTorch CUDA-dependent imports or calls occur, ensure code paths for `--clm_offload` and `--naive_offload` are not executed  
+- Monitor CPU memory usage to prevent OOM; adjust batch size and prealloc_capacity accordingly  
+- If training is very slow on CPU, consider smaller dataset scales or hardware upgrades  
+- For dataset loading errors, confirm correct local path and dataset format  
+- Confirm no attempts to use GPU features during training or script runs  
+
+---
+
+**Summary of Key Adjustments:**
+
+| Aspect                          | Original Plan (GPU)                                | Adjusted Plan (CPU-only)                          |
+|--------------------------------|--------------------------------------------------|--------------------------------------------------|
+| GPU Driver & CUDA Toolkit       | Install CUDA 12.4 & GPU driver                    | **Omit CUDA & GPU driver installation**           |
+| PyTorch Version                | PyTorch 2.6.0 with CUDA 12.4 support              | PyTorch 2.6.0 CPU-only build                       |
+| Offload Strategies             | Support `--clm_offload`, `--naive_offload`, `--no_offload` | **Only support `--no_offload`; skip others**      |
+| Environment Variables          | Set `PYTORCH_CUDA_ALLOC_CONF`                      | **Do not set CUDA-related env vars**               |
+| Submodules                     | Compile all including `clm_kernels` (CUDA kernels) | Skip or disable `clm_kernels` compilation          |
+| Training Scripts               | Run all offload modes                              | Run only with `--no_offload`                        |
+| Hardware Requirements          | GPU with ≥24GB VRAM for large-scale, 32GB+ CPU RAM | No GPU needed; maintain CPU RAM and disk requirements |
+| Dataset Decoding & Storage     | Fast local disk; same requirements                 | Same requirements                                  |
+| Testing                       | Include CUDA availability and GPU-specific tests  | Skip CUDA/GPU tests; test CPU-only training        |
+
+---
+
+This adjusted plan ensures your environment setup and workflow are compatible with your CPU-only Linux x86_64 hardware, avoiding GPU dependencies, while preserving dataset handling, model training (with `--no_offload`), and experiment reproducibility.

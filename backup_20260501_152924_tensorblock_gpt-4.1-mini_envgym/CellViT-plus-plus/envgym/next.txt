@@ -1,0 +1,21 @@
+current progress  
+- Base image set to python:3.10-slim-bullseye with necessary system packages installed for CPU-only environment.  
+- Miniconda installed successfully.  
+- Conda channels configured to defaults, conda-forge, and bioconda (nvidia and rapidsai channels removed as per plan).  
+- Attempted conda update and environment creation with environment.yaml, but build failed during conda update step.  
+- Pip installs for CPU-only PyTorch versions and requirements.txt executed.  
+- Viewer environment created from CPU-only adjusted environment.yml and pip requirements installed.  
+- Source code copied and permissions set.  
+- Environment variables set for conda environment activation.  
+- Docker entrypoint and CMD set for bash shell.  
+
+next step  
+- Investigate and fix the conda update failure during Docker build: check network connectivity, conda config correctness, and base conda installation integrity.  
+- Ensure environment.yaml and environment files are correctly CPU-only without CUDA or GPU packages before environment creation.  
+- Consider adding explicit conda clean commands after update to reduce cache issues.  
+- Validate that conda commands run successfully in non-interactive Docker context, possibly adding debugging or retry logic.  
+- Once conda update passes, verify that environment creation steps do not include any CUDA or GPU dependencies.  
+- Test minimal conda update and environment creation commands in local Docker build to isolate error.  
+- After fixing conda update, confirm absence of NVIDIA channels and packages in all conda environment files.  
+- Ensure that pip installs for CPU-only PyTorch packages use correct URLs and versions.  
+- Finalize Dockerfile by removing any unnecessary shell changes or redundant PATH modifications.

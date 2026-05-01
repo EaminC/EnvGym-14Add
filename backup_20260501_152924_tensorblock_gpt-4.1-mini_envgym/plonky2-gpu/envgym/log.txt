@@ -1,0 +1,22 @@
+=== Docker Execution Log - 20260501_101753 ===
+Dockerfile: envgym/envgym.dockerfile
+Image Name: envgym_test_1777630600
+
+=== Build Log ===
+Build Status: Failed
+Build Error:
+--------------------
+45 |     RUN cargo clean
+46 |
+47 | >>> RUN cargo build --release --workspace --verbose
+48 |
+49 |     RUN mkdir -p build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release -DENABLE_CUDA=OFF && cmake --build . -- -j$(nproc)
+--------------------
+ERROR: failed to solve: process "/bin/sh -c cargo build --release --workspace --verbose" did not complete successfully: exit code: 101
+
+=== Runtime Log ===  
+Runtime Status: Failed
+Runtime Error:
+
+
+=== Execution End ===

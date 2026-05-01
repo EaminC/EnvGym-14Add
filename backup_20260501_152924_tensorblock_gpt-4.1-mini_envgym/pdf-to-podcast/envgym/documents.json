@@ -1,0 +1,16 @@
+[
+  "README.md",
+  "requirements.txt",
+  "Dockerfile",
+  "services/AgentService/Dockerfile",
+  "services/APIService/Dockerfile",
+  "services/PDFService/Dockerfile",
+  "services/PDFService/PDFModelService/Dockerfile.api",
+  "services/PDFService/PDFModelService/Dockerfile.worker",
+  "services/TTSService/Dockerfile",
+  "frontend/shared/setup.py",
+  "shared/setup.py",
+  "tests/requirements-test.txt",
+  "docker-compose.yaml",
+  "workbench/docker-compose.yaml"
+]

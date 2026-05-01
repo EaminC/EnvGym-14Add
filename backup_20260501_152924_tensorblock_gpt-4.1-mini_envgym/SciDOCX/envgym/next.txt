@@ -1,0 +1,19 @@
+current progress  
+- Dockerfile uses `python:3.10-slim` CPU-only base image as per plan.  
+- System packages git, curl, pandoc installed.  
+- UV installed via pip.  
+- Source code copied to `/app`.  
+- Python dependencies installed from `requirements-lock.txt` or `requirements.txt` with CPU-only torch and torchvision versions substituted by sed.  
+- Directories `/app/models`, `/app/data/output`, and `/app/data/mmrag-output` created (note: `/app/outputs` missing as per plan).  
+- `PYTHONPATH` set to `/app`.  
+- `CUDA_VISIBLE_DEVICES` set to empty string to disable GPU usage.  
+- Port 8000 exposed.  
+- Default command is bash shell (no entrypoint or start server command set).  
+
+next step  
+- Modify Dockerfile to set entrypoint or CMD to start the API server, e.g., `CMD ["python3", "start_server.py"]` as specified.  
+- Adjust directory creation to include `/app/outputs` instead of `/app/data/output` to match volume mount and plan.  
+- Confirm the copied source code path correctness, ensure DeepSeek-OCR source is properly copied as per plan.  
+- Verify curl presence or installation for healthcheck inside container (already installed).  
+- Remove any unnecessary directories or fix paths to align with plan (`/app/outputs` vs `/app/data/output`).  
+- Optionally, add healthcheck command in Dockerfile if desired (currently handled by docker-compose).

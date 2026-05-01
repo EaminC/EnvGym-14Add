@@ -1,0 +1,17 @@
+current progress
+
+- Dockerfile uses a CPU-compatible base image (python:3.10-slim) without GPU or CUDA dependencies.
+- Standard Linux paths are used, with working directory set to /NeMo_Gym inside the container.
+- Essential build tools and libraries are installed for CPU-only builds.
+- Pip is upgraded to ensure latest packaging tools.
+- Docker build and runtime logs show successful build and execution.
+- Docker version supports Buildx and BuildKit, and the build targets linux/amd64 architecture as planned.
+
+next step
+
+- Explicitly set the platform to linux/amd64 in the Docker build command to ensure architecture compatibility.
+- Adjust WORKDIR to match the host's working directory path (/home/cc/EnvGym/data/20260501_071208_tensorblock_gpt-4.1-mini/NeMo_Gym) or mount it appropriately at runtime.
+- Add installation of any additional CPU-only Python dependencies required by the application.
+- Include environment variable settings for CPU-only operation if needed by the application.
+- Add testing commands or scripts within the Dockerfile or CI pipeline to validate no GPU code paths are triggered.
+- Ensure sufficient memory allocation for Docker daemon during build if large builds are expected.

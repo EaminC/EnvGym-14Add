@@ -1,0 +1,11 @@
+current progress  
+- Base Ubuntu 22.04 image set up with required system dependencies and Python 3.10 installed  
+- Miniconda installed and conda initialized  
+- Dockerfile attempts to create conda environment `clm_gs_cpu` with Python 3.10 using `source` and `conda create` in a RUN step, but this step fails with exit code 1  
+- Subsequent steps to install Python packages and clone repository with submodules are present but not reached due to environment creation failure  
+
+next step  
+- Modify Dockerfile to create the conda environment without relying on `source` in a RUN step, such as using `conda create -n clm_gs_cpu python=3.10 -y` directly without `source` or use `conda run` commands to avoid environment activation issues in Docker build steps  
+- Alternatively, create the environment and install packages in a single RUN command using `conda run -n clm_gs_cpu` to avoid shell environment activation problems  
+- Verify conda environment creation step succeeds before proceeding to package installations and submodule handling  
+- Ensure conda initialization is correctly set for non-interactive shell and Docker build context

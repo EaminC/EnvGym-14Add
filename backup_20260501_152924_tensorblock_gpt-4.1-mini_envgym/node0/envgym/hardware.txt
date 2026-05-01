@@ -1,0 +1,6 @@
+- Working Directory: /home/cc/EnvGym/data/20260501_071208_tensorblock_gpt-4.1-mini/node0; project within nested folder, use relative paths carefully
+- Architecture: x86_64; recommended --platform=linux/amd64
+- Base Image: Linux amd64 base images (e.g., ubuntu:20.04, debian, alpine) compatible; no GPU-specific base required
+- GPU: No NVIDIA GPU detected; no CUDA base image needed
+- Instruction Notes: Use standard Linux amd64 instructions; no GPU drivers or CUDA dependencies; ensure volume paths respect nested working directory; overlay2 storage driver supports efficient layering
+- Docker Version: 28.1.1; supports BuildKit, advanced features, but no native GPU build support needed due to lack of NVIDIA GPU

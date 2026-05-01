@@ -1,0 +1,9 @@
+[
+  "README.md",
+  "release_scripts/bigcity_README.md",
+  "release_scripts/mip360_README.md",
+  "release_scripts/rubble4k_README.md",
+  "strategies/clm_offload/README.md",
+  "strategies/naive_offload/README.md",
+  "strategies/no_offload/README.md"
+]

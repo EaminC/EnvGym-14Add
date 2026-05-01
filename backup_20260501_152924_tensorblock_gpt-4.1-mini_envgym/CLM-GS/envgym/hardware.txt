@@ -1,0 +1,6 @@
+- Working Directory: /home/cc/EnvGym/data/20260501_071208_tensorblock_gpt-4.1-mini/CLM-GS; project likely located in this directory within a Linux host
+- Architecture: x86_64; recommended --platform=linux/amd64
+- Base Image: x86_64 compatible base images (e.g., ubuntu:20.04, debian:buster); no GPU-specific base images needed
+- GPU: NVIDIA GPU not available; no CUDA or GPU-accelerated base images required
+- Instruction Notes: No GPU-related Dockerfile instructions needed; overlay2 storage driver supported; Linux-based instructions compatible; working directory paths should respect Linux file system structure
+- Docker Version: 28.1.1; supports BuildKit and Docker Buildx; GPU build features (--gpus) not applicable due to lack of NVIDIA GPU

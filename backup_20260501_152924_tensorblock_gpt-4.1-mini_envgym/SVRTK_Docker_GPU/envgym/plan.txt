@@ -1,0 +1,145 @@
+=== ADJUSTED ENVIRONMENT SETUP PLAN BASED ON PROVIDED HARDWARE INFORMATION ===
+
+**Notes on hardware context and impact:**  
+- Architecture: x86_64 (compatible with recommended linux/amd64 platform images) → no change needed for base images or Docker platform flags.  
+- No NVIDIA GPU available → GPU- and CUDA-specific installation steps and options should be skipped or disabled.  
+- Docker version 28.1.1 supports BuildKit and buildx, but GPU flags are unnecessary and should be omitted.  
+- Working directory: `/home/cc/EnvGym/data/20260501_071208_tensorblock_gpt-4.1-mini/SVRTK_Docker_GPU`; all host paths and volume mounts must be absolute and aligned accordingly.  
+- Memory: large RAM available, so multi-stage builds can be used for efficient Docker layering if desired.  
+- Storage: ensure minimum 30 GB free disk space is available in the `/home/cc/EnvGym` filesystem.  
+- Operating system assumed Linux (Ubuntu 20.04+ or equivalent), no WSL2 specifics apply.
+
+---
+
+1. **DOWNLOADS NEEDED:**  
+   - Git (latest stable version ≥ 2.13 to support submodule branch checkout)  
+   - Wget (latest stable version)  
+   - Curl (latest stable version)  
+   - Docker CE edition compatible with Linux x86_64 (Ubuntu 20.04+ recommended)  
+     - No GPU Docker images or CUDA toolkit needed since no NVIDIA GPU is available  
+   - Nvidia GPU drivers and CUDA Toolkit v11 installation steps should be **skipped entirely**  
+   - Pre-built Docker image:  
+     - Use `fetalsvrtk/svrtk:pride-svr-docker-0.2.0` only if CPU-only compatible (verify image supports CPU-only mode). Otherwise, build locally with CPU-only options.  
+   - Neural network weights and brain atlases (>500 MB total):  
+     - Download as per original plan into submodule directories  
+   - Additional tools inside Docker image remain the same (pigz, dcmtk, build-essential, cmake, libboost, libeigen3, libtbb, libfltk, dcm2niix from dev branch)  
+   - Python packages installation remains unchanged inside Docker container  
+   - Git submodules as before, ensure Git ≥ 2.13
+
+2. **FILES TO CREATE:**  
+   - Docker volume mount point directory for input/output data:  
+     - Path: use absolute path based on working directory, e.g.,  
+       `/home/cc/EnvGym/data/20260501_071208_tensorblock_gpt-4.1-mini/SVRTK_Docker_GPU/recon/`  
+     - Place input nifti files named `stack1.nii.gz`, `stack2.nii.gz`, etc. here before running reconstruction  
+   - Docker build context directory:  
+     - Path: `/home/cc/EnvGym/data/20260501_071208_tensorblock_gpt-4.1-mini/SVRTK_Docker_GPU/`  
+     - Ensure presence of Dockerfile `svrtk-docker-gpu.Dockerfile` and source folders/submodules cloned and checked out correctly  
+   - `.gitignore` in root:  
+     ```
+     .idea
+     ```  
+     - Purpose unchanged, keep IDE files excluded  
+   - `.gitmodules` file present and correct  
+   - Optional `.env` file can be created if environment variable management is desired  
+   - Ensure executable permissions on `/home/scripts/*` inside container (handled in Dockerfile)  
+
+3. **NECESSARY TEST CASES IN THE CODEBASE:**  
+   - Docker container launch:  
+     - Run container interactively **without GPU flags**:  
+       ```
+       docker run -it fetalsvrtk/svrtk:pride-svr-docker-0.2.0
+       ```  
+   - MIRTK tool availability inside container: `mirtk` command runs and shows usage  
+   - Neural network weights presence inside container after volume mount or build process  
+   - dcm2niix availability and version inside container (`dcm2niix -h`)  
+   - Verify mounting of nifti input files and output file generation `SVR-output.nii.gz`  
+   - Python environment and packages installed (`python -m pip list`)  
+   - Git submodules checked out correctly, `Segmentation_FetalMRI` on branch `dev`  
+   - GPU acceleration test **skipped** as no GPU present  
+   - `.gitignore` effectiveness verified  
+   - Error handling tests remain, with emphasis on CPU-only execution paths  
+
+4. **COMPLETE TODO LIST:**  
+   1. Verify host system minimum hardware requirements:  
+      - CPU: ≥6 cores (≥10 cores recommended) — confirmed compatible x86_64 CPU architecture  
+      - RAM: minimum 16GB (≥32GB recommended) — large memory available per hardware info  
+      - Disk space: minimum 30GB free in `/home/cc/EnvGym/data/` filesystem  
+      - GPU: **No NVIDIA GPU available; all GPU-related setup skipped**  
+   2. Install required software on host system:  
+      - Git ≥ 2.13, Wget, Curl installed  
+      - Docker CE installed as per Linux x86_64 (Ubuntu 20.04+) instructions  
+      - **Skip Nvidia GPU drivers and CUDA toolkit installation entirely**  
+   3. Clone repository with submodules:  
+      - Use absolute path within working directory:  
+        ```
+        cd /home/cc/EnvGym/data/20260501_071208_tensorblock_gpt-4.1-mini
+        git clone https://github.com/SVRTK/svrtk-docker-gpu.git SVRTK_Docker_GPU
+        cd SVRTK_Docker_GPU
+        git submodule update --init --recursive
+        git -C Segmentation_FetalMRI checkout dev
+        ```  
+      - Explicit checkout of `dev` branch in `Segmentation_FetalMRI` required  
+   4. Create/update `.gitignore` in `/home/cc/EnvGym/data/20260501_071208_tensorblock_gpt-4.1-mini/SVRTK_Docker_GPU/` root:  
+      ```
+      .idea
+      ```  
+      - Verify with `git status` that `.idea` is untracked  
+   5. Verify `.gitmodules` file is present and correct  
+   6. Download neural network weights and brain atlases as per original commands inside cloned repo; verify successful downloads and non-zero size files  
+   7. Choose installation method:  
+      - Option 1: Use pre-built Docker image only if confirmed CPU-only compatible; else, prefer local build  
+      - Option 2: Build Docker image locally with CPU-only configuration:  
+        - Navigate to build context:  
+          ```
+          cd /home/cc/EnvGym/data/20260501_071208_tensorblock_gpt-4.1-mini/SVRTK_Docker_GPU
+          ```  
+        - Ensure Dockerfile `svrtk-docker-gpu.Dockerfile` and source folders are present  
+        - Build image without GPU-related build arguments or flags:  
+          ```
+          docker build -f svrtk-docker-gpu.Dockerfile -t fetalsvrtk/svrtk:cpu-only .
+          ```  
+        - Consider modifying Dockerfile prior to build to remove or disable CUDA-specific instructions and GPU drivers installation if present (e.g., no `nvidia/cuda` base image, no `--gpus` runtime instructions)  
+   8. Verify Docker container functionality:  
+      - Run container interactively **without `--gpus` flag**:  
+        ```
+        docker run -it fetalsvrtk/svrtk:cpu-only
+        ```  
+      - Inside container verify:  
+        - `mirtk` command runs correctly  
+        - `dcm2niix -h` outputs help info  
+        - Python packages installed (`python -m pip list`)  
+      - Exit container  
+   9. Prepare input data:  
+      - Place nifti input files (`stack1.nii.gz`, `stack2.nii.gz`, ...) into:  
+        ```
+        /home/cc/EnvGym/data/20260501_071208_tensorblock_gpt-4.1-mini/SVRTK_Docker_GPU/recon/
+        ```  
+   10. Run automated SVR reconstruction in CPU mode:  
+       ```
+       docker run -v "/home/cc/EnvGym/data/20260501_071208_tensorblock_gpt-4.1-mini/SVRTK_Docker_GPU/recon":/home/recon fetalsvrtk/svrtk:cpu-only /home/scripts/docker-recon-brain-auto.bash /home/recon
+       ```  
+       - **Do not use `--gpus all` flag**  
+       - Verify output `SVR-output.nii.gz` is created in recon folder  
+   11. Error handling and verification:  
+       - If container fails to start, verify Docker installation and image presence  
+       - If `mirtk` command not found, rebuild image or verify tag  
+       - If `dcm2niix` missing, rebuild image ensuring build steps complete successfully  
+       - GPU-related errors should not occur; if any GPU flags are used, remove them  
+       - Input files missing or malformed should prompt container error — validate inputs and file naming  
+       - Neural network weights presence inside container verified at `/home/Segmentation_FetalMRI/trained-models`  
+       - `.gitignore` verified to exclude `.idea` folder  
+       - Git submodules verified with `git submodule status` and correct branch checkout of `Segmentation_FetalMRI`  
+   12. (Optional) Automate setup with scripts or container orchestration tools using CPU-only configuration for repeated deployments or batch processing  
+   13. Document environment variables, paths, versions used, and Docker image build details for reproducibility, noting CPU-only configuration and no GPU support  
+
+---
+
+**Summary of key adjustments:**  
+- **Skip all NVIDIA GPU driver and CUDA toolkit installation steps.**  
+- **Skip GPU-related Docker run flags (`--gpus all`) and GPU-specific Dockerfile instructions.**  
+- **Build or use Docker images configured for CPU-only operation.**  
+- **Use absolute host paths matching the hardware working directory for all volume mounts.**  
+- **Confirm all base images and tools are compatible with x86_64 architecture (linux/amd64).**  
+- **Maintain all CPU-related resource requirements and installation steps unchanged.**  
+
+This adjusted plan ensures compatibility and proper setup on your current hardware environment with no NVIDIA GPU available.

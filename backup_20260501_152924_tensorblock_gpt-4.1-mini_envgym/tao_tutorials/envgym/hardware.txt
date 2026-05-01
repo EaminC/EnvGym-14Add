@@ -1,0 +1,6 @@
+- Working Directory: /home/cc/EnvGym/data/20260501_071208_tensorblock_gpt-4.1-mini/tao_tutorials; project likely CPU-focused due to no NVIDIA GPU presence  
+- Architecture: x86_64; recommended --platform=linux/amd64  
+- Base Image: Linux x86_64 compatible images; CPU-optimized base images (e.g., ubuntu, debian, or python:3.x-slim) without GPU/CUDA tags  
+- GPU: NVIDIA GPU not available; no CUDA base image needed  
+- Instruction Notes: Avoid GPU-specific instructions; leverage multi-stage builds if necessary for large projects; ensure paths relative to /home/cc/EnvGym/data/20260501_071208_tensorblock_gpt-4.1-mini/tao_tutorials; no GPU runtime instructions  
+- Docker Version: 28.1.1; compatible with BuildKit and Docker Buildx; GPU build flags (--gpus) not applicable due to lack of NVIDIA GPU

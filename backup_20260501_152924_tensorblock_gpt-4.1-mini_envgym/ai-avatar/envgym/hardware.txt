@@ -1,0 +1,6 @@
+- Working Directory: /home/cc/EnvGym/data/20260501_071208_tensorblock_gpt-4.1-mini/ai-avatar, project likely located in ai-avatar folder under tensorblock_gpt-4.1-mini
+- Architecture: x86_64, recommended --platform=linux/amd64
+- Base Image: x86_64 Linux compatible images (e.g., ubuntu, debian, alpine for amd64)
+- GPU: NVIDIA GPU not available, no CUDA base image required
+- Instruction Notes: No GPU-specific instructions needed; standard CPU-based builds; large memory and storage available, no special resource constraints; use overlay2 storage driver compatible commands
+- Docker Version: 28.1.1, supports BuildKit and Buildx; no native GPU build support needed due to no NVIDIA GPU

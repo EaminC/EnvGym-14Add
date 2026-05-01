@@ -1,0 +1,11 @@
+[
+  "README.md",
+  "setup.py",
+  "tox.ini",
+  "pytest.ini",
+  "docs/requirements.txt",
+  "docs/Makefile",
+  "docs/make.bat",
+  "docs/conf.py",
+  ".readthedocs.yml"
+]

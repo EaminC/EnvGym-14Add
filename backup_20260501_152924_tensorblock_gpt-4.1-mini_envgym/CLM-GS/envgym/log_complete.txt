@@ -1,0 +1,88 @@
+=== Docker Execution Log - 20260501_075308 ===
+Dockerfile: envgym/envgym.dockerfile
+Image Name: envgym_test_1777621986
+
+=== Build Log ===
+Build Status: Failed
+Build Output:
+
+
+Build Error:
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from envgym.dockerfile
+#1 transferring dockerfile: 2.92kB done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/ubuntu:22.04
+#2 DONE 0.1s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [ 1/12] FROM docker.io/library/ubuntu:22.04@sha256:962f6cadeae0ea6284001009daa4cc9a8c37e75d1f5191cf0eb83fe565b63dd7
+#4 DONE 0.0s
+
+#5 [ 3/12] RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.10 1 &&     python -m pip install --upgrade pip setuptools wheel
+#5 CACHED
+
+#6 [ 4/12] RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /tmp/miniconda.sh &&     bash /tmp/miniconda.sh -b -p /opt/conda &&     rm /tmp/miniconda.sh
+#6 CACHED
+
+#7 [ 2/12] RUN apt-get update && apt-get install -y --no-install-recommends     git     curl     wget     ca-certificates     build-essential     gcc     g++     make     python3.10     python3.10-dev     python3-pip     python3-setuptools     python3-venv     libgl1-mesa-glx     libglib2.0-0     bash     && rm -rf /var/lib/apt/lists/*
+#7 CACHED
+
+#8 [ 5/12] RUN /opt/conda/bin/conda init bash
+#8 CACHED
+
+#9 [ 6/12] RUN source /opt/conda/etc/profile.d/conda.sh &&     conda create -n clm_gs_cpu python=3.10 -y &&     conda clean -afy
+#9 1.176 
+#9 1.176 CondaToSNonInteractiveError: Terms of Service have not been accepted for the following channels. Please accept or remove them before proceeding:
+#9 1.176     - https://repo.anaconda.com/pkgs/main
+#9 1.176     - https://repo.anaconda.com/pkgs/r
+#9 1.176 
+#9 1.176 To accept these channels' Terms of Service, run the following commands:
+#9 1.176     conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main
+#9 1.176     conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r
+#9 1.176 
+#9 1.176 For information on safely removing channels from your conda configuration,
+#9 1.176 please see the official documentation:
+#9 1.176 
+#9 1.176     https://www.anaconda.com/docs/tools/working-with-conda/channels
+#9 1.176 
+#9 ERROR: process "/bin/bash -c source $CONDA_DIR/etc/profile.d/conda.sh &&     conda create -n clm_gs_cpu python=3.10 -y &&     conda clean -afy" did not complete successfully: exit code: 1
+------
+ > [ 6/12] RUN source /opt/conda/etc/profile.d/conda.sh &&     conda create -n clm_gs_cpu python=3.10 -y &&     conda clean -afy:
+1.176 
+1.176 To accept these channels' Terms of Service, run the following commands:
+1.176     conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main
+1.176     conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r
+1.176 
+1.176 For information on safely removing channels from your conda configuration,
+1.176 please see the official documentation:
+1.176 
+1.176     https://www.anaconda.com/docs/tools/working-with-conda/channels
+1.176 
+------
+envgym.dockerfile:44
+--------------------
+  43 |     # Create conda environment clm_gs_cpu with python 3.10 using sourced conda.sh
+  44 | >>> RUN source $CONDA_DIR/etc/profile.d/conda.sh && \
+  45 | >>>     conda create -n clm_gs_cpu python=3.10 -y && \
+  46 | >>>     conda clean -afy
+  47 |     
+--------------------
+ERROR: failed to solve: process "/bin/bash -c source $CONDA_DIR/etc/profile.d/conda.sh &&     conda create -n clm_gs_cpu python=3.10 -y &&     conda clean -afy" did not complete successfully: exit code: 1
+
+
+=== Runtime Log ===  
+Runtime Status: Failed
+Runtime Output:
+
+
+Runtime Error:
+
+
+=== Execution End ===
+

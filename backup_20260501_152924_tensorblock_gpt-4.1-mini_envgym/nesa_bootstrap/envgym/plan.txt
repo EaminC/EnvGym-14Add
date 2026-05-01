@@ -1,0 +1,119 @@
+=== ADJUSTED ENVIRONMENT SETUP PLAN ===
+
+1. DOWNLOADS NEEDED:  
+   - **Docker**:  
+     - Use latest stable Docker version compatible with your OS and x86_64 architecture.  
+     - Verify installation with `docker --version` (Docker 28.1.1 detected, supports BuildKit and Buildx).  
+     - Ensure Docker daemon is running and accessible without GPU requirements.  
+     - Reference: https://docs.docker.com/get-docker/  
+   - **Nvidia Container Toolkit**:  
+     - **Skip NVIDIA Container Toolkit installation**, as no NVIDIA GPU detected on this system.  
+     - No CUDA base images or GPU-specific Docker runtime needed.  
+   - **Curl**:  
+     - Install latest stable curl version if missing.  
+     - Verify with `curl --version`.  
+     - Reference: https://curl.se/docs/install.html  
+   - **Gum**:  
+     - Installed automatically by bootstrap script; used for enhanced shell UI.  
+   - **jq**:  
+     - Install if not present; required for JSON processing in scripts.  
+   - **Python and Python libraries**:  
+     - Ensure Python 3.7+ is installed and available on x86_64 architecture Linux environment.  
+     - Libraries installed automatically by bootstrap script.  
+   - **(Optional) Hugging Face API Key**:  
+     - Obtain only if gated models will be used.  
+
+2. FILES TO CREATE:  
+   - All paths and files relative to project directory `/home/cc/EnvGym/data/20260501_071208_tensorblock_gpt-4.1-mini/nesa_bootstrap` (adjust COPY/ADD commands accordingly in Dockerfiles and scripts).  
+   - `~/.nesa/env/base.env`  
+     - Store node identity: moniker, referral code (optional), public IP.  
+   - `~/.nesa/env/orchestrator.env`  
+     - Store sensitive data: private key, node ID, optional Hugging Face API key.  
+     - Set permissions securely with `chmod 600`.  
+   - Bootstrap logs at `~/.nesa/logs/bootstrap.log` created automatically.  
+   - Optional custom overrides in `.env` files as needed.  
+
+3. NECESSARY TEST CASES IN THE CODEBASE:  
+   - Adjust GPU detection tests to allow fallback **always** to CPU mode, since no NVIDIA GPU is present.  
+   - Confirm dependency detection ignores GPU/CUDA dependencies gracefully.  
+   - Other tests remain unchanged.  
+
+4. COMPLETE TODO LIST:  
+
+   1. **Verify System Hardware Compatibility**  
+      - CPU: x86_64 architecture confirmed, use linux/amd64 compatible base images (ubuntu, debian, alpine amd64 tags) only.  
+      - RAM: Ensure ≥16 GB available (verify manually as not provided).  
+      - Disk: Ensure at least 100 GB free disk space available.  
+      - Network: Confirm stable internet connection.  
+      - GPU: Skip NVIDIA GPU and CUDA checks, CPU-only setup.  
+
+   2. **Install Required Software**  
+      - Install or verify Docker 28.1.1 installed and running.  
+      - **Skip NVIDIA drivers, CUDA, NVIDIA Container Toolkit installation.**  
+      - Install curl if missing.  
+      - Ensure Python 3.7+ installed.  
+      - Install jq if missing.  
+
+   3. **Configure User Permissions**  
+      - Add current user to Docker group to avoid sudo requirement:  
+        ```bash  
+        sudo usermod -aG docker $USER  
+        newgrp docker  
+        ```  
+      - Verify Docker commands run without sudo.  
+
+   4. **Download and Run Bootstrap Script**  
+      - Run bootstrap script with CPU-optimized expectations:  
+        ```bash  
+        bash <(curl -s https://raw.githubusercontent.com/nesaorg/bootstrap/master/bootstrap.sh)  
+        ```  
+      - Respond to prompts:  
+        - Unique node name (moniker).  
+        - Referral code (optional).  
+        - Hugging Face API key (optional).  
+        - Wallet option: generate new or import private key; securely save private key if generated.  
+      - Wait for wallet balance check and fund wallet if required.  
+      - Proceed with node and miner registration.  
+
+   5. **Confirm Deposit and Start Node**  
+      - Add required stake deposit.  
+      - Confirm deposit escrow and unbonding period details.  
+      - Bootstrap will start node containers automatically, running CPU-optimized containers.  
+
+   6. **Verify Node Operation**  
+      - Check node status via bootstrap management menu.  
+      - Stream live logs for activity.  
+      - Confirm node health and uptime accuracy.  
+
+   7. **Configure Advanced Settings (Optional)**  
+      - Edit environment files `~/.nesa/env/base.env` and `~/.nesa/env/orchestrator.env` for custom settings.  
+      - Secure sensitive files with correct permissions.  
+
+   8. **Set Up Auto-Update and Monitoring**  
+      - Confirm auto-update enabled and functional.  
+      - Optionally set up container health monitoring and alerting.  
+
+   9. **Backup and Recovery Plan**  
+      - Backup private key securely.  
+      - Backup `.nesa/env/` directory regularly.  
+      - Document recovery steps clearly.  
+
+  10. **Troubleshooting and Verification**  
+      - Verify Docker service with `docker info`.  
+      - Skip NVIDIA GPU and CUDA verification steps.  
+      - Check bootstrap logs at `~/.nesa/logs/bootstrap.log`.  
+      - Validate network connectivity to Nesa blockchain.  
+      - Re-run bootstrap script to access management and config menus.  
+
+  11. **Join Community for Support**  
+      - Join Nesa Discord: https://discord.gg/nesa  
+      - Consult FAQ and Troubleshooting.md in repo.  
+
+**Summary of Key Adjustments:**  
+- Skip all NVIDIA GPU, CUDA, and NVIDIA Container Toolkit installation and verification steps.  
+- Use CPU-only Docker images compatible with x86_64 (linux/amd64).  
+- Ensure all file paths align with `/home/cc/EnvGym/data/20260501_071208_tensorblock_gpt-4.1-mini/nesa_bootstrap` as base working directory for COPY/ADD instructions.  
+- Confirm Docker version 28.1.1 supports all required features without GPU support.  
+- Maintain all other environment setup, security, and operational steps unchanged.  
+
+This adjusted plan aligns fully with your hardware setup and ensures CPU-optimized, x86_64-compatible environment setup for running a Nesa node.

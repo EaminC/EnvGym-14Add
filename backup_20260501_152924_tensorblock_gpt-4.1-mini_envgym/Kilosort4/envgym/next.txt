@@ -1,0 +1,18 @@
+current progress  
+- Base Ubuntu 22.04 image with essential packages and Miniconda installed successfully.  
+- Conda configured with conda-forge channel and strict priority.  
+- Project files including setup.py, docs, tox, and pytest configs copied into image.  
+- Dockerfile runs conda environment creation and installs packages: numpy, scipy, scikit-learn, tqdm, numba, faiss-cpu, cpuonly pytorch, pyqt, matplotlib, pyqtgraph, qtpy, sphinx and related docs tools, pytest and testing tools, and installs the kilosort package with GUI extras.  
+- Build failed during RUN command; error details not explicit but likely due to conda install conflicts or pip/conda interaction.
+
+next step  
+- Split the long RUN command into multiple RUN steps to isolate and identify the failure point.  
+- Replace `conda install -y -c pytorch cpuonly pytorch` with `conda install -y pytorch cpuonly -c pytorch` to ensure correct package resolution order.  
+- Avoid mixing pip and conda installs for common packages where possible; consider installing pyqtgraph, qtpy via conda if available to reduce conflicts.  
+- Confirm that pyqt and matplotlib versions are compatible and installed from the same channel (prefer conda-forge or pytorch channel consistently).  
+- Add explicit environment activation before pip installs using `conda run -n kilosort` or chain commands properly to ensure environment is active.  
+- Verify Python 3.10 environment is activated correctly during installation steps; consider adding `conda init bash` and `source ~/.bashrc` if needed.  
+- Test package installations locally or in smaller test containers before full build.  
+- Add error logging or verbose flags to pip and conda installs to capture detailed failure reasons.  
+- After fixing installs, set `ENV PATH` and `CONDA_DEFAULT_ENV` only after environment is created.  
+- Confirm no GPU or CUDA packages are installed to match hardware constraints.

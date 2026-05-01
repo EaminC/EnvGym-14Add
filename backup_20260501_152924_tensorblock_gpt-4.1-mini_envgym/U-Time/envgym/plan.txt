@@ -1,0 +1,217 @@
+=== ADJUSTED ENVIRONMENT SETUP PLAN FOR CPU-ONLY x86_64 LINUX SYSTEM ===
+
+**Hardware Context Summary:**  
+- CPU-only workloads on x86_64 architecture (linux/amd64)  
+- No NVIDIA GPU available; no CUDA or cuDNN needed  
+- Multi-core CPU available (48 physical cores, 96 logical cores) — optimize for CPU parallelism  
+- Base Linux image should be CPU-compatible (e.g., ubuntu:20.04, debian, python slim for amd64)  
+- Docker version supports BuildKit and Compose v2.35.1, no GPU build support needed  
+- Working directory path is long; recommend simplified WORKDIR inside container  
+- Storage driver: overlay2 compatible instructions  
+
+---
+
+### 1. DOWNLOADS NEEDED (UPDATED FOR CPU-ONLY ENVIRONMENT)
+
+- Operating System:  
+  - Linux OS recommended: Ubuntu 18.04 or higher (Ubuntu 20.04 preferred for image compatibility)  
+  - MacOS Catalina 10.15.6 supported for CPU-only use (optional)  
+  - Ensure OS image is x86_64 compatible (amd64) — no ARM or other arch builds needed  
+
+- Anaconda or Miniconda:  
+  - Version 4.10.3 or higher (64-bit amd64)  
+  - Confirm installer is for x86_64 Linux platform  
+
+- Python version: 3.7.7 or higher (minimum as per environment.yaml)  
+
+- Pip version: 21.2.4 or higher  
+
+- Setuptools version: 52.0.0 or higher  
+
+- Wheel version: 0.37.0 or higher  
+
+- Tk version: 8.6.10 or higher  
+
+- NumPy version: >=1.21.5  
+
+- **NO NVIDIA GPU drivers, CUDA Toolkit, or cuDNN SDK needed or installed**  
+
+- Git: for cloning U-Time repository  
+
+- Python dependencies installed via conda environment and pip as per environment.yaml and requirements.txt  
+
+- Additional pip packages per requirements.txt including: carbontracker, psg_utils, yamlhparams, setuptools_git, tensorflow >=2.8.0 (CPU version), tensorflow-addons >=0.16.1, etc.  
+
+- TensorFlow:  
+  - Install CPU-only TensorFlow binaries (tensorflow>=2.8.0 CPU version)  
+  - Avoid GPU-enabled TensorFlow packages to prevent unnecessary CUDA dependencies  
+
+- Optional: datasets from public sleep databases (Sleep-EDF, DCSM, NSRR, PhysioNet) — downloadable via `ut fetch` or manually  
+
+- Optional: PyPi package `utime` available but may be outdated  
+
+---
+
+### 2. FILES TO CREATE (NO CHANGE)
+
+- Conda environment file: `U-Time/environment.yaml` (updated to minimum versions)  
+- `requirements.txt` file listing Python packages versions, pip installs supplementary packages  
+- `setup.py` for package installation/distribution with console script `ut`  
+- Project directory structure with hyperparameters, dataset configs, dataset folders, preprocessed archives, model output, predictions output  
+- Maintain relative paths and environment variable expansions for dataset paths to facilitate portability  
+
+---
+
+### 3. NECESSARY TEST CASES IN THE CODEBASE (NO CHANGE)
+
+- Include tests for conda environment creation with updated environment.yaml  
+- Test pip installs of requirements.txt packages, including CPU TensorFlow  
+- Test package installation via setup.py and console script availability  
+- Test dataset download, splitting, preprocessing, training (CPU mode), prediction, evaluation  
+- Test error handling with missing files and invalid parameters  
+- Test integration for YAML parsing, monitoring tools (carbontracker), and CPU-only execution  
+- Test compatibility with Python >=3.7.7  
+- Test upgrading conda, pip, setuptools, wheel inside environment  
+- Test inclusion of non-Python files in distribution  
+
+---
+
+### 4. COMPLETE TODO LIST (ADJUSTED FOR CPU-ONLY ENVIRONMENT)
+
+**Step 1: Prepare Operating System and Drivers**  
+- Install supported Linux distribution (Ubuntu 20.04 recommended for container base image compatibility)  
+- **Skip all NVIDIA GPU driver, CUDA Toolkit, cuDNN SDK installation steps**  
+- Verify system architecture is x86_64 (amd64) using `uname -m` (should return x86_64)  
+
+**Step 2: Install Conda**  
+- Download and install Anaconda or Miniconda 64-bit for Linux (x86_64)  
+- Verify conda version >=4.10.3 with `conda --version`  
+
+**Step 3: Clone Repository and Prepare Environment**  
+- `git clone https://github.com/perslev/U-Time.git`  
+- `cd U-Time`  
+- Review `environment.yaml` for:  
+  - conda>=4.10.3  
+  - python>=3.7.7  
+  - pip>=21.2.4  
+  - setuptools>=52.0.0  
+  - tk>=8.6.10  
+  - wheel>=0.37.0  
+  - numpy>=1.21.5  
+  - channels: defaults and conda-forge  
+- Create conda environment:  
+  - `conda env create --file environment.yaml`  
+- Activate environment: `conda activate u-sleep`  
+- Verify versions:  
+  - `python --version` ≥ 3.7.7  
+  - `conda --version` ≥ 4.10.3  
+  - `pip --version` ≥ 21.2.4  
+  - `python -c "import numpy; print(numpy.__version__)"` ≥ 1.21.5  
+
+**Step 4: Install Python Dependencies from requirements.txt**  
+- Inside activated environment:  
+  - Upgrade pip, setuptools, wheel:  
+    `pip install --upgrade pip setuptools wheel` (ensure versions meet minimum)  
+  - Install supplementary packages:  
+    `pip install -r requirements.txt`  
+- Ensure TensorFlow installed is CPU version (verify with `python -c "import tensorflow as tf; print(tf.test.is_built_with_cuda())"` — should return False)  
+
+**Step 5: Install U-Time Package Using setup.py**  
+- Inside activated environment, run:  
+  - `pip install .` (in root directory with setup.py)  
+- Confirm console script `ut` is installed and runnable:  
+  - `ut --help`  
+- Alternatively, PyPi install (`pip install utime`) may be outdated; prefer local install  
+
+**Step 6: Initialize Project Directory**  
+- For demo:  
+  - `ut init --name demo --model usleep_demo`  
+- For full reproduction:  
+  - Prepare local dataset folder(s) and update dataset config YAMLs with correct paths  
+  - `ut init --name u-sleep --model usleep`  
+
+**Step 7: Download and Prepare Dataset(s)**  
+- Use `ut fetch` to download demo datasets or manual download for full datasets  
+- Run extraction and splitting commands:  
+  - `ut extract`, `ut extract_hypno`, `ut cv_split`  
+
+**Step 8: Split Datasets**  
+- Run `ut cv_split` with correct parameters for train/val/test splits  
+- Confirm files and folders created correctly  
+
+**Step 9: Data Preprocessing (Optional)**  
+- Recommended for large datasets to speed up training  
+- Run:  
+  - `ut preprocess --out_path data/processed_data.h5 --dataset_splits train_data val_data`  
+- Confirm creation of processed_data.h5  
+
+**Step 10: Train Model (CPU-Only)**  
+- Run training command with CPU mode:  
+  - Demo: `ut train --num_gpus=0 --preprocessed --seed 123`  
+  - Full reproduction (adjust batch size and memory params as needed):  
+    `ut train --num_gpus=0 --max_loaded_per_dataset 40 --num_access_before_reload 32 --train_queue_type limitation --val_queue_type lazy --max_train_samples_per_epoch 1000000 --preprocessed`  
+- Leverage multi-core CPU by setting environment variables for parallelism if needed (e.g., `OMP_NUM_THREADS=48`, `MKL_NUM_THREADS=48`)  
+- Monitor logs for errors and verify checkpoints saved in `model/`  
+
+**Step 11: Predict and Evaluate**  
+- Prediction on test data:  
+  - `ut predict --num_gpus=0 --data_split test_data --strip_func strip_to_match --one_shot --save_true --majority --out_dir predictions`  
+- Confirm prediction files in `predictions/test_data`  
+- Evaluate confusion matrix:  
+  - `ut cm --true 'predictions/test_data/sedf_sc/*TRUE.npy' --pred 'predictions/test_data/sedf_sc/majority/*PRED.npy' --ignore 5 --round 2 --wake_trim_min 30`  
+- Check metrics output  
+
+**Step 12: Additional Verification and Error Handling**  
+- Test commands with missing or invalid dataset paths — expect clear error messages  
+- Confirm all commands run correctly in CPU-only mode  
+- Modify hyperparameters in `hparams.yaml` and verify changes affect training  
+- Test YAML parsing and config loading with `ruamel.yaml` and `yamlhparams`  
+- Confirm `ut` console script and subcommands function correctly  
+- Test version reporting via `ut --version` or equivalent  
+- Document any errors and resolutions  
+- Test upgrading conda, pip, setuptools, wheel inside environment without regressions  
+
+**Step 13: (Optional) U-Time Model Example**  
+- Follow U-Time example commands for dataset fetch, split, init, train, predict, evaluate — all in CPU mode  
+- Confirm successful execution  
+
+**Step 14: Backup and Documentation**  
+- Backup project folder including hyperparameters, processed data, models  
+- Document OS, conda, Python, pip, TensorFlow (CPU version), and package versions for reproducibility  
+
+---
+
+### ADDITIONAL NOTES FOR CPU-ONLY DEPLOYMENT & DOCKER CONTAINERIZATION
+
+- Use base Docker image with CPU Linux x86_64 compatibility:  
+  - e.g., `ubuntu:20.04`, `debian:bullseye-slim`, or `python:3.8-slim` (amd64) as base image  
+- Set `WORKDIR /app` inside container to shorten path length and avoid issues with very long paths  
+- No CUDA or NVIDIA driver installation steps in Dockerfile  
+- Install Miniconda inside container for environment management or use prebuilt conda base images for Linux amd64  
+- Leverage multi-core CPU by configuring environment variables inside container:  
+  - `ENV OMP_NUM_THREADS=48`  
+  - `ENV MKL_NUM_THREADS=48`  
+- Use overlay2 compatible Dockerfile instructions for layered caching and builds  
+- Mount host dataset paths or copy datasets into container as needed  
+- Test container build and run ensuring all environment steps complete successfully and `ut` commands run without GPU errors  
+
+---
+
+### SUMMARY OF KEY CHANGES FROM ORIGINAL PLAN TO MATCH HARDWARE
+
+| Aspect                      | Original Plan                                  | Adjusted for Hardware                        |
+|-----------------------------|-----------------------------------------------|---------------------------------------------|
+| GPU Drivers & CUDA           | Install NVIDIA drivers, CUDA, cuDNN           | **Skip all GPU-related drivers and libraries** |
+| TensorFlow Package           | GPU-enabled TensorFlow >=2.8.0 recommended    | **Install CPU-only TensorFlow >=2.8.0**     |
+| Base OS                      | Ubuntu 18.04 or RHEL 7.8 recommended           | **Ubuntu 20.04 or Debian slim amd64 preferred** |
+| Architecture                | x86_64 or compatible                           | **Confirmed x86_64 only; no ARM support needed** |
+| Docker Base Image            | Possibly CUDA base images (if GPU)             | **CPU-only base images for amd64 Linux**    |
+| WORKDIR Path                | Long working directory path                     | **Use shorter WORKDIR /app or similar**     |
+| Parallelism                 | Not explicitly optimized                        | **Set CPU parallelism environment variables to leverage 48 cores** |
+| GPU training commands       | Use `--num_gpus=1` or more                      | **Use `--num_gpus=0` for CPU-only training** |
+| Environment variable checks | Include CUDA verification steps                  | **Skip CUDA verification; verify TensorFlow CPU-only** |
+| Installation steps          | Include CUDA toolkit and drivers install         | **Omit CUDA installs and verification**     |
+
+---
+
+This adjusted plan ensures full compatibility with your CPU-only x86_64 Linux environment, avoids unnecessary GPU dependencies, optimizes CPU usage, and maintains all required software versions and environment reproducibility guarantees.

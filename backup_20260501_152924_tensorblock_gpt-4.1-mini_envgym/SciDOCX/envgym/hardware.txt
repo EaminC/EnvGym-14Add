@@ -1,0 +1,6 @@
+- Working Directory: /home/cc/EnvGym/data/20260501_071208_tensorblock_gpt-4.1-mini/SciDOCX; project likely local with no special volume mount requirements indicated
+- Architecture: x86_64; recommended --platform=linux/amd64
+- Base Image: amd64 Linux base images (e.g., ubuntu:20.04, debian, python:3.x) compatible; no ARM or alternative arch needed
+- GPU: No NVIDIA GPU detected; no CUDA base image required
+- Instruction Notes: Use standard Linux instructions; no GPU-specific drivers or CUDA setup needed; consider overlay2 storage driver compatibility; paths inside container should reflect Linux filesystem
+- Docker Version: 28.1.1; supports BuildKit and docker buildx; no native GPU build support needed (--gpus flag not applicable)

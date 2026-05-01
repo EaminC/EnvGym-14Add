@@ -1,0 +1,170 @@
+=== Docker Execution Log - 20260501_104253 ===
+Dockerfile: envgym/envgym.dockerfile
+Image Name: envgym_test_1777632154
+
+=== Build Log ===
+Build Status: Failed
+Build Output:
+
+
+Build Error:
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from envgym.dockerfile
+#1 transferring dockerfile: 1.44kB done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/ubuntu:22.04
+#2 DONE 0.1s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [ 1/13] FROM docker.io/library/ubuntu:22.04@sha256:962f6cadeae0ea6284001009daa4cc9a8c37e75d1f5191cf0eb83fe565b63dd7
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 1.85MB 0.0s done
+#5 DONE 0.0s
+
+#6 [ 3/13] RUN locale-gen en_US.UTF-8
+#6 CACHED
+
+#7 [ 6/13] RUN python3.11 -m pip install hatchling
+#7 CACHED
+
+#8 [ 5/13] RUN python3.11 -m pip install --upgrade pip setuptools wheel
+#8 CACHED
+
+#9 [ 2/13] RUN apt-get update && apt-get install -y --no-install-recommends     software-properties-common     build-essential     curl     wget     git     vim     rsync     openssh-client     jq     lsof     locales     ca-certificates     libffi-dev     libssl-dev     libpq-dev     pkg-config     cmake     libprotobuf-dev     protobuf-compiler     libbz2-dev     liblzma-dev     libreadline-dev     zlib1g-dev     libsqlite3-dev     libncurses5-dev     libncursesw5-dev     python3.11     python3.11-venv     python3.11-distutils     python3.11-dev     cargo     && rm -rf /var/lib/apt/lists/*
+#9 CACHED
+
+#10 [ 4/13] RUN curl -sS https://bootstrap.pypa.io/get-pip.py | python3.11
+#10 CACHED
+
+#11 [ 7/13] WORKDIR /root/node0
+#11 CACHED
+
+#12 [ 8/13] COPY . .
+#12 DONE 0.0s
+
+#13 [ 9/13] RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
+#13 0.325 info: downloading installer
+#13 0.731 warn: It looks like you have an existing installation of Rust at:
+#13 0.731 warn: /usr/bin
+#13 0.731 warn: It is recommended that rustup be the primary Rust installation.
+#13 0.731 warn: Otherwise you may have confusion unless you are careful with your PATH.
+#13 0.731 warn: If you are sure that you want both rustup and your already installed Rust
+#13 0.731 warn: then please reply `y' or `yes' or set RUSTUP_INIT_SKIP_PATH_CHECK to yes
+#13 0.731 warn: or pass `-y' to ignore all ignorable checks.
+#13 0.731 error: cannot install while Rust is installed
+#13 0.731 warn: continuing (because the -y flag is set and the error is ignorable)
+#13 0.731 warn: It looks like you have an existing rustup settings file at:
+#13 0.731 warn: /root/.rustup/settings.toml
+#13 0.731 warn: Rustup will install the default toolchain as specified in the settings file,
+#13 0.731 warn: instead of the one inferred from the default host triple.
+#13 0.746 info: profile set to default
+#13 0.746 info: default host triple is x86_64-unknown-linux-gnu
+#13 0.747 info: syncing channel updates for stable-x86_64-unknown-linux-gnu
+#13 0.873 info: latest update on 2026-04-16 for version 1.95.0 (59807616e 2026-04-14)
+#13 0.873 info: downloading 6 components
+#13 12.16 
+#13 12.16 info: default toolchain set to stable-x86_64-unknown-linux-gnu
+#13 12.17   stable-x86_64-unknown-linux-gnu installed - rustc 1.95.0 (59807616e 2026-04-14)
+#13 12.17 
+#13 12.17 
+#13 12.17 Rust is installed now. Great!
+#13 12.17 
+#13 12.17 To get started you may need to restart your current shell.
+#13 12.17 This would reload your PATH environment variable to include
+#13 12.17 Cargo's bin directory ($HOME/.cargo/bin).
+#13 12.17 
+#13 12.17 To configure your current shell, you need to source
+#13 12.17 the corresponding env file under $HOME/.cargo.
+#13 12.17 
+#13 12.17 This is usually done by running one of the following (note the leading DOT):
+#13 12.17 . "$HOME/.cargo/env"            # For sh/bash/zsh/ash/dash/pdksh
+#13 12.17 source "$HOME/.cargo/env.fish"  # For fish
+#13 12.17 source "~/.cargo/env.nu"  # For nushell
+#13 12.17 source "$HOME/.cargo/env.tcsh"  # For tcsh
+#13 12.17 . "$HOME/.cargo/env.ps1"        # For pwsh
+#13 12.17 source "$HOME/.cargo/env.xsh"   # For xonsh
+#13 DONE 15.8s
+
+#14 [10/13] RUN rustup default stable
+#14 0.207 info: using existing install for stable-x86_64-unknown-linux-gnu
+#14 0.207 info: default toolchain set to stable-x86_64-unknown-linux-gnu
+#14 0.208 
+#14 0.224   stable-x86_64-unknown-linux-gnu unchanged - rustc 1.95.0 (59807616e 2026-04-14)
+#14 0.224 
+#14 DONE 0.3s
+
+#15 [11/13] RUN rustc --version && cargo --version && rustup show
+#15 0.365 rustc 1.95.0 (59807616e 2026-04-14)
+#15 0.382 cargo 1.95.0 (f2d3ce0bd 2026-03-21)
+#15 0.395 Default host: x86_64-unknown-linux-gnu
+#15 0.395 rustup home:  /root/.rustup
+#15 0.395 
+#15 0.412 installed toolchains
+#15 0.412 --------------------
+#15 0.412 stable-x86_64-unknown-linux-gnu (active, default)
+#15 0.412 
+#15 0.412 active toolchain
+#15 0.412 ----------------
+#15 0.412 name: stable-x86_64-unknown-linux-gnu
+#15 0.412 active because: it's the default toolchain
+#15 0.412 installed targets:
+#15 0.412   x86_64-unknown-linux-gnu
+#15 DONE 0.5s
+
+#16 [12/13] RUN python3.11 -m pip install --upgrade git+https://github.com/learning-at-home/hivemind.git@v0.7.44
+#16 0.591 Collecting git+https://github.com/learning-at-home/hivemind.git@v0.7.44
+#16 0.592   Cloning https://github.com/learning-at-home/hivemind.git (to revision v0.7.44) to /tmp/pip-req-build-8rydb_i7
+#16 0.593   Running command git clone --filter=blob:none --quiet https://github.com/learning-at-home/hivemind.git /tmp/pip-req-build-8rydb_i7
+#16 1.357   Did not find branch or tag 'v0.7.44', assuming revision or ref.
+#16 1.359   Running command git checkout -q v0.7.44
+#16 1.363   error: pathspec 'v0.7.44' did not match any file(s) known to git
+#16 1.369   error: subprocess-exited-with-error
+#16 1.369   
+#16 1.369   × git checkout -q v0.7.44 did not run successfully.
+#16 1.369   │ exit code: 1
+#16 1.369   ╰─> No available output.
+#16 1.369   
+#16 1.369   note: This error originates from a subprocess, and is likely not a problem with pip.
+#16 1.369 ERROR: Failed to build 'git+https://github.com/learning-at-home/hivemind.git@v0.7.44' when git checkout -q v0.7.44
+#16 ERROR: process "/bin/sh -c python3.11 -m pip install --upgrade git+https://github.com/learning-at-home/hivemind.git@v0.7.44" did not complete successfully: exit code: 1
+------
+ > [12/13] RUN python3.11 -m pip install --upgrade git+https://github.com/learning-at-home/hivemind.git@v0.7.44:
+1.359   Running command git checkout -q v0.7.44
+1.363   error: pathspec 'v0.7.44' did not match any file(s) known to git
+1.369   error: subprocess-exited-with-error
+1.369   
+1.369   × git checkout -q v0.7.44 did not run successfully.
+1.369   │ exit code: 1
+1.369   ╰─> No available output.
+1.369   
+1.369   note: This error originates from a subprocess, and is likely not a problem with pip.
+1.369 ERROR: Failed to build 'git+https://github.com/learning-at-home/hivemind.git@v0.7.44' when git checkout -q v0.7.44
+------
+envgym.dockerfile:64
+--------------------
+  62 |     RUN rustc --version && cargo --version && rustup show
+  63 |     
+  64 | >>> RUN python3.11 -m pip install --upgrade git+https://github.com/learning-at-home/hivemind.git@v0.7.44
+  65 |     
+  66 |     RUN python3.11 -m pip install . --verbose
+--------------------
+ERROR: failed to solve: process "/bin/sh -c python3.11 -m pip install --upgrade git+https://github.com/learning-at-home/hivemind.git@v0.7.44" did not complete successfully: exit code: 1
+
+
+=== Runtime Log ===  
+Runtime Status: Failed
+Runtime Output:
+
+
+Runtime Error:
+
+
+=== Execution End ===
+

@@ -1,0 +1,53 @@
+This is our current plan:
+
+
+This is our hardware information:
+- Working Directory: /home/cc/EnvGym/data/20260501_071208_tensorblock_gpt-4.1-mini/NeMo_Gym, project likely Linux-based, no GPU-specific code implied  
+- Architecture: x86_64, recommended --platform=linux/amd64  
+- Base Image: Linux x86_64 compatible images (e.g., ubuntu, debian, python official images for amd64)  
+- GPU: NVIDIA GPU not available, no CUDA base image needed  
+- Instruction Notes: Use standard Linux filesystem paths, no GPU drivers or CUDA dependencies, consider large memory for builds if needed, overlay2 storage driver compatible with all standard Dockerfile instructions  
+- Docker Version: 28.1.1, supports BuildKit, Docker Buildx, no GPU build features required due to absence of NVIDIA GPU
+
+Adjusted Plan:
+
+1. Base Image Selection:
+   - Use an official Linux x86_64 base image such as `ubuntu:22.04`, `debian:bullseye`, or `python:3.10-slim` with platform explicitly set to `linux/amd64` to ensure architecture compatibility.
+   - Avoid any CUDA or GPU-specific base images.
+
+2. Docker Build Configuration:
+   - Use Docker Buildx with `--platform=linux/amd64` to build images compatible with the x86_64 architecture.
+   - No need for `--gpus` flags or NVIDIA runtime.
+
+3. Filesystem and Paths:
+   - Ensure all paths use standard Linux filesystem conventions.
+   - Use `/home/cc/EnvGym/data/20260501_071208_tensorblock_gpt-4.1-mini/NeMo_Gym` as working directory inside container or mount point as needed.
+   - Avoid Windows-style paths or GPU-specific mount points.
+
+4. Dependencies and Tools:
+   - Install only CPU-compatible dependencies.
+   - Exclude CUDA, cuDNN, or NVIDIA driver packages.
+   - Use system package managers (apt-get/yum) and Python package managers (pip) as needed for CPU-only libraries.
+   - Consider installing build-essential tools if compilation is required.
+
+5. Memory and Storage:
+   - Since large memory builds may be needed, allocate sufficient RAM to Docker daemon if possible.
+   - Ensure enough disk space for build artifacts and dependencies.
+   - Use overlay2 storage driver compatible Dockerfile instructions without modifications.
+
+6. Environment Variables and Runtime:
+   - Avoid environment variables related to GPU or CUDA.
+   - Set any CPU-specific environment variables if required by the application.
+
+7. Testing and Validation:
+   - Test container builds on the target x86_64 Linux environment.
+   - Validate that no GPU-specific code paths are triggered.
+   - Confirm that the application runs correctly on CPU-only setup.
+
+Summary:
+- All base images and build commands must target `linux/amd64`.
+- Remove GPU/CUDA dependencies and configurations entirely.
+- Use standard Linux paths and ensure working directory matches host environment.
+- Confirm Docker version supports Buildx and BuildKit, and utilize them for efficient builds.
+- Allocate sufficient memory and storage to handle large builds.
+- Validate final container on intended hardware before deployment.

@@ -1,0 +1,6 @@
+- Working Directory: /home/cc/EnvGym/data/20260501_071208_tensorblock_gpt-4.1-mini/plonky2-gpu; project likely CPU-bound, no GPU dependencies detected  
+- Architecture: x86_64; recommended --platform=linux/amd64  
+- Base Image: x86_64 compatible base images (e.g., ubuntu, debian, or official language/runtime images with amd64 tags)  
+- GPU: NVIDIA GPU not available; no CUDA base image required  
+- Instruction Notes: No GPU-specific instructions needed; ensure no GPU drivers or CUDA dependencies included; consider multi-stage builds for large CPU-bound projects; use overlay2 storage driver compatibility; working directory can be set inside image as /app or similar  
+- Docker Version: 28.1.1; supports BuildKit and Buildx; GPU build features not applicable due to lack of NVIDIA GPU

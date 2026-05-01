@@ -1,0 +1,22 @@
+=== Docker Execution Log - 20260501_075308 ===
+Dockerfile: envgym/envgym.dockerfile
+Image Name: envgym_test_1777621986
+
+=== Build Log ===
+Build Status: Failed
+Build Error:
+--------------------
+43 |     # Create conda environment clm_gs_cpu with python 3.10 using sourced conda.sh
+44 | >>> RUN source $CONDA_DIR/etc/profile.d/conda.sh && \
+45 | >>>     conda create -n clm_gs_cpu python=3.10 -y && \
+46 | >>>     conda clean -afy
+47 |
+--------------------
+ERROR: failed to solve: process "/bin/bash -c source $CONDA_DIR/etc/profile.d/conda.sh &&     conda create -n clm_gs_cpu python=3.10 -y &&     conda clean -afy" did not complete successfully: exit code: 1
+
+=== Runtime Log ===  
+Runtime Status: Failed
+Runtime Error:
+
+
+=== Execution End ===

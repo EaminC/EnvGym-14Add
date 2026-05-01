@@ -1,0 +1,17 @@
+current progress  
+- Dockerfile is based on python:3.10-slim-bullseye and installs all required system packages for CPU-only environment including build-essential, gcc, g++, llvm, libvips, openslide, OpenCV dev libraries, compression and image format libs.  
+- PyTorch CPU-only versions (2.2.2+cpu) and related packages are installed correctly via pip with the proper index-url.  
+- Pre-commit and code quality tools (black, ruff, conventional-pre-commit) installed via pip.  
+- Local repository files copied into /workspace and cellvit package installed from source.  
+- OpenSlide python bindings installed explicitly.  
+- Environment variable CELLVIT_CACHE_DIR set properly.  
+- Default command set to bash shell.  
+- Docker build and runtime logs indicate successful build and execution with no GPU or CUDA related errors.
+
+next step  
+- Remove any leftover or commented GPU-related Docker Compose configurations if present (outside Dockerfile).  
+- Verify the Docker Compose YAML file does not include GPU runtime flags or NVIDIA device reservations.  
+- Document or add comments in the Dockerfile to clarify this image is CPU-only and does not support GPU or CUDA.  
+- Optionally, reduce image size by removing unnecessary packages if any are GPU-specific or unused.  
+- Validate the Docker container runs the cellvit inference pipeline with CPU-only config (gpu: -1 or omitted).  
+- Update README and documentation to reflect CPU-only Docker image usage and limitations.

@@ -1,0 +1,212 @@
+=== ADJUSTED ENVIRONMENT SETUP PLAN (GPU-LESS AMD64 LINUX) ===
+
+**Context:**  
+- Host architecture: x86_64 (AMD64) Linux-compatible base images only  
+- No NVIDIA GPU detected → **No CUDA, no NVIDIA drivers, no GPU runtime needed**  
+- Docker version 28.1.1 supports BuildKit/buildx, no GPU build support (`--gpus` flag not applicable)  
+- Use standard Linux instructions with overlay2 storage driver compatibility  
+- Working directory is local Linux path; no special volume mount adjustments needed  
+- Paths inside container remain Linux-style  
+- Adjust software and container setup to CPU-only environment  
+
+---
+
+### 1. DOWNLOADS NEEDED (UPDATED):
+
+- **Docker** (latest stable version, already installed 28.1.1)  
+  - **Do NOT install NVIDIA Container Toolkit or CUDA drivers/toolkit** since no GPU is present  
+  - Docker Compose v2 or compatible (already supported)  
+- **Python 3.8+** (Recommended 3.10)  
+- **Git** (latest stable)  
+- **UV** (Universal Virtual environment manager)  
+- **Pandoc** (latest stable) for document conversion  
+- **curl** available inside container for healthcheck (verify or install as needed)  
+- **No NVIDIA GPU drivers or CUDA Toolkit installation required**  
+- Python libraries as listed remain the same (core API, image/PDF processing, utilities, Hugging Face, vLLM, optional VLM dependencies)  
+
+**Dependencies notes:**  
+- The optional VLM dependencies (`torch`, `torchvision`, `timm`) must be installed with CPU-only variants (no `+cu121` CUDA tags). Use CPU wheels from PyPI or specify CPU versions explicitly to avoid CUDA dependencies.  
+- For example, install `torch==2.5.1+cpu` or just `torch==2.5.1` if CPU-only wheel is default; **do NOT install CUDA-specific torch wheels**.  
+- Update `requirements.txt` or Dockerfile installs accordingly to CPU-compatible versions of these packages.  
+
+---
+
+### 2. FILES TO CREATE (UPDATED):
+
+- **`docker-compose.yml`**:  
+  - Remove `runtime: nvidia` (no GPU runtime)  
+  - Remove `deploy.resources.reservations.devices` section that requests NVIDIA GPUs  
+  - Keep service name `deepseek-ocr`, container named `deepseek-ocr-vllm`  
+  - Keep volumes mounts (`./models` → `/app/models`, `./outputs` → `/app/outputs`)  
+  - Environment variables inside container remain:  
+    - `CUDA_VISIBLE_DEVICES=""` or unset (empty string to disable GPU usage)  
+    - `MODEL_PATH=/app/models/deepseek-ai/DeepSeek-OCR`  
+    - `MAX_CONCURRENCY=5`  
+    - `GPU_MEMORY_UTILIZATION=0.85` (can keep, but note no GPU memory usage on CPU-only)  
+  - Restart policy: `unless-stopped`  
+  - Healthcheck unchanged (curl to `http://localhost:8000/health`)  
+  - Remove any GPU-specific deploy or resource reservation keys to avoid Docker warnings/errors  
+
+- **`Dockerfile`**:  
+  - Use CPU-friendly base image, e.g. `python:3.10-slim` or similar lightweight Debian/Ubuntu-based image compatible with x86_64  
+    - **Do NOT use `vllm/vllm-openai:v0.8.5` base image if it assumes GPU/CUDA support**; instead, use a base image that does not require GPU or CUDA  
+  - Copy DeepSeek-OCR source code from `DeepSeek-OCR-master/DeepSeek-OCR-master/DeepSeek-OCR-vllm/` as before (ensure path correctness)  
+  - Install all Python dependencies from `requirements-lock.txt` with the following changes:  
+    - For optional VLM dependencies, install CPU-only torch and torchvision versions (without CUDA extensions)  
+    - Avoid installing CUDA Toolkit or NVIDIA drivers inside container  
+  - Set `PYTHONPATH` environment variable as before  
+  - Expose port 8000  
+  - Set entrypoint as before (`python3 start_server.py`)  
+  - Create `/app/models` and `/app/outputs` directories inside container  
+
+- **`.dockerignore`** and **`.gitignore`** files remain unchanged as specified, placed at root of repository  
+
+- **`.env`** file (optional):  
+  - Set `CUDA_VISIBLE_DEVICES=""` or omit entirely to reflect no GPU available  
+  - Other environment variables remain the same  
+
+- **`requirements.txt`** (updated):  
+  - Pin all packages as per `requirements-lock.txt`  
+  - For optional VLM dependencies: specify CPU-only versions of `torch` and `torchvision` (e.g., `torch==2.5.1`, `torchvision==0.20.1`, no `+cu121`)  
+  - Include comments or instructions to install CPU variants when no GPU is available  
+
+- Configuration shell scripts (`setup_env.sh`, `setup_env.bat`) updated accordingly:  
+  - Set `CUDA_VISIBLE_DEVICES=""` explicitly or unset  
+  - Export other environment variables unchanged  
+  - Ensure `PYTHONPATH` reflects correct local source path  
+
+- Model weights directory structure unchanged  
+
+- Source code path correctness check remains necessary  
+
+---
+
+### 3. NECESSARY TEST CASES IN THE CODEBASE (UNCHANGED):
+
+- All tests remain valid  
+- Add emphasis on testing **CPU-only fallback and performance** since no GPU present  
+- Verify that optional VLM enrichment runs correctly using CPU-only torch if enabled  
+- Confirm healthcheck and service startup without GPU or CUDA errors  
+
+---
+
+### 4. COMPLETE TODO LIST (UPDATED):
+
+1. **Install Required Software:**  
+   - Docker (already installed 28.1.1) and Docker Compose v2 (already supported)  
+   - **Do NOT install NVIDIA Container Toolkit, CUDA drivers, or CUDA Toolkit**  
+   - Python 3.10+ and Git  
+   - Pandoc  
+   - UV environment manager  
+   - Confirm `curl` is present in container base image or plan to install manually in Dockerfile  
+
+2. **Clone Repository:**  
+   - As before, clone `SciDOCX` repo  
+   - Clone or add `DeepSeek-OCR` repo separately or as submodule at `DeepSeek-OCR/`  
+
+3. **Add `.dockerignore` and `.gitignore`:**  
+   - As specified, no changes  
+
+4. **Prepare Python Dependencies:**  
+   - Adjust `requirements.txt` to pin CPU-only versions of torch and torchvision for optional VLM dependencies  
+   - For example:  
+     ```
+     # Optional VLM dependencies (CPU-only)
+     torch==2.5.1
+     torchvision==0.20.1
+     timm==1.0.21
+     ```  
+   - Install all dependencies with `uv pip install -r requirements.txt` locally and inside Docker build  
+
+5. **Download Model Weights:**  
+   - No changes  
+
+6. **Set Environment Variables:**  
+   - Set `CUDA_VISIBLE_DEVICES=""` explicitly to disable GPU usage  
+   - Others unchanged  
+
+7. **Build and Launch Setup:**  
+
+   - **Docker Build and Run:**  
+     - Use updated `Dockerfile` with CPU-friendly base image (e.g., `python:3.10-slim`)  
+     - Remove GPU runtime and device reservation from `docker-compose.yml`  
+     - Build and run container as usual:  
+       ```bash
+       docker compose build
+       docker compose up -d
+       ```  
+     - Verify container runs without GPU errors  
+     - Verify healthcheck endpoint reachable at `http://localhost:8000/health`  
+     - Confirm environment variables inside container (check `CUDA_VISIBLE_DEVICES=""`)  
+     - Confirm exposed port 8000 matches API server port  
+     - Confirm `.dockerignore` exclusions work (check build context size)  
+
+   - **Local Python Environment:**  
+     - `uv pip install -r requirements.txt` with CPU-only dependencies  
+     - Clone DeepSeek-OCR repo if needed  
+     - Run API server locally (default port 8001)  
+     - Verify server starts without errors and healthcheck endpoint reachable  
+
+8. **Verify Model Loading and Inference:**  
+   - Run sample PDF processing as before  
+
+9. **Run Batch Processing:**  
+   - No changes  
+
+10. **Test GPU Fallback:**  
+    - Now default operation is CPU-only; verify no GPU-related errors occur  
+    - Confirm that running with `CUDA_VISIBLE_DEVICES=""` or unset works gracefully  
+
+11. **Error Handling Validation:**  
+    - No changes  
+
+12. **Test New Environment Variables:**  
+    - `MAX_CONCURRENCY` and `GPU_MEMORY_UTILIZATION` still effective for concurrency and resource control (note GPU memory utilization is irrelevant on CPU but can be kept for code compatibility)  
+
+13. **Test Optional VLM Features:**  
+    - Ensure optional VLM dependencies installed as CPU-only versions  
+    - Run enrichment pipeline and verify correctness  
+
+14. **Dependency Compatibility & Performance Validation:**  
+    - Confirm no conflicts with CPU-only torch and torchvision versions  
+    - Monitor performance and resource usage on CPU  
+
+15. **Documentation & Scripts:**  
+    - Update documentation to reflect no GPU usage and CPU-only setup  
+    - Provide notes on installing CPU-only torch wheels  
+    - Update `setup_env.sh` and `.env` to reflect `CUDA_VISIBLE_DEVICES=""`  
+
+16. **Optional: Evaluation Framework Setup:**  
+    - No changes  
+
+17. **Final Verification:**  
+    - Confirm Dockerfile uses CPU-only base image and no GPU runtime  
+    - Confirm Docker Compose YAML has no GPU device reservations or runtime settings  
+    - Confirm environment variables set properly (`CUDA_VISIBLE_DEVICES=""`)  
+    - Confirm all pipelines run without GPU or CUDA dependencies  
+    - Confirm API port consistency (container port 8000, local server port 8001)  
+    - Confirm container healthcheck passes  
+    - Confirm `.dockerignore` and `.gitignore` exclude files as expected  
+    - Confirm upstream DeepSeek-OCR code cloned separately and not committed inside repo  
+
+---
+
+### SUMMARY OF KEY ADJUSTMENTS:
+
+| Aspect                  | Original Plan                             | Adjusted Plan (No GPU)                           |
+|-------------------------|------------------------------------------|-------------------------------------------------|
+| Base Docker Image       | `vllm/vllm-openai:v0.8.5` (CUDA-enabled) | Use official CPU-only base image (e.g., `python:3.10-slim`) |
+| Docker Compose `runtime`| `nvidia` (GPU runtime)                    | Remove runtime setting (default runtime)         |
+| Docker Compose `deploy.resources` | Reserve NVIDIA GPUs                | Remove GPU device reservation                    |
+| CUDA Drivers/Toolkit    | Install CUDA 12.1 and NVIDIA drivers      | **Do not install CUDA or NVIDIA drivers**         |
+| CUDA_VISIBLE_DEVICES    | `0` (GPU device 0)                        | Set to empty string `""` or unset to disable GPU |
+| Optional VLM deps       | CUDA-enabled torch/torchvision wheels (`+cu121`) | Use CPU-only torch/torchvision wheels             |
+| Environment variables   | Include GPU-specific vars                  | Set `CUDA_VISIBLE_DEVICES=""`, others unchanged  |
+| Healthcheck & Ports     | Port 8000 exposed, healthcheck on localhost:8000 | No change                                        |
+| `requirements.txt`      | CUDA-enabled packages in optional deps    | CPU-only variants for torch/torchvision           |
+| Build context & ignores | No change                                 | No change                                         |
+| Scripts and docs        | GPU instructions included                  | Remove GPU instructions, add CPU-specific notes   |
+
+---
+
+This adjusted plan ensures full compatibility with your hardware environment (no NVIDIA GPU, AMD64 Linux), avoids unnecessary CUDA and GPU dependencies, and maintains all functional features of DeepSeek-OCR and vLLM pipelines on CPU-only infrastructure.
