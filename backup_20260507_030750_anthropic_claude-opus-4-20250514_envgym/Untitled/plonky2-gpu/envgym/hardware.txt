@@ -1,0 +1,6 @@
+- Working Directory: /home/cc/EnvGym/data/20260501_233214_anthropic_claude-opus-4-20250514/plonky2-gpu
+- Architecture: x86_64, --platform=linux/amd64
+- Base Image: ubuntu:20.04, debian:bullseye, alpine:3.18, rust:latest, python:3.11
+- GPU: No NVIDIA GPU detected, only Matrox integrated graphics, no CUDA support needed
+- Instruction Notes: Standard CPU-only builds, no GPU-specific instructions needed
+- Docker Version: 28.1.1, BuildKit enabled by default, no --gpus flag needed

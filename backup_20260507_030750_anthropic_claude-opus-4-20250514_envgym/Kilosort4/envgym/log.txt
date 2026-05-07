@@ -1,0 +1,22 @@
+=== Docker Execution Log - 20260502_030106 ===
+Dockerfile: envgym/envgym.dockerfile
+Image Name: envgym_test_1777690864
+
+=== Build Log ===
+Build Status: Failed
+Build Error:
+--------------------
+35 |     ENV PATH="/opt/conda/bin:$PATH"
+36 |
+37 | >>> RUN /opt/conda/bin/conda create -n py310 python=3.10 pip -y
+38 |
+39 |     RUN echo "conda activate py310" >> ~/.bashrc
+--------------------
+ERROR: failed to solve: process "/bin/sh -c /opt/conda/bin/conda create -n py310 python=3.10 pip -y" did not complete successfully: exit code: 1
+
+=== Runtime Log ===  
+Runtime Status: Failed
+Runtime Error:
+
+
+=== Execution End ===

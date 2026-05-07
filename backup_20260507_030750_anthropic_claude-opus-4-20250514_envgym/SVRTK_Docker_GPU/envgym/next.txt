@@ -1,0 +1,11 @@
+current progress
+
+The Docker build is failing at the MIRTK compilation stage (lines 76-88). The previous approach of cloning the SVRTK repository and its submodules is encountering issues with MIRTK. The dockerfile has been modified to clone MIRTK directly from the official BioMedIA repository using version 2.0.0, but the build still fails during the cmake/make process.
+
+next step
+
+Diagnose the specific MIRTK build error by adding verbose output to the cmake command and checking for missing dependencies. Modify the dockerfile to:
+1. Add `-DCMAKE_VERBOSE_MAKEFILE=ON` to the MIRTK cmake command
+2. Split the RUN command to separate cmake configuration from make to identify which step fails
+3. Consider using a pre-built MIRTK package or Docker image as base instead of building from source
+4. Verify all required MIRTK dependencies are installed (particularly ITK version compatibility)

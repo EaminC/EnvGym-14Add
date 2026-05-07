@@ -1,0 +1,299 @@
+=== ENVIRONMENT SETUP PLAN ===
+
+1. DOWNLOADS NEEDED:
+   - Python 3.9 or 3.10 (for tox testing compatibility)
+   - Git (for version control and SCM)
+   - C++ compiler (for building numpy/scipy/torch extensions)
+     - Linux: gcc/g++ 7.0+ (install via apt-get)
+   - Pandoc 2.0+ (for documentation building)
+   - pip package manager (latest version)
+   - setuptools-scm (for version management)
+   - setuptools (for package building)
+   - wheel (for wheel distribution building)
+   - twine (for PyPI uploads)
+   - tox (for multi-environment testing)
+   - tox-gh-actions (for GitHub Actions integration)
+   - conda or miniconda (for tox conda environments)
+   - Core dependencies:
+     - numpy>=1.20.0
+     - scipy (latest compatible version)
+     - scikit-learn (latest compatible version)
+     - tqdm (latest compatible version)
+     - torch>=1.6 (CPU-only version)
+     - numba (latest compatible version)
+     - faiss-cpu (latest compatible version)
+   - Optional GUI dependencies:
+     - pyqtgraph>=0.13.0
+     - qtpy (latest compatible version)
+     - pyqt6 + pyqt6.sip (or alternative Qt backend)
+     - matplotlib (latest compatible version)
+   - Documentation dependencies:
+     - sphinx>=3.0
+     - sphinxcontrib-apidoc
+     - nbsphinx
+     - myst_parser
+     - sphinx_rtd_theme
+   - Testing dependencies:
+     - pytest
+     - pytest-cov
+     - pytest-xvfb (for Linux GUI testing)
+     - py
+     - codecov (for coverage reporting)
+
+2. FILES TO CREATE:
+   - .gitignore (CREATED)
+     - Python bytecode files, build directories, IDE files, test data
+   - requirements.txt
+     - Core dependencies for basic installation
+   - requirements-dev.txt
+     - Development dependencies including testing tools
+   - requirements-gui.txt
+     - GUI-specific dependencies
+   - docs/requirements.txt (CREATED)
+     - Contains: nbsphinx, myst_parser, sphinx_rtd_theme
+   - pyproject.toml
+     - Modern Python packaging configuration
+   - MANIFEST.in
+     - Include README.md and other non-Python files
+   - .github/workflows/test_and_deploy.yml (CREATED)
+     - CI/CD pipeline configuration for automated testing and PyPI deployment
+   - tox.ini
+     - Multi-environment testing configuration for Python 3.9 and 3.10 on Linux, macOS, and Windows
+     - Configure tox-gh-actions integration
+   - pytest.ini
+     - pytest configuration with filterwarnings settings
+   - setup.cfg
+     - Additional setup configuration and tool settings
+   - setup.py
+     - Package setup script for building distributions
+   - .readthedocs.yml
+     - Read the Docs build configuration
+   - docs/conf.py
+     - Sphinx configuration file
+
+3. NECESSARY TEST CASES IN THE CODEBASE:
+   - tests/test_installation.py
+     - Test core package imports
+     - Verify numpy/scipy/torch versions
+     - Verify CPU-only torch installation
+   - tests/test_dependencies.py
+     - Test Qt backend detection logic
+     - Verify correct GUI dependencies installation
+     - Test torch version detection (CPU-only)
+   - tests/test_spike_sorting.py
+     - Basic spike sorting pipeline functionality
+     - Input/output data handling
+     - Algorithm correctness tests
+   - tests/test_gui.py
+     - GUI initialization tests (if gui extras installed)
+     - Qt backend compatibility tests
+     - Basic UI component tests
+     - Tests with pytest-xvfb on Linux
+   - tests/test_utils.py
+     - Utility function tests
+     - Data preprocessing tests
+     - Performance benchmarks with numba
+   - tests/test_faiss_integration.py
+     - FAISS-CPU functionality tests
+     - Clustering and similarity search tests
+   - tests/test_docs_build.py
+     - Test documentation can be built
+     - Verify all modules are documented
+     - Check for broken links in docs
+     - Test nbsphinx notebook rendering
+     - Verify MyST markdown parsing
+   - tests/test_platform_compatibility.py
+     - Platform-specific tests for Linux, macOS, and Windows
+     - Environment variable handling tests
+     - Display/GUI availability tests
+   - tests/test_gitignore.py
+     - Verify test data directory is properly ignored
+     - Check that build artifacts are ignored
+     - Ensure coverage reports are ignored
+   - tests/test_packaging.py
+     - Test setup.py functionality
+     - Verify package can be built as sdist and wheel
+     - Test version detection with setuptools-scm
+     - Ensure all necessary files are included in distributions
+
+4. COMPLETE TODO LIST:
+   - Install Python 3.9 or 3.10
+     - Verify: python --version
+   - Install conda or miniconda
+     - Download from https://conda.io/miniconda.html
+     - Verify: conda --version
+   - Install system dependencies
+     - Linux: sudo apt-get update && sudo apt-get install -y build-essential xvfb libgl1-mesa-glx
+     - Verify: gcc --version
+   - Create virtual environment in /home/cc/EnvGym/data/20260501_233214_anthropic_claude-opus-4-20250514/Kilosort4
+     - cd /home/cc/EnvGym/data/20260501_233214_anthropic_claude-opus-4-20250514/Kilosort4
+     - python -m venv kilosort_env
+     - Activate: source kilosort_env/bin/activate
+     - Verify: which python
+   - Upgrade pip and setuptools
+     - pip install --upgrade pip setuptools wheel
+     - Verify: pip --version
+   - Install setuptools-scm, tox, and build tools
+     - pip install setuptools-scm tox tox-gh-actions twine
+     - Verify: pip show setuptools-scm tox tox-gh-actions twine
+   - Create project structure
+     - mkdir -p /home/cc/EnvGym/data/20260501_233214_anthropic_claude-opus-4-20250514/Kilosort4/kilosort
+     - mkdir -p /home/cc/EnvGym/data/20260501_233214_anthropic_claude-opus-4-20250514/Kilosort4/tests
+     - mkdir -p /home/cc/EnvGym/data/20260501_233214_anthropic_claude-opus-4-20250514/Kilosort4/docs
+     - Create __init__.py files in package directories
+     - mkdir -p tests/.test_data (for test data storage)
+   - Initialize Git repository
+     - git init
+     - Create initial commit for setuptools-scm
+     - git add .
+     - git commit -m "Initial setup"
+   - Verify .gitignore is properly configured
+     - Check .gitignore exists with correct content
+     - Verify it includes all necessary patterns
+     - Test: git check-ignore tests/.test_data/
+   - Create setup.py
+     - Include setuptools configuration
+     - Configure package metadata
+     - Define entry points if needed
+     - Configure setuptools-scm for version management
+     - Add docs extras_require with nbsphinx, myst_parser, sphinx_rtd_theme
+   - Create requirements files
+     - Create requirements.txt with core dependencies (specify CPU-only torch)
+     - Create requirements-dev.txt with pytest, pytest-cov, pytest-xvfb, py, codecov
+     - Create requirements-gui.txt with GUI dependencies
+     - Verify docs/requirements.txt exists with nbsphinx, myst_parser, sphinx_rtd_theme
+   - Create tox.ini configuration
+     - Configure environments for py39 and py310
+     - Set up platform-specific testing for Linux, macOS, Windows
+     - Configure conda dependencies and channels
+     - Set up pytest commands with coverage reporting
+     - Configure tox-gh-actions matrix mapping
+     - Add PLATFORM environment variable handling
+   - Install core dependencies
+     - pip install torch==1.13.1+cpu -f https://download.pytorch.org/whl/torch_stable.html
+     - pip install -r requirements.txt
+     - Verify: python -c "import numpy, scipy, sklearn, torch, numba, faiss"
+   - Check and handle PyTorch installation
+     - Test existing torch: python -c "import torch; print(torch.__version__); print(torch.cuda.is_available())"
+     - Ensure CPU-only version is installed
+   - Create configuration files
+     - Create MANIFEST.in including README.md
+     - Create setup.cfg with flake8, pytest configurations
+     - Create pyproject.toml with build-system requirements
+     - Create pytest.ini with filterwarnings configuration
+     - Create .readthedocs.yml with Ubuntu 22.04 and Python 3.11
+   - Configure GitHub Actions workflow
+     - Verify .github/workflows/test_and_deploy.yml exists
+     - Ensure matrix includes Python 3.9 and 3.10
+     - Ensure platform matrix includes ubuntu-latest, macos-latest, windows-latest
+     - Configure codecov integration
+     - Set up deployment triggers for version tags (v*)
+   - Test .gitignore functionality
+     - Create test file in ignored directories
+     - Verify git status doesn't show ignored files
+     - Test pattern matching for various file types
+   - Install package in development mode
+     - pip install -e .
+     - Verify: pip show kilosort
+   - Install optional dependencies
+     - pip install -e ".[gui]" (for GUI support)
+     - pip install -e ".[docs]" (for documentation)
+     - Verify GUI: python -c "import pyqtgraph, matplotlib"
+     - Verify docs: python -c "import nbsphinx, myst_parser, sphinx_rtd_theme"
+   - Install development dependencies
+     - pip install -r requirements-dev.txt
+     - Verify: pytest --version
+   - Set up documentation structure
+     - cd /home/cc/EnvGym/data/20260501_233214_anthropic_claude-opus-4-20250514/Kilosort4/docs && sphinx-quickstart
+     - Configure sphinx with autodoc in conf.py
+     - Update conf.py for Read the Docs compatibility
+     - Add sphinx extensions: autodoc, nbsphinx, myst_parser
+     - Configure sphinx_rtd_theme as html_theme
+     - Set up MyST parser for markdown support
+     - Configure nbsphinx for Jupyter notebook integration
+     - Ensure docs/README.md is symlinked or copied from root README.md
+   - Create test files
+     - Implement basic test cases in tests/ directory
+     - Ensure __init__.py in tests/
+     - Add platform-specific tests
+     - Add documentation build tests
+     - Add packaging tests
+     - Create test data in tests/.test_data/ for testing
+   - Run initial tests
+     - pytest tests/ -v
+     - Verify all imports work correctly
+     - Confirm DeprecationWarnings are properly filtered
+     - Verify test data directory is created but ignored by git
+   - Test package building
+     - python setup.py sdist bdist_wheel
+     - Verify dist/ directory is created with .tar.gz and .whl files
+     - Check package contents: tar -tzf dist/*.tar.gz
+     - Verify dist/ is ignored by git
+   - Test with tox locally
+     - tox -e py39-linux
+     - Verify coverage reports are generated
+     - Ensure coverage files are ignored by git
+   - Set up PyPI credentials
+     - Create account on pypi.org
+     - Generate API token
+     - Add TWINE_API_KEY to GitHub repository secrets
+     - Test with: twine check dist/*
+   - Create version tags for testing
+     - git tag v0.0.1
+     - Verify setuptools-scm picks up version
+     - python setup.py --version
+   - Test GitHub Actions integration
+     - Push to GitHub repository
+     - Create pull request to trigger tests
+     - Verify workflow runs on all platforms
+     - Check codecov integration works
+     - Verify tox-gh-actions correctly maps environments
+   - Set up pre-commit hooks
+     - pip install pre-commit
+     - Create .pre-commit-config.yaml
+     - pre-commit install
+     - Add .pre-commit-config.yaml to git
+   - Test GUI functionality (if installed)
+     - Export DISPLAY=:99.0 (for xvfb)
+     - Start xvfb: Xvfb :99 -screen 0 1024x768x24 &
+     - python -c "import PyQt6" or check alternative Qt backend
+     - Create simple GUI test script
+     - Test with xvfb-run on Linux for headless testing
+   - Build documentation locally
+     - cd /home/cc/EnvGym/data/20260501_233214_anthropic_claude-opus-4-20250514/Kilosort4/docs
+     - Install documentation dependencies: pip install -r requirements.txt
+     - make html
+     - Verify: ls _build/html/index.html
+     - Test notebook rendering with nbsphinx
+     - Test MyST markdown parsing
+     - Verify RTD theme is properly applied
+     - Verify docs/_build/ is ignored by git
+   - Configure Read the Docs integration
+     - Create account on readthedocs.org
+     - Import project from GitHub/GitLab
+     - Verify .readthedocs.yml is detected
+     - Ensure docs/requirements.txt is used for builds
+     - Trigger test build
+     - Check build logs for errors
+     - Verify nbsphinx and MyST features work on RTD
+   - Test deployment workflow
+     - Create test tag: git tag v0.1.0-test
+     - Push tag: git push origin v0.1.0-test
+     - Monitor GitHub Actions deployment job
+     - Verify package appears on test.pypi.org (if configured)
+     - Delete test tag after verification
+   - Final verification
+     - pip list (document installed packages)
+     - python -m pytest --collect-only (verify test discovery)
+     - pip check (verify no conflicts)
+     - python setup.py check
+     - tox --list (verify all environments are configured)
+     - Run full tox test suite: tox
+     - Verify Read the Docs webhook is active
+     - Test documentation auto-build on commit
+     - Check GitHub Actions runs successfully on all platforms
+     - Verify coverage reports are properly generated and uploaded to codecov
+     - Test deployment workflow with version tag (dry run)
+     - Confirm all build artifacts and temporary files are ignored by git
+     - Run git status to ensure clean working directory
+     - Document PyPI release process in README.md

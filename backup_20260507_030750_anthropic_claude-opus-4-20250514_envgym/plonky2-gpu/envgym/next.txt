@@ -1,0 +1,7 @@
+current progress
+
+The Dockerfile has been created with Ubuntu 20.04 base image, all necessary system dependencies installed (build tools, CMake 3.28.1, Rust stable, LLVM, Python3), and the plonky2 repository cloned. Basic configuration files (.env, .cargo/config.toml, .gitignore) and benchmark scripts for all modules (plonky2, evm, field, insertion, starky, system-zero, u32, util, waksman) have been created. Initial cargo fetch and build attempts were made.
+
+next step
+
+Create workspace.toml file to define workspace members and dependencies, create module-specific Cargo.toml files for each crate (plonky2, ecdsa, evm, field, starky, system_zero, u32, util, waksman, insertion, maybe_rayon), and create CPU benchmark files for modules that need them (starky/benches/cpu_benchmarks.rs, system_zero/benches/cpu_benchmarks.rs, field/benches/cpu_benchmarks.rs, insertion/benches/cpu_benchmarks.rs, waksman/benches/cpu_benchmarks.rs).

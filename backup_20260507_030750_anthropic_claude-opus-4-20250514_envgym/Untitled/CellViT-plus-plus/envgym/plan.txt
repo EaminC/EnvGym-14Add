@@ -1,0 +1,116 @@
+Based on the hardware information provided, here's the adjusted plan:
+
+## Adjusted Environment Setup Plan for CellViT-plus-plus
+
+### System Requirements
+- **Architecture**: x86_64 (linux/amd64)
+- **Base Image Options**: ubuntu:20.04, debian:11, alpine:3.18, or python:3.x-slim
+- **GPU**: CPU-only configuration (No NVIDIA GPU detected)
+- **Docker**: Version 28.1.1 with BuildKit enabled
+
+### Working Directory
+```
+/home/cc/EnvGym/data/20260501_233214_anthropic_claude-opus-4-20250514/CellViT-plus-plus
+```
+
+### Docker Configuration
+Since no GPU is available, the environment will be configured for CPU-only execution:
+- No `--gpus` flag needed in Docker commands
+- Use CPU-optimized builds and libraries
+- Avoid CUDA/cuDNN dependencies
+
+### Base Image Selection
+Recommended base image for this setup:
+```dockerfile
+FROM python:3.9-slim
+```
+This provides a lightweight Python environment suitable for CPU-only workloads.
+
+### Environment Setup Steps
+
+1. **Create Dockerfile** in the working directory:
+```dockerfile
+FROM python:3.9-slim
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    git \
+    wget \
+    libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender-dev \
+    libgomp1 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set working directory
+WORKDIR /workspace
+
+# Copy project files
+COPY . /workspace/
+
+# Install Python dependencies (CPU versions)
+RUN pip install --no-cache-dir \
+    torch==2.0.1+cpu torchvision==0.15.2+cpu -f https://download.pytorch.org/whl/torch_stable.html \
+    numpy \
+    opencv-python \
+    pillow \
+    scikit-image \
+    matplotlib \
+    jupyter \
+    pandas
+
+# Set environment variables for CPU optimization
+ENV OMP_NUM_THREADS=4
+ENV MKL_NUM_THREADS=4
+
+# Expose port for Jupyter if needed
+EXPOSE 8888
+
+CMD ["/bin/bash"]
+```
+
+2. **Build Docker Image**:
+```bash
+cd /home/cc/EnvGym/data/20260501_233214_anthropic_claude-opus-4-20250514/CellViT-plus-plus
+docker build --platform=linux/amd64 -t cellvit-plusplus-cpu .
+```
+
+3. **Run Container**:
+```bash
+docker run -it --rm \
+    --platform=linux/amd64 \
+    -v $(pwd):/workspace \
+    -w /workspace \
+    cellvit-plusplus-cpu
+```
+
+### CPU Optimization Notes
+- PyTorch CPU version will be installed instead of GPU version
+- OpenMP and MKL thread counts are set for optimal CPU performance
+- No CUDA-specific dependencies or configurations
+- Memory usage will be managed by the system automatically
+
+### Alternative Lightweight Setup
+If storage is a concern, use Alpine-based image:
+```dockerfile
+FROM python:3.9-alpine3.18
+
+RUN apk add --no-cache \
+    build-base \
+    git \
+    jpeg-dev \
+    zlib-dev \
+    freetype-dev \
+    lcms2-dev \
+    openjpeg-dev \
+    tiff-dev \
+    tk-dev \
+    tcl-dev
+
+WORKDIR /workspace
+# Continue with Python dependencies...
+```
+
+This configuration ensures compatibility with the available hardware while maintaining functionality for the CellViT-plus-plus project in a CPU-only environment.

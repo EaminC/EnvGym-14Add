@@ -1,0 +1,3 @@
+=== HARDWARE CHECKING ERROR ===
+Error: Error code: 400 - {'error': {'message': '{"type":"error","error":{"type":"invalid_request_error","message":"You have reached your specified workspace API usage limits. You will regain access on 2026-06-01 at 00:00 UTC."},"request_id":"req_011CadHSJskfkLeWcv2sYuaK"}', 'type': 'provider_error', 'code': 400, 'provider': 'anthropic', 'request_id': '9f636351-ff7e-407f-9e0d-2e6aba4d5859'}}
+Please check your system configuration and try again.

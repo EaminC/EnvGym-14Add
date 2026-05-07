@@ -1,0 +1,710 @@
+=== ADJUSTED ENVIRONMENT SETUP PLAN ===
+
+**CRITICAL ADJUSTMENT: NO GPU AVAILABLE - CPU-ONLY SETUP**
+
+1. DOWNLOADS NEEDED:
+   - Python 3.9+ (recommended 3.10 or 3.11, with 3.10 as default for pre-commit)
+   - Docker Engine (latest stable version) ✓ Already installed 28.1.1
+   - Docker Compose v2.0+ ✓ Supported by Docker 28.1.1
+   - ~~NVIDIA Container Toolkit (nvidia-docker2)~~ **NOT NEEDED - NO GPU**
+   - ~~CUDA Toolkit 12.1 or compatible version~~ **NOT NEEDED - NO GPU**
+   - ~~NVIDIA GPU drivers (latest stable version)~~ **NOT NEEDED - NO GPU**
+   - Git (latest stable version)
+   - pre-commit framework
+   - Sphinx (latest stable version) for documentation
+   - sphinx-build command line tool
+   - Python build tools:
+     - build (python -m pip install build)
+     - setuptools>=61.0.0
+     - wheel
+   - Testing frameworks:
+     - pytest>=7.0.0
+     - pytest-cov>=4.0.0
+     - pytest-mock>=3.10.0
+   - Documentation tools:
+     - sphinx>=4.0.0
+     - sphinx-rtd-theme
+     - sphinx-autodoc-typehints
+     - myst-parser (for Markdown support in Sphinx)
+     - sphinx-collapse
+     - sphinx-copybutton
+     - sphinx-design
+     - sphinx-material
+     - sphinx-notfound-page
+     - sphinx-tabs
+     - sphinxawesome-theme
+     - sphinxcontrib-applehelp
+     - sphinxcontrib-devhelp
+     - sphinxcontrib-htmlhelp
+     - sphinxcontrib-jquery
+     - sphinxcontrib-jsmath
+     - sphinxcontrib-qthelp
+     - sphinxcontrib-serializinghtml
+   - System binaries:
+     - libvips (v8.10+)
+     - openslide (v3.4.1+)
+     - gcc/g++ (v9.0+)
+     - libopencv-core-dev (v4.5+)
+     - libopencv-imgproc-dev (v4.5+)
+     - libsnappy-dev
+     - libgeos-dev
+     - llvm (v10+)
+     - libjpeg-dev
+     - libpng-dev
+     - libtiff-dev
+     - make (for Makefile support)
+   - **PyTorch 2.2.2 CPU-only version** ⚠️ ADJUSTED
+   - **torchvision 0.17.2 CPU-only version** ⚠️ ADJUSTED
+   - **torchaudio 2.2.2 CPU-only version** ⚠️ ADJUSTED
+   - Core dependencies from pyproject.toml:
+     - opencv-python-headless==4.7.0.72
+     - numpy<2.0.0
+     - scikit-image>=0.19.3,<0.27
+     - Shapely>=1.8.5.post1,<=2.0.5
+     - pydantic>=1.10.16,<2.0
+     - ray[default]>=2.9.3
+     - pathopatch>=1.0.9
+   - Development tools:
+     - black==23.1.0
+     - ruff==0.3.4
+     - pre-commit-hooks==4.4.0
+     - conventional-pre-commit==2.1.1
+   - ~~Optional: CuPy (matching CUDA version)~~ **NOT AVAILABLE - NO GPU**
+   - ~~Optional: cuCIM (RAPIDS library)~~ **NOT AVAILABLE - NO GPU**
+   - **Docker image: CPU-only variant needed** ⚠️ CRITICAL
+   - Additional tools for file format support:
+     - Support for multiple WSI formats (.svs, .tiff, .ndpi, .vms, .vmu, .scn, .mrxs, .tif, .svslide, .bif)
+     - GeoJSON export libraries for QuPath integration
+
+2. FILES TO CREATE:
+   [No changes - all files remain the same]
+
+3. NECESSARY TEST CASES IN THE CODEBASE:
+   - ~~`test_gpu_availability.py` - Verify CUDA and GPU accessibility~~ **SKIP - NO GPU**
+   - `test_binary_dependencies.py` - Check all system binaries are installed
+   - **`test_pytorch_cpu_installation.py` - Verify PyTorch CPU-only support** ⚠️ ADJUSTED
+   - `test_cellvit_import.py` - Test CellViT package import and basic functionality
+   - `test_openslide_functionality.py` - Test WSI reading capabilities
+   - **`test_inference_pipeline_cpu.py` - End-to-end inference test with CPU** ⚠️ ADJUSTED
+   - `test_config_loading.py` - Test YAML configuration parsing
+   - `test_cache_directory.py` - Verify cache directory creation and permissions
+   - ~~`test_optional_dependencies.py` - Check CuPy and cuCIM if installed~~ **SKIP - NO GPU**
+   - **`test_cpu_memory_requirements.py` - Verify system meets CPU inference memory requirements** ⚠️ ADJUSTED
+   - `test_visualization_output.py` - Test output generation and visualization
+   - **`test_batch_processing_cpu.py` - Test batch WSI processing on CPU** ⚠️ ADJUSTED
+   - `test_different_formats.py` - Test .svs, .tiff, and other WSI formats
+   - `test_cli_commands.py` - Test all CLI commands (cellvit-inference, cellvit-check, etc.)
+   - `test_ray_integration.py` - Test Ray distributed computing setup
+   - `test_pathopatch_integration.py` - Test PathoPatch functionality
+   - `test_version_compatibility.py` - Test dependency version constraints
+   - **`test_docker_cpu_environment.py` - Test Docker container CPU functionality** ⚠️ ADJUSTED
+   - ~~`test_nvidia_docker_runtime.py` - Verify NVIDIA Docker runtime~~ **SKIP - NO GPU**
+   - `test_docker_volume_mounts.py` - Test Docker volume mounting and permissions
+   - ~~`test_docker_gpu_access.py` - Test GPU access from within Docker container~~ **SKIP - NO GPU**
+   - `test_docker_memory_limits.py` - Verify Docker memory constraints
+   - **`test_model_selection_cpu.py` - Test SAM and HIPT model loading on CPU** ⚠️ ADJUSTED
+   - `test_nuclei_taxonomies.py` - Test all nuclei classification taxonomies
+   - `test_geojson_export.py` - Test GeoJSON output generation for QuPath
+   - `test_graph_generation.py` - Test cell graph generation functionality
+   - `test_compression.py` - Test Snappy compression for output files
+   - ~~`test_amp_inference.py` - Test Automatic Mixed Precision inference~~ **LIMITED ON CPU**
+   - **`test_batch_size_performance_cpu.py` - Test CPU-appropriate batch sizes** ⚠️ ADJUSTED
+   - `test_csv_filelist_processing.py` - Test WSI processing from CSV filelist
+   - `test_mpp_magnification_extraction.py` - Test automatic MPP/magnification extraction
+   - `test_system_resource_configuration.py` - Test CPU/memory/Ray worker configuration
+   - `test_debug_mode.py` - Test debug mode functionality
+   - `test_pre_commit_hooks.py` - Test pre-commit hook functionality
+   - `test_code_formatting.py` - Test black and ruff formatting compliance
+   - `test_commit_message_format.py` - Test conventional commit message format
+   - `test_large_file_detection.py` - Test large file detection in commits
+   - `test_build_process.py` - Test package build process
+   - `test_package_distribution.py` - Test built package installation
+   - `test_build_artifacts.py` - Verify build artifacts are correctly generated
+   - `test_manifest_inclusion.py` - Test MANIFEST.in file inclusions
+   - `tests/test_utils/test_slow_operations.py` - Tests marked as slow for separate execution
+   - `tests/test_utils/test_fast_operations.py` - Fast unit tests for utils module
+   - `tests/test_utils/test_integration.py` - Integration tests for utils module
+   - `test_model_files.py` - Test PyTorch model file loading (.pt, .pth, .bin)
+   - `test_wsi_file_handling.py` - Test handling of .svs and .tiff WSI files
+   - `test_test_database_download.py` - Test example database download functionality
+   - `test_notebook_execution.py` - Test Jupyter notebook functionality if notebooks exist
+   - `test_documentation_links.py` - Test that all documentation links are valid
+   - **`test_cpu_hardware_requirements.py` - Verify CPU system meets minimum requirements** ⚠️ ADJUSTED
+   - `test_sphinx_documentation.py` - Test Sphinx documentation build process
+   - `test_docs_makefile.py` - Test documentation Makefile functionality
+   - `test_docs_make_bat.py` - Test documentation make.bat functionality on Windows
+   - `test_docs_build_html.py` - Test HTML documentation generation
+   - `test_docs_build_pdf.py` - Test PDF documentation generation if LaTeX installed
+   - `test_docs_api_generation.py` - Test API documentation auto-generation
+   - `test_docs_links.py` - Test all internal documentation links
+   - `test_docs_examples.py` - Test code examples in documentation
+   - `test_sphinx_build_availability.py` - Test sphinx-build command availability
+   - `test_windows_documentation_build.py` - Test documentation build on Windows using make.bat
+   - `test_documentation_deployment.py` - Test GitHub Pages deployment configuration
+   - `test_sphinx_extensions.py` - Test all Sphinx extensions work correctly
+   - `test_documentation_themes.py` - Test documentation theme rendering
+
+4. COMPLETE TODO LIST:
+   - [x] **Check system specifications (CPU-only setup, RAM ≥32GB recommended, Storage ≥30GB, CPU cores ≥16)** ⚠️ ADJUSTED
+   - [ ] Verify Python version ≥3.9 (3.10 recommended): `python --version`
+   - [ ] Install Git if not already installed: `sudo apt-get install git`
+   - [ ] Install make utility if not already installed: `sudo apt-get install make`
+   - [ ] Clone or initialize Git repository for the project
+   - [x] **Docker Engine already installed: version 28.1.1** ✓
+   - [x] **Docker Compose v2 supported by Docker 28.1.1** ✓
+   - [ ] ~~Install NVIDIA Container Toolkit~~ **SKIP - NO GPU**
+   - [ ] ~~Verify Docker GPU support~~ **SKIP - NO GPU**
+   - [ ] ~~Install CUDA Toolkit 12.1~~ **SKIP - NO GPU**
+   - [ ] ~~Update NVIDIA GPU drivers~~ **SKIP - NO GPU**
+   - [ ] Install system binaries:
+     ```bash
+     sudo apt-get update
+     sudo apt-get install libvips openslide gcc g++ libopencv-core-dev libopencv-imgproc-dev libsnappy-dev libgeos-dev llvm libjpeg-dev libpng-dev libtiff-dev make
+     ```
+   - [ ] Create project directory structure:
+     ```bash
+     cd /home/cc/EnvGym/data/20260501_233214_anthropic_claude-opus-4-20250514/CellViT-Inference
+     mkdir -p config/nuclei_taxonomy_configs scripts tests/test_utils docker input-data output-data/geojson output-data/graphs notebooks test_scripts tests/data tests/test_data docs/source/_static docs/source/_templates _build .github/workflows
+     touch input-data/.gitkeep output-data/.gitkeep output-data/geojson/.gitkeep output-data/graphs/.gitkeep
+     touch tests/test_utils/__init__.py tests/conftest.py
+     touch docs/source/_static/.gitkeep docs/source/_templates/.gitkeep
+     ```
+   - [ ] Copy provided .gitignore to project root
+   - [ ] Copy provided .pre-commit-config.yaml to project root
+   - [ ] **Create CPU-only docker-compose.yaml** ⚠️ ADJUSTED - Remove GPU runtime
+   - [ ] Copy provided example_config.yaml to config/example_config.yaml
+   - [ ] Copy provided build.sh to project root and make it executable: `chmod +x build.sh`
+   - [ ] Copy provided test.sh to project root and make it executable: `chmod +x test.sh`
+   - [ ] Copy provided docs/README-PyPI.md to docs/README-PyPI.md
+   - [ ] Copy provided docs/Makefile to docs/Makefile
+   - [ ] Copy provided docs/make.bat to docs/make.bat
+   - [ ] Copy provided .github/workflows/documentation.yml to .github/workflows/documentation.yml
+   - [ ] **Create main README.md with CPU-only setup instructions** ⚠️ ADJUSTED
+   - [ ] Update docker-compose.yaml volume paths to match your local directories
+   - [ ] **Find or build CPU-only CellViT Docker image** ⚠️ CRITICAL
+   - [ ] Test Docker container: `docker-compose run --rm cellvit bash`
+   - [ ] Create Python virtual environment: `python -m venv cellvit-env`
+   - [ ] Activate virtual environment: `source cellvit-env/bin/activate` (Linux)
+   - [ ] Upgrade pip and install build tools: `pip install --upgrade pip setuptools wheel build`
+   - [ ] **Install PyTorch CPU-only version:** ⚠️ ADJUSTED
+     ```bash
+     pip install torch==2.2.2 torchvision==0.17.2 torchaudio==2.2.2 --index-url https://download.pytorch.org/whl/cpu
+     ```
+   - [ ] **Verify PyTorch CPU:** `python -c "import torch; print(torch.cuda.is_available())"` (should return False)
+   - [ ] Install OpenSlide via conda (if using conda): `conda install -c conda-forge openslide`
+   - [ ] Install CellViT package with dependencies: `pip install cellvit`
+   - [ ] Install testing dependencies:
+     ```bash
+     pip install pytest>=7.0.0 pytest-cov>=4.0.0 pytest-mock>=3.10.0
+     ```
+   - [ ] Install development dependencies:
+     ```bash
+     pip install pytest pytest-cov pytest-mock black==23.1.0 ruff==0.3.4 pre-commit build
+     ```
+   - [ ] Install documentation dependencies:
+     ```bash
+     pip install sphinx sphinx-rtd-theme sphinx-autodoc-typehints myst-parser sphinx-collapse sphinx-copybutton sphinx-design sphinx-material sphinx-notfound-page sphinx-tabs sphinxawesome-theme sphinxcontrib-applehelp sphinxcontrib-devhelp sphinxcontrib-htmlhelp sphinxcontrib-jquery sphinxcontrib-jsmath sphinxcontrib-qthelp sphinxcontrib-serializinghtml
+     ```
+   - [ ] Create requirements-dev.txt:
+     ```bash
+     echo "pytest>=7.0.0\npytest-cov>=4.0.0\npytest-mock>=3.10.0\nblack==23.1.0\nruff==0.3.4\npre-commit\nbuild\nsphinx>=4.0.0\nsphinx-rtd-theme\nsphinx-autodoc-typehints\nmyst-parser" > requirements-dev.txt
+     ```
+   - [ ] Create requirements-test.txt:
+     ```bash
+     echo "pytest>=7.0.0\npytest-cov>=4.0.0\npytest-mock>=3.10.0" > requirements-test.txt
+     ```
+   - [ ] Create requirements-docs.txt:
+     ```bash
+     echo "sphinx>=4.0.0\nsphinx-rtd-theme\nsphinx-autodoc-typehints\nmyst-parser\nsphinx-collapse\nsphinx-copybutton\nsphinx-design\nsphinx-material\nsphinx-notfound-page\nsphinx-tabs\nsphinxawesome-theme\nsphinxcontrib-applehelp\nsphinxcontrib-devhelp\nsphinxcontrib-htmlhelp\nsphinxcontrib-jquery\nsphinxcontrib-jsmath\nsphinxcontrib-qthelp\nsphinxcontrib-serializinghtml" > requirements-docs.txt
+     ```
+   - [ ] Create docs/requirements.txt:
+     ```bash
+     cp requirements-docs.txt docs/requirements.txt
+     ```
+   - [ ] Create pytest.ini configuration:
+     ```ini
+     [pytest]
+     testpaths = tests
+     python_files = test_*.py
+     python_classes = Test*
+     python_functions = test_*
+     markers =
+         slow: marks tests as slow (deselect with '-m "not slow"')
+         integration: marks tests as integration tests
+         unit: marks tests as unit tests
+         gpu: marks tests that require GPU (skip on CPU-only systems)
+     addopts = -ra -q --strict-markers -m "not gpu"
+     ```
+   - [ ] Create .coveragerc configuration:
+     ```ini
+     [run]
+     source = cellvit
+     omit = 
+         */tests/*
+         */test_*
+         */__init__.py
+         */setup.py
+     
+     [report]
+     exclude_lines =
+         pragma: no cover
+         def __repr__
+         raise AssertionError
+         raise NotImplementedError
+         if __name__ == .__main__.:
+     ```
+   - [ ] Verify docs/make.bat is properly configured for Windows Sphinx builds
+   - [ ] Create docs/source/conf.py for Sphinx configuration:
+     ```python
+     # Configuration file for the Sphinx documentation builder.
+     import os
+     import sys
+     sys.path.insert(0, os.path.abspath('../..'))
+     
+     project = 'CellViT'
+     copyright = '2024, TIO-IKIM'
+     author = 'TIO-IKIM'
+     release = '1.0.0'
+     
+     extensions = [
+         'sphinx.ext.autodoc',
+         'sphinx.ext.napoleon',
+         'sphinx.ext.viewcode',
+         'sphinx_autodoc_typehints',
+         'myst_parser',
+         'sphinx_collapse',
+         'sphinx_copybutton',
+         'sphinx_design',
+         'sphinx_tabs',
+         'sphinxcontrib.jquery',
+     ]
+     
+     templates_path = ['_templates']
+     exclude_patterns = []
+     
+     html_theme = 'sphinx_rtd_theme'
+     html_static_path = ['_static']
+     
+     # MyST parser configuration
+     myst_enable_extensions = [
+         "deflist",
+         "tasklist",
+         "html_image",
+     ]
+     ```
+   - [ ] Create docs/source/index.rst:
+     ```rst
+     Welcome to CellViT's documentation!
+     ===================================
+     
+     .. toctree::
+        :maxdepth: 2
+        :caption: Contents:
+     
+        installation
+        usage
+        examples
+        api
+     
+     Indices and tables
+     ==================
+     
+     * :ref:`genindex`
+     * :ref:`modindex`
+     * :ref:`search`
+     ```
+   - [ ] **Create docs/source/installation.rst with CPU-only instructions** ⚠️ ADJUSTED
+   - [ ] Create docs/source/usage.rst with usage guide
+   - [ ] Create docs/source/examples.rst with example code
+   - [ ] Create docs/source/api.rst with API documentation structure
+   - [ ] Create scripts/build_docs.sh:
+     ```bash
+     #!/bin/bash
+     set -e
+     echo "Building documentation..."
+     cd docs
+     make clean
+     make html
+     echo "Documentation built successfully in docs/build/html/"
+     ```
+   - [ ] Make build_docs.sh executable: `chmod +x scripts/build_docs.sh`
+   - [ ] Test documentation build locally:
+     ```bash
+     cd docs
+     make clean
+     make html
+     ```
+   - [ ] Test documentation build using GitHub Actions workflow directory:
+     ```bash
+     sphinx-build docs/source _build
+     ```
+   - [ ] Verify documentation builds without warnings
+   - [ ] Open docs/build/html/index.html or _build/index.html in browser to check output
+   - [ ] Verify sphinx-build command is available: `sphinx-build --version`
+   - [ ] Install pre-commit hooks:
+     ```bash
+     pre-commit install
+     pre-commit install --hook-type commit-msg
+     ```
+   - [ ] Run pre-commit on all files to verify setup: `pre-commit run --all-files`
+   - [ ] Verify numpy version compatibility: `python -c "import numpy; print(numpy.__version__)"`
+   - [ ] Set CELLVIT_CACHE environment variable: `export CELLVIT_CACHE=/home/cc/EnvGym/data/20260501_233214_anthropic_claude-opus-4-20250514/CellViT-Inference/.cache/cellvit`
+   - [ ] Add CELLVIT_CACHE to .env file: `echo "CELLVIT_CACHE=/home/cc/EnvGym/data/20260501_233214_anthropic_claude-opus-4-20250514/CellViT-Inference/.cache/cellvit" > .env`
+   - [ ] Create cache directory: `mkdir -p .cache/cellvit`
+   - [ ] Test build script execution: `./build.sh`
+   - [ ] Verify build artifacts in dist/ directory
+   - [ ] Create clean_build.sh script:
+     ```bash
+     echo '#!/bin/bash\nset -e\necho "Cleaning build artifacts..."\nrm -rf ./cellvit.egg-info ./dist ./build\necho "Clean completed."' > scripts/clean_build.sh
+     chmod +x scripts/clean_build.sh
+     ```
+   - [ ] Create run_tests.sh script:
+     ```bash
+     echo '#!/bin/bash\nset -e\n# Run tests with coverage by default\nif [ "$1" == "fast" ]; then\n    python -m pytest --cov=cellvit ./tests/ -m "not slow and not gpu"\nelif [ "$1" == "slow" ]; then\n    python -m pytest --cov=cellvit ./tests/ -m "slow and not gpu"\nelif [ "$1" == "all" ]; then\n    python -m pytest --cov=cellvit ./tests/ -m "not gpu"\nelse\n    python -m pytest --cov=cellvit ./tests/test_utils/ -m "not slow and not gpu"\nfi' > scripts/run_tests.sh
+     chmod +x scripts/run_tests.sh
+     ```
+   - [ ] Create check_examples.sh script:
+     ```bash
+     echo '#!/bin/bash\nset -e\necho "Checking example files..."\n# Add example checking logic here\necho "Examples check completed."' > check_examples.sh
+     chmod +x check_examples.sh
+     ```
+   - [ ] Run initial test suite: `./test.sh`
+   - [ ] Verify test coverage report
+   - [ ] **Run system check (CPU mode):** `cellvit-check` ⚠️ ADJUSTED
+   - [ ] Test Docker-based system check: `docker-compose run --rm cellvit cellvit-check`
+   - [ ] Download test database: `cellvit-download-examples`
+   - [ ] Download pre-trained models: `cellvit-download-models`
+   - [ ] Copy test data to input-data directory for Docker testing
+   - [ ] **Create CPU-optimized inference configuration files:** ⚠️ ADJUSTED
+     ```bash
+     cp config/example_config.yaml config/inference_config.yaml
+     cp config/example_config.yaml config/single_slide_config.yaml
+     cp config/example_config.yaml config/batch_config.yaml
+     ```
+   - [ ] **Configure single_slide_config.yaml for CPU processing:** ⚠️ ADJUSTED
+     - Set `model: "SAM"` or `"HIPT"`
+     - Configure `process_wsi` section with test WSI path
+     - Set `output_format.outdir` to `./output-data`
+     - **Reduce batch_size for CPU (e.g., 1-4)**
+     - **Disable AMP (enforce_amp: false)**
+   - [ ] **Configure batch_config.yaml for CPU dataset processing:** ⚠️ ADJUSTED
+     - Set `model: "SAM"` or `"HIPT"`
+     - Configure `process_dataset` section with WSI folder or filelist
+     - Enable desired output formats (geojson, graph, compression)
+     - **Limit concurrent processing for CPU**
+   - [ ] Create WSI filelist CSV template:
+     ```csv
+     path,wsi_mpp,wsi_magnification
+     /home/cc/EnvGym/data/20260501_233214_anthropic_claude-opus-4-20250514/CellViT-Inference/input-data/slide1.svs,0.25,40
+     /home/cc/EnvGym/data/20260501_233214_anthropic_claude-opus-4-20250514/CellViT-Inference/input-data/slide2.tiff,0.5,20
+     ```
+   - [ ] Create CONTRIBUTING.md with conventional commit guidelines:
+     ```markdown
+     # Contributing Guidelines
+     
+     ## System Requirements
+     - CPU-only setup (no GPU required)
+     - Minimum 32GB RAM recommended
+     - 16+ CPU cores recommended for reasonable performance
+     
+     ## Commit Message Format
+     We use Conventional Commits. Format: `type(scope): description`
+     
+     Types: feat, fix, docs, style, refactor, test, chore, perf, ci, build
+     
+     Example: `feat(inference): add support for new WSI format`
+     
+     ## Running Tests
+     - Run fast tests: `./test.sh` or `./scripts/run_tests.sh fast`
+     - Run all tests: `./scripts/run_tests.sh all`
+     - Run slow tests only: `./scripts/run_tests.sh slow`
+     - Run with coverage: Tests run with coverage by default
+     - Note: GPU tests are automatically skipped on CPU-only systems
+     
+     ## Building Documentation
+     - Build HTML docs: `cd docs && make html` (Linux/Mac)
+     - Build HTML docs: `cd docs && make.bat html` (Windows)
+     - Build PDF docs: `cd docs && make latexpdf` (requires LaTeX)
+     - Clean docs: `cd docs && make clean`
+     - Use build script: `./scripts/build_docs.sh`
+     - Build for GitHub Pages: `sphinx-build docs/source _build`
+     
+     ## Documentation
+     Full documentation: https://tio-ikim.github.io/CellViT-Inference/
+     ```
+   - [ ] Test CLI commands in local environment:
+     ```bash
+     cellvit-inference --help
+     cellvit-check
+     cellvit-download-examples
+     cellvit-download-models --help
+     ```
+   - [ ] Test CLI commands in Docker container:
+     ```bash
+     docker-compose run --rm cellvit cellvit-inference --help
+     docker-compose run --rm cellvit cellvit-check
+     ```
+   - [ ] **Verify Ray installation (CPU mode):** `python -c "import ray; ray.init(num_gpus=0)"` ⚠️ ADJUSTED
+   - [ ] ~~Test Docker GPU memory allocation~~ **SKIP - NO GPU**
+   - [ ] ~~Optional: Install CuPy~~ **SKIP - NO GPU**
+   - [ ] ~~Optional: Install cuCIM~~ **SKIP - NO GPU**
+   - [ ] Test code formatting with black: `black --check .`
+   - [ ] Test code linting with ruff: `ruff check .`
+   - [ ] **Test inference with SAM model (CPU):** ⚠️ ADJUSTED
+     ```bash
+     cellvit-inference -c config/single_slide_config.yaml
+     ```
+   - [ ] **Test inference with HIPT model (CPU):** ⚠️ ADJUSTED
+     ```bash
+     # Update config to use HIPT model, then:
+     cellvit-inference -c config/single_slide_config.yaml
+     ```
+   - [ ] Test batch processing with CSV filelist:
+     ```bash
+     cellvit-inference -c config/batch_config.yaml
+     ```
+   - [ ] Test inference with different nuclei taxonomies:
+     ```bash
+     # Update nuclei_taxonomy in config to test each option
+     cellvit-inference -c config/inference_config.yaml
+     ```
+   - [ ] Test GeoJSON export for QuPath:
+     ```bash
+     # Enable geojson: true in config
+     cellvit-inference -c config/inference_config.yaml
+     ```
+   - [ ] Test graph generation:
+     ```bash
+     # Enable graph: true in config
+     cellvit-inference -c config/inference_config.yaml
+     ```
+   - [ ] Test compression output:
+     ```bash
+     # Enable compression: true in config
+     cellvit-inference -c config/inference_config.yaml
+     ```
+   - [ ] ~~Test AMP inference~~ **SKIP OR LIMITED - CPU doesn't benefit from AMP**
+   - [ ] **Test CPU-appropriate batch sizes (1-4) for performance** ⚠️ ADJUSTED
+   - [ ] Run pytest with coverage for utils module: `python -m pytest --cov=cellvit ./tests/test_utils/ -m "not slow and not gpu"`
+   - [ ] Run all tests including slow tests: `python -m pytest --cov=cellvit ./tests/ -m "not gpu"`
+   - [ ] Generate HTML coverage report: `python -m pytest --cov=cellvit --cov-report=html ./tests/ -m "not gpu"`
+   - [ ] Test inference on sample WSI (Docker): 
+     ```bash
+     docker-compose run --rm cellvit cellvit-inference -c /workspace/CellViT-plus-plus/config/single_slide_config.yaml
+     ```
+   - [ ] Verify Docker output files in local output-data directory
+   - [ ] Verify GeoJSON files can be imported into QuPath
+   - [ ] **Test CPU resource configuration (CPU count, Ray workers, memory limits)** ⚠️ ADJUSTED
+   - [ ] Test debug mode functionality
+   - [ ] Create GitHub Actions workflow for pre-commit checks:
+     ```yaml
+     name: pre-commit
+     on:
+       pull_request:
+       push:
+         branches: [main, master]
+     jobs:
+       pre-commit:
+         runs-on: ubuntu-latest
+         steps:
+         - uses: actions/checkout@v3
+         - uses: actions/setup-python@v4
+           with:
+             python-version: '3.10'
+         - uses: pre-commit/action@v3.0.0
+     ```
+   - [ ] **Create GitHub Actions workflow for running tests (CPU-only):** ⚠️ ADJUSTED
+     ```yaml
+     name: tests
+     on:
+       pull_request:
+       push:
+         branches: [main, master]
+     jobs:
+       test:
+         runs-on: ubuntu-latest
+         steps:
+         - uses: actions/checkout@v3
+         - uses: actions/setup-python@v4
+           with:
+             python-version: '3.10'
+         - name: Install system dependencies
+           run: |
+             sudo apt-get update
+             sudo apt-get install -y libvips openslide gcc g++ libopencv-core-dev libopencv-imgproc-dev
+         - name: Install dependencies
+           run: |
+             python -m pip install --upgrade pip
+             pip install torch==2.2.2 torchvision==0.17.2 torchaudio==2.2.2 --index-url https://download.pytorch.org/whl/cpu
+             pip install -r requirements-test.txt
+         - name: Run tests
+           run: python -m pytest --cov=cellvit ./tests/ -m "not slow and not gpu"
+         - name: Upload coverage reports
+           uses: codecov/codecov-action@v3
+     ```
+   - [ ] Create GitHub Actions workflow for package building:
+     ```yaml
+     name: build
+     on:
+       push:
+         tags: ['v*']
+       pull_request:
+         branches: [main, master]
+     jobs:
+       build:
+         runs-on: ubuntu-latest
+         steps:
+         - uses: actions/checkout@v3
+         - uses: actions/setup-python@v4
+           with:
+             python-version: '3.10'
+         - name: Install build dependencies
+           run: pip install build
+         - name: Build package
+           run: python -m build
+         - uses: actions/upload-artifact@v3
+           with:
+             name: dist
+             path: dist/
+     ```
+   - [ ] Verify GitHub Actions documentation workflow configuration:
+     - Check peaceiris/actions-gh-pages@v3 for GitHub Pages deployment
+     - Ensure GITHUB_TOKEN has correct permissions
+     - Verify gh-pages branch will be created with force_orphan: true
+     - Test workflow triggers on push, pull_request, and workflow_dispatch
+   - [ ] Test pre-commit hooks with a test commit
+   - [ ] Test package build process: `python -m build`
+   - [ ] Test built package installation in a fresh virtual environment:
+     ```bash
+     python -m venv test-env
+     source test-env/bin/activate
+     pip install torch==2.2.2 torchvision==0.17.2 torchaudio==2.2.2 --index-url https://download.pytorch.org/whl/cpu
+     pip install dist/*.whl
+     cellvit-check
+     deactivate
+     rm -rf test-env
+     ```
+   - [ ] **Run all CPU-compatible test cases to verify installation** ⚠️ ADJUSTED
+   - [ ] **Document CPU-only batch_size recommendations (1-4)** ⚠️ ADJUSTED
+   - [ ] **Document CPU-only installation issues and resolutions** ⚠️ ADJUSTED
+   - [ ] Create backup of working environment: `pip freeze > requirements-frozen.txt`
+   - [ ] **Create Docker CPU environment documentation** ⚠️ ADJUSTED
+   - [ ] Test Docker compose up/down cycle: `docker-compose up -d && docker-compose down`
+   - [ ] Verify all dependencies meet version constraints from pyproject.toml
+   - [ ] **Create README for Docker CPU-only usage instructions** ⚠️ ADJUSTED
+   - [ ] **Create CPU-optimized configuration templates** ⚠️ ADJUSTED
+   - [ ] Set up commit message template: `git config commit.template .gitmessage`
+   - [ ] Document pre-commit hook usage in README
+   - [ ] Test automatic code formatting on commit
+   - [ ] Verify all YAML and JSON files pass validation
+   - [ ] Test large file detection (>100MB) in commits
+   - [ ] Document development workflow with pre-commit hooks
+   - [ ] Create MANIFEST.in file for package distribution:
+     ```
+     include README.md
+     include LICENSE
+     include requirements*.txt
+     include test.sh
+     recursive-include config *.yaml
+     recursive-include scripts *.sh *.py
+     recursive-include tests *.py
+     recursive-include docs *.rst *.py *.txt Makefile make.bat
+     recursive-exclude * __pycache__
+     recursive-exclude * *.py[co]
+     recursive-exclude tests/htmlcov *
+     recursive-exclude docs/build *
+     recursive-exclude _build *
+     ```
+   - [ ] Test clean build process: `./scripts/clean_build.sh && ./build.sh`
+   - [ ] Verify package metadata in built wheel/sdist
+   - [ ] Test package upload to PyPI test server (if applicable)
+   - [ ] Document build and release process
+   - [ ] Set up test markers in pytest: `pytest -m "not slow and not gpu"` for fast CPU tests
+   - [ ] Document test execution patterns in README
+   - [ ] Create test coverage badge for README
+   - [ ] Verify test discovery works correctly: `pytest --collect-only`
+   - [ ] Test parallel test execution if needed: `pytest -n auto`
+   - [ ] Document minimum coverage requirements for CI/CD
+   - [ ] Test Sphinx documentation build targets:
+     ```bash
+     cd docs
+     make html      # Build HTML documentation
+     make dirhtml   # Build HTML documentation with directories
+     make singlehtml # Build single HTML file
+     make help      # Show all available targets
+     ```
+   - [ ] Test documentation auto-build on file changes (if using sphinx-autobuild):
+     ```bash
+     pip install sphinx-autobuild
+     cd docs
+     sphinx-autobuild source build/html
+     ```
+   - [ ] Verify documentation API generation from docstrings
+   - [ ] Test cross-references in documentation work correctly
+   - [ ] Create documentation deployment script for GitHub Pages
+   - [ ] Test documentation search functionality
+   - [ ] Verify documentation builds are reproducible
+   - [ ] Test documentation internationalization support if needed
+   - [ ] Clean up any accidentally committed model files (.pt, .pth, .bin)
+   - [ ] Clean up any accidentally committed WSI files (.svs, .tiff)
+   - [ ] Verify .gitignore properly excludes all cache directories
+   - [ ] Verify .gitignore excludes VS Code settings (.vscode/)
+   - [ ] Test that test_database downloads are properly ignored
+   - [ ] Ensure notebooks directory is properly excluded if not needed in repo
+   - [ ] Verify log files are not tracked (*.log, cufile.log)
+   - [ ] Check that gdc-client binary is properly excluded
+   - [ ] Ensure all build directories are excluded (dist/, *.egg-info/, docs/build/, _build/)
+   - [ ] Verify test data directories are properly excluded
+   - [ ] Create placeholder notebooks directory if needed for development
+   - [ ] Document which files should be kept vs ignored in development workflow
+   - [ ] **Add CPU-only documentation links to README.md** ⚠️ ADJUSTED
+   - [ ] Verify all documentation links are accessible: https://tio-ikim.github.io/CellViT-Inference/
+   - [ ] **Test that hardware requirements meet CPU-only specs (32GB RAM, 16+ CPU cores)** ⚠️ ADJUSTED
+   - [ ] **Document CPU-only performance expectations** ⚠️ ADJUSTED
+   - [ ] Add badges from docs/README-PyPI.md to main README.md
+   - [ ] Create links to specific documentation sections (Installation, Usage, Examples)
+   - [ ] Test that PyPI package name `cellvit` is correctly installed
+   - [ ] Verify GitHub repository link: https://github.com/TIO-IKIM/CellViT-Inference
+   - [ ] Add citation information for CellViT++ and CellViT papers to README.md
+   - [ ] Test that all badges display correctly (black, ruff, CodeFactor, PyTorch, arXiv)
+   - [ ] **Document that CPU-only mode is significantly slower than GPU mode** ⚠️ ADJUSTED
+   - [ ] **Add note about CPU-only PyTorch installation** ⚠️ ADJUSTED
+   - [ ] Document the importance of checking PyTorch installation guide for system-specific instructions
+   - [ ] Create comprehensive documentation index with all sections
+   - [ ] Test documentation PDF generation if LaTeX is installed: `cd docs && make latexpdf`
+   - [ ] Verify documentation can be served locally: `cd docs/build/html && python -m http.server` or `cd _build && python -m http.server`
+   - [ ] Document Sphinx theme customization options
+   - [ ] Create documentation style guide for consistency
+   - [ ] Test documentation build in CI/CD pipeline
+   - [ ] Verify all Makefile targets work correctly:
+     ```bash
+     cd docs
+     make clean     # Remove build artifacts
+     make html      # Build HTML
+     make help      # Show available commands
+     ```
+   - [ ] Test sphinx-build error handling when not installed
+   - [ ] Verify SPHINXBUILD environment variable can be customized
+   - [ ] Test documentation build with custom output directories
+   - [ ] **Verify documentation build works on Linux x86_64** ⚠️ ADJUSTED
+   - [ ] Test GitHub Pages deployment after push to main branch
+   - [ ] Verify documentation is accessible at GitHub Pages URL after deployment
+   - [ ] Test all Sphinx extensions load correctly:
+     - sphinx_collapse for collapsible sections
+     - sphinx_copybutton for code block copy buttons
+     - sphinx_design for enhanced layouts
+     - sphinx_tabs for tabbed content
+     - sphinx-material theme (if used)
+     - sphinx-notfound-page for 404 handling
+     - sphinxawesome-theme (if used)
+     - sphinxcontrib extensions for various output formats
+   - [ ] Verify documentation workflow permissions for GitHub Pages deployment
+   - [ ] Test manual workflow dispatch for documentation build
+   - [ ] Monitor GitHub Actions workflow runs for any failures
+   - [ ] Create documentation versioning strategy if needed
+   - [ ] Test documentation build with all installed Sphinx extensions
+   - [ ] Verify _build directory is created correctly for GitHub Pages
+   - [ ] Test that documentation workflow uses correct Python version
+   - [ ] Verify all documentation dependencies install correctly in CI
+   - [ ] Test force_orphan option in GitHub Pages deployment
+   - [ ] **Document the CPU-only setup process in CONTRIBUTING.md** ⚠️ ADJUSTED

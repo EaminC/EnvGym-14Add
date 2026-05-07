@@ -1,0 +1,6 @@
+- Working Directory: /home/cc/EnvGym/data/20260501_233214_anthropic_claude-opus-4-20250514/NeMo_Gym
+- Architecture: x86_64, --platform=linux/amd64
+- Base Image: ubuntu:20.04, debian:bullseye, alpine:latest, python:3.x-slim
+- GPU: No NVIDIA GPU detected, CPU-only base images recommended
+- Instruction Notes: No GPU-specific instructions needed, use CPU-optimized builds
+- Docker Version: 28.1.1, BuildKit enabled by default, no --gpus flag needed

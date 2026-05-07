@@ -1,0 +1,11 @@
+[
+  "README.md",
+  "svrtk-docker-gpu.Dockerfile",
+  ".gitmodules",
+  ".gitignore",
+  "recon/pride/SVR/StartSVR.bat",
+  "recon/pride/SVR/StartSVR_GPU.bat",
+  "scripts/docker-recon-brain-auto.bash",
+  "scripts/StartSVR.bash",
+  "scripts/StartSVR_WinVM.bat"
+]

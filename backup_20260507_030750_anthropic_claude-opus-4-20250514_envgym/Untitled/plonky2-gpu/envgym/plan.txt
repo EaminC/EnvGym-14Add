@@ -1,0 +1,558 @@
+=== ADJUSTED ENVIRONMENT SETUP PLAN (CPU-ONLY) ===
+
+1. DOWNLOADS NEEDED:
+   - Rust programming language (latest stable version)
+   - Git version control system
+   - CMake 3.16 or higher
+   - GCC/G++ compiler (version 11 or higher)
+   - Python 3.8 or higher
+   - Plonky2 base repository
+   - Build essentials package (for Linux)
+   - cargo-workspaces tool for managing Rust workspace
+   - rust-analyzer for IDE support
+   - LLVM toolchain (for LTO optimization)
+   - cc crate version 1.0.70 or higher (build dependency)
+   - which crate version 4.0 or higher (build dependency)
+   - rayon crate version 1.5.3 (for maybe_rayon parallel feature)
+   - plonky2_u32 crate (workspace dependency for ECDSA)
+   - jemalloc allocator (for non-MSVC targets)
+   - pest parser generator (version 2.1.3)
+   - ethereum-types crate (version 0.14.0)
+   - keccak-hash crate (version 0.8.0 for plonky2 core)
+   - eth_trie_utils crate (version 0.4.0)
+   - anyhow crate (version 1.0.40) for error handling
+   - ahash crate (version 0.7.6) with compile-time-rng feature
+   - hashbrown crate (version 0.12.3) with ahash, serde, and rayon features
+   - itertools crate (version 0.10.0)
+   - num crate (version 0.4) with rand feature
+   - serde crate (version 1.0) with derive feature
+   - static_assertions crate (version 1.1.0)
+   - unroll crate (version 0.1.5)
+   - criterion crate (version 0.4.0) for benchmarking
+   - env_logger crate (version 0.9.0) for development
+   - num_cpus crate (version 1.14.0) for development
+   - serde_cbor crate (version 0.11.2) for development
+   - structopt crate (version 0.3.26) for development
+   - tynm crate (version 0.1.6) for development
+   - jemallocator crate (version 0.5.0) for non-MSVC development
+   - log crate (version 0.4.14) for starky module
+   - plonky2_util crate (workspace dependency)
+   - rand crate (version 0.8.5) for plonky2_util development
+   - rand_chacha crate (version 0.3.1) for system_zero
+   - env_logger crate (version 0.10.0) for system_zero development
+   - array_tool crate (version 1.0.3) for waksman module
+   - bimap crate (version 0.6.1) for waksman module
+
+2. FILES TO CREATE:
+   - `.env` - Environment variables for build configuration
+   - `Cargo.toml` - Root workspace configuration
+   - `.cargo/config.toml` - Cargo configuration for optimization
+   - `scripts/setup.sh` - Automated setup script for Linux/macOS
+   - `benchmarks/config.toml` - Benchmark configuration file
+   - `.gitignore` - Git ignore file for build artifacts
+   - `docker/Dockerfile` - Docker configuration for containerized development
+   - `docker/docker-compose.yml` - Docker compose configuration
+   - `plonky2/Cargo.toml` - Update existing with proper features
+   - `ecdsa/Cargo.toml` - Update existing with proper dependencies
+   - `evm/Cargo.toml` - Update existing with proper dependencies
+   - `field/Cargo.toml` - Update existing with proper dependencies
+   - `starky/Cargo.toml` - Update existing with proper dependencies
+   - `starky/benches/cpu_benchmarks.rs` - CPU-specific benchmarks for STARK operations
+   - `workspace.toml` - Workspace configuration
+   - `.github/workflows/ci.yml` - CI configuration for builds
+   - `scripts/verify-deps.sh` - Script to verify dependencies
+   - `u32/Cargo.toml` - Configuration for plonky2_u32
+   - `system_zero/Cargo.toml` - Update existing with proper dependencies
+   - `system_zero/benches/cpu_benchmarks.rs` - CPU benchmarks for system_zero
+   - `scripts/benchmark-evm.sh` - Script to run EVM benchmarks
+   - `scripts/benchmark-plonky2.sh` - Script to run plonky2 core benchmarks
+   - `field/benches/cpu_benchmarks.rs` - CPU benchmarks for field operations
+   - `scripts/benchmark-field.sh` - Script to run field benchmarks
+   - `insertion/Cargo.toml` - Update existing with proper dependencies
+   - `insertion/benches/cpu_benchmarks.rs` - CPU benchmarks for insertion operations
+   - `scripts/benchmark-insertion.sh` - Script to run insertion benchmarks
+   - `scripts/benchmark-starky.sh` - Script to run STARK benchmarks
+   - `scripts/benchmark-system-zero.sh` - Script to run system_zero benchmarks
+   - `util/Cargo.toml` - Configuration for plonky2_util
+   - `scripts/benchmark-u32.sh` - Script to run u32 benchmarks
+   - `scripts/benchmark-util.sh` - Script to run util benchmarks
+   - `waksman/Cargo.toml` - Configuration for plonky2_waksman
+   - `waksman/benches/cpu_benchmarks.rs` - CPU benchmarks for waksman operations
+   - `scripts/benchmark-waksman.sh` - Script to run waksman benchmarks
+
+3. NECESSARY TEST CASES IN THE CODEBASE:
+   - FFT CPU Test - Validate FFT operations
+   - Merkle Tree CPU Test - Test Merkle tree construction performance
+   - Polynomial Operations Test - Test polynomial manipulation
+   - Ed25519 Signature Test - Validate ed25519 signature generation and verification
+   - Performance Benchmark Test - Compare proving times
+   - Error Handling Test - Test error recovery mechanisms
+   - Integration Test - Full pipeline test from input to proof generation
+   - Plonky2 Core Test - Test core plonky2 operations
+   - Plonky2 Feature Flag Test - Test plonky2 with various features
+   - Plonky2 Gate Testing Test - Test gate operations with gate_testing feature
+   - Plonky2 Parallel Feature Test - Test parallel feature
+   - Plonky2 Timing Feature Test - Test timing measurements
+   - Plonky2 Generate Constants Test - Test generate_constants binary
+   - Plonky2 Field Arithmetic Test - Test field arithmetic benchmarks
+   - Plonky2 FFT Benchmark Test - Test FFT benchmarks
+   - Plonky2 Hashing Test - Test Keccak hashing operations
+   - Plonky2 Merkle Benchmark Test - Test Merkle tree benchmarks
+   - Plonky2 Transpose Test - Test matrix transpose operations
+   - Plonky2 Reverse Index Bits Test - Test bit manipulation operations
+   - ECDSA Module Test - Test ECDSA operations
+   - ECDSA Parallel Feature Test - Test plonky2_ecdsa with parallel feature
+   - ECDSA U32 Integration Test - Test plonky2_ecdsa with plonky2_u32 dependency
+   - EVM Module Test - Validate EVM execution
+   - EVM Keccak Test - Test Keccak hash operations
+   - EVM Trie Operations Test - Test Ethereum trie operations
+   - EVM Stack Manipulation Test - Test stack operations performance
+   - EVM Memory Allocator Test - Test jemalloc integration
+   - EVM Parallel Feature Test - Test plonky2_evm with parallel feature
+   - Field Operations Test - Test field arithmetic
+   - Field Arithmetic Test - Test field addition, multiplication, and inversion
+   - Field Batch Operations Test - Test batch field operations performance
+   - Field Cross-Module Test - Test field operations with other modules
+   - Starky Module Test - Test STARK proving
+   - Starky Parallel Feature Test - Test starky with parallel feature
+   - Starky Timing Feature Test - Test starky timing measurements
+   - Starky STD Feature Test - Test starky with std feature enabled
+   - Starky Default Features Test - Test starky with default features
+   - Starky No-STD Test - Test starky operations without std feature
+   - Starky Anyhow Integration Test - Test anyhow error handling
+   - Starky Itertools Test - Test itertools operations
+   - Starky Log Integration Test - Test log crate integration
+   - Starky Maybe Rayon Integration Test - Test conditional parallelism
+   - Starky Plonky2 Integration Test - Test starky integration with plonky2
+   - Starky Cross-Feature Test - Test feature combinations
+   - Starky Benchmark Suite Test - Test criterion benchmarks
+   - Starky Error Recovery Test - Test error handling
+   - Workspace Integration Test - Test all modules working together
+   - Memory Pool Test - Test memory pooling and management
+   - Cross-module Communication Test - Test data sharing between modules
+   - Build System Test - Verify cc and which crates properly detect environment
+   - Build Optimization Test - Verify optimization level effectiveness
+   - Debug Symbol Test - Verify -g flag produces proper debug information
+   - Maybe Rayon Integration Test - Test conditional parallelism with maybe_rayon
+   - Maybe Rayon Feature Flag Test - Test maybe_rayon with and without parallel feature
+   - Workspace Dependency Test - Verify all workspace dependencies resolve correctly
+   - EVM Assemble Binary Test - Test assemble binary with asmtools feature
+   - EVM Benchmark Suite Test - Test criterion benchmarks for stack manipulation
+   - EVM RLP Encoding Test - Test RLP operations
+   - EVM Ethereum Types Test - Test ethereum-types operations
+   - Field Unroll Optimization Test - Test unroll crate integration
+   - Insertion Module Basic Test - Test basic list insertion functionality
+   - Insertion Module Parallel Test - Test parallel list insertion operations
+   - Insertion Module Memory Test - Test memory efficiency of list operations
+   - Insertion Module Batch Test - Test batch insertion operations
+   - Insertion Module Error Handling Test - Test anyhow error handling
+   - Insertion Module Circuit Test - Test circuit generation for list insertion
+   - Insertion Module Proof Test - Test proof generation for insertion operations
+   - Insertion Module Benchmark Test - Benchmark insertion performance
+   - Insertion Module Integration Test - Test insertion module with other components
+   - Plonky2 Ahash Integration Test - Test ahash with compile-time-rng feature
+   - Plonky2 Hashbrown Test - Test hashbrown with rayon feature
+   - Plonky2 Itertools Test - Test itertools operations
+   - Plonky2 Num Test - Test num crate operations
+   - Plonky2 Unroll Test - Test unroll crate optimization
+   - Plonky2 Static Assertions Test - Verify static assertions
+   - Plonky2 Dev Dependencies Test - Test all dev dependencies
+   - Starky Dev Dependencies Test - Test env_logger 0.9.0 with starky
+   - System Zero Basic Test - Test basic VM execution verification
+   - System Zero Ethereum Transaction Test - Test proving Ethereum transactions
+   - System Zero STARK Integration Test - Test system_zero with starky
+   - System Zero Plonky2 Integration Test - Test system_zero with plonky2
+   - System Zero Random Generation Test - Test rand and rand_chacha integration
+   - System Zero Error Handling Test - Test anyhow error handling
+   - System Zero Lookup Permuted Cols Test - Test lookup_permuted_cols benchmark
+   - System Zero Memory Allocator Test - Test jemalloc integration
+   - System Zero Parallel Execution Test - Test parallel VM execution
+   - System Zero Cross-Module Test - Test system_zero with all modules
+   - System Zero Benchmark Suite Test - Test criterion benchmarks
+   - System Zero Dev Dependencies Test - Test env_logger 0.10.0
+   - Plonky2 Util Module Test - Test plonky2_util functionality
+   - Plonky2 Util Integration Test - Test plonky2_util with other modules
+   - Plonky2 Util Random Test - Test plonky2_util with rand 0.8.5
+   - Plonky2 Util Getrandom Feature Test - Test plonky2_util with getrandom
+   - U32 Module Basic Test - Test basic u32 operations
+   - U32 Module Anyhow Integration Test - Test anyhow error handling
+   - U32 Module Itertools Test - Test itertools operations
+   - U32 Module Num Test - Test num crate operations
+   - U32 Module Plonky2 Integration Test - Test plonky2_u32 integration
+   - U32 Module Gate Testing Test - Test plonky2_u32 with gate_testing
+   - U32 Module Rand Test - Test rand crate integration
+   - U32 Module Error Recovery Test - Test error handling
+   - U32 Module Memory Management Test - Test memory management
+   - U32 Module Batch Operations Test - Test batch u32 operations
+   - U32 Module Cross-Module Test - Test u32 operations with ECDSA
+   - U32 Module Benchmark Test - Benchmark u32 performance
+   - U32 Module No-STD Test - Test plonky2_u32 without default features
+   - Waksman Module Basic Test - Test AS-Waksman network functionality
+   - Waksman Module Permutation Test - Test permutation checking
+   - Waksman Module Sorting Test - Test sorting functionality
+   - Waksman Module Array Tool Integration Test - Test array_tool operations
+   - Waksman Module Bimap Integration Test - Test bimap operations
+   - Waksman Module Anyhow Integration Test - Test anyhow error handling
+   - Waksman Module Itertools Test - Test itertools operations
+   - Waksman Module Plonky2 Integration Test - Test plonky2_waksman integration
+   - Waksman Module Field Integration Test - Test with plonky2_field
+   - Waksman Module Util Integration Test - Test with plonky2_util
+   - Waksman Module Circuit Test - Test circuit generation
+   - Waksman Module Proof Test - Test proof generation
+   - Waksman Module Memory Management Test - Test memory management
+   - Waksman Module Batch Operations Test - Test batch permutation operations
+   - Waksman Module Error Recovery Test - Test error handling
+   - Waksman Module Cross-Module Test - Test waksman with other modules
+   - Waksman Module Benchmark Test - Benchmark waksman performance
+   - Waksman Module Random Generation Test - Test rand 0.8.4 integration
+
+4. COMPLETE TODO LIST:
+   - Verify hardware requirements (8 CPU cores, 16GB RAM)
+   - Install CMake 3.16 or higher: `sudo apt install cmake` or download from cmake.org
+   - Verify CMake version: `cmake --version`
+   - Install Rust: `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh`
+   - Install build tools and compilers: `sudo apt-get install build-essential gcc g++`
+   - Clone plonky2-gpu repository: `git clone [repository-url]`
+   - Clone original Plonky2 repository for reference
+   - Create `.env` file with build configuration
+   - Install cargo-workspaces: `cargo install cargo-workspaces`
+   - Verify workspace structure includes maybe_rayon, u32, starky, system_zero, util, and waksman directories
+   - Verify maybe_rayon/Cargo.toml exists with correct dependencies
+   - Test maybe_rayon crate build: `cargo build -p maybe_rayon`
+   - Test maybe_rayon with parallel feature: `cargo build -p maybe_rayon --features parallel`
+   - Verify u32/Cargo.toml exists with correct dependencies
+   - Test plonky2_u32 crate build: `cargo build -p plonky2_u32`
+   - Test plonky2_u32 with gate_testing dev dependency: `cargo test -p plonky2_u32`
+   - Test plonky2_u32 with rand dev dependency: `cargo test -p plonky2_u32 --features getrandom`
+   - Verify plonky2/Cargo.toml exists with dependencies
+   - Test plonky2 with default features: `cargo build -p plonky2`
+   - Test plonky2 without std feature: `cargo build -p plonky2 --no-default-features`
+   - Test generate_constants binary: `cargo run --bin generate_constants`
+   - Run plonky2 field arithmetic benchmarks: `cargo bench -p plonky2 --bench field_arithmetic`
+   - Run plonky2 FFT benchmarks: `cargo bench -p plonky2 --bench ffts`
+   - Run plonky2 hashing benchmarks: `cargo bench -p plonky2 --bench hashing`
+   - Run plonky2 merkle benchmarks: `cargo bench -p plonky2 --bench merkle`
+   - Run plonky2 transpose benchmarks: `cargo bench -p plonky2 --bench transpose`
+   - Run plonky2 reverse_index_bits benchmarks: `cargo bench -p plonky2 --bench reverse_index_bits`
+   - Verify insertion/Cargo.toml exists with correct dependencies
+   - Verify ecdsa/Cargo.toml exists with correct dependencies
+   - Verify evm/Cargo.toml exists with correct dependencies
+   - Verify field/Cargo.toml exists with correct dependencies
+   - Verify starky/Cargo.toml exists with correct dependencies
+   - Test starky with default features: `cargo build -p starky`
+   - Test starky without std feature: `cargo build -p starky --no-default-features`
+   - Test starky with parallel feature only: `cargo build -p starky --no-default-features --features parallel`
+   - Test starky with timing feature only: `cargo build -p starky --no-default-features --features timing`
+   - Run starky benchmarks: `cargo bench -p starky`
+   - Verify system_zero/Cargo.toml exists with correct dependencies
+   - Test system_zero with default features: `cargo build -p system_zero`
+   - Run system_zero benchmarks: `cargo bench -p system_zero --bench lookup_permuted_cols`
+   - Verify util/Cargo.toml exists with correct dependencies
+   - Test plonky2_util crate build: `cargo build -p plonky2_util`
+   - Test plonky2_util with dev dependencies: `cargo test -p plonky2_util`
+   - Test plonky2_util with rand 0.8.5 getrandom feature: `cargo test -p plonky2_util --features getrandom`
+   - Verify waksman/Cargo.toml exists with correct dependencies
+   - Test plonky2_waksman crate build: `cargo build -p plonky2_waksman`
+   - Test plonky2_waksman with array_tool dependency: `cargo test -p plonky2_waksman`
+   - Test plonky2_waksman with bimap dependency: `cargo test -p plonky2_waksman`
+   - Test plonky2_waksman with rand 0.8.4: `cargo test -p plonky2_waksman --features getrandom`
+   - Update root Cargo.toml to include all workspace members
+   - Configure Cargo for optimization in `.cargo/config.toml`
+   - Set CXXFLAGS environment variable for C++ compiler options if needed
+   - Install Python and required packages for benchmarking
+   - Create Docker configuration for Ubuntu 20.04 base image
+   - Test Docker build: `docker build -t plonky2-cpu .`
+   - Create unified benchmark suite for all modules
+   - Configure release profile optimizations (verify opt-level=3)
+   - Run initial benchmarks to establish baseline
+   - Test plonky2 crate build: `cargo build -p plonky2`
+   - Test plonky2 with all features: `cargo build -p plonky2 --all-features`
+   - Test plonky2_insertion crate build: `cargo build -p plonky2_insertion`
+   - Test plonky2_ecdsa crate build: `cargo build -p plonky2_ecdsa`
+   - Test plonky2_ecdsa with parallel feature: `cargo build -p plonky2_ecdsa --features parallel`
+   - Test plonky2_evm crate build: `cargo build -p plonky2_evm`
+   - Test plonky2_evm with parallel feature: `cargo build -p plonky2_evm --features parallel`
+   - Test plonky2_evm with asmtools feature: `cargo build -p plonky2_evm --features asmtools`
+   - Test plonky2_field crate build: `cargo build -p plonky2_field`
+   - Test starky crate build: `cargo build -p starky`
+   - Test starky with all features: `cargo build -p starky --all-features`
+   - Test starky without default features: `cargo build -p starky --no-default-features`
+   - Test starky with individual features: `cargo build -p starky --no-default-features --features std`
+   - Test system_zero crate build: `cargo build -p system_zero`
+   - Test system_zero with env_logger 0.10.0: `cargo test -p system_zero`
+   - Test plonky2_util crate build: `cargo build -p plonky2_util`
+   - Run field benchmarks: `cargo bench -p plonky2_field`
+   - Run insertion benchmarks: `cargo bench -p plonky2_insertion`
+   - Run plonky2 benchmarks: `cargo bench -p plonky2`
+   - Run starky benchmarks: `cargo bench -p starky`
+   - Run system_zero benchmarks: `cargo bench -p system_zero`
+   - Run u32 benchmarks: `cargo bench -p plonky2_u32`
+   - Run waksman benchmarks: `cargo bench -p plonky2_waksman`
+   - Run util benchmarks: `cargo bench -p plonky2_util`
+   - Test assemble binary: `cargo build --bin assemble --features asmtools`
+   - Run EVM stack manipulation benchmarks: `cargo bench -p plonky2_evm --bench stack_manipulation`
+   - Run EVM benchmarks: `cargo bench -p plonky2_evm`
+   - Test workspace build: `cargo build --workspace`
+   - Run workspace tests: `cargo test --workspace`
+   - Set up continuous integration pipeline for all modules
+   - Create Docker image for reproducible builds
+   - Write comprehensive documentation for plonky2 core
+   - Write comprehensive documentation for plonky2_insertion module
+   - Write comprehensive documentation for plonky2_u32 module
+   - Write comprehensive documentation for plonky2_ecdsa
+   - Write comprehensive documentation for plonky2_evm
+   - Write comprehensive documentation for plonky2_field
+   - Write comprehensive documentation for starky module
+   - Write comprehensive documentation for starky feature combinations
+   - Write comprehensive documentation for system_zero module
+   - Write comprehensive documentation for system_zero VM verification
+   - Write comprehensive documentation for maybe_rayon module and parallel feature
+   - Write comprehensive documentation for plonky2_util module
+   - Write comprehensive documentation for plonky2_waksman module
+   - Write comprehensive documentation for AS-Waksman network algorithms
+   - Document architecture requirements
+   - Write comprehensive documentation for each module
+   - Perform memory leak detection with valgrind on all modules
+   - Profile CPU utilization for each module
+   - Profile insertion module performance
+   - Profile plonky2 core performance for FFT, merkle, and polynomial operations
+   - Profile u32 module performance for arithmetic operations
+   - Profile starky performance for STARK proving operations
+   - Profile system_zero performance for VM execution verification
+   - Profile waksman performance for permutation checking and sorting
+   - Profile util performance
+   - Create optimized release build: `cargo build --release --workspace`
+   - Verify ed25519 proving time performance
+   - Test inter-module data sharing and communication
+   - Test maybe_rayon integration with all modules that support parallel feature
+   - Document performance characteristics for each module
+   - Create example programs for plonky2 core
+   - Create example programs for plonky2_insertion
+   - Create example programs for plonky2_u32
+   - Create example programs for plonky2_ecdsa
+   - Create example programs for plonky2_evm
+   - Create example programs for plonky2_field
+   - Create example programs for starky
+   - Create example programs for starky demonstrating different feature combinations
+   - Create example programs for system_zero
+   - Create example programs for system_zero demonstrating Ethereum transaction proving
+   - Create example programs for maybe_rayon demonstrating parallel and non-parallel usage
+   - Create example programs for plonky2_util demonstrating utility functions
+   - Create example programs for plonky2_waksman
+   - Create example programs for plonky2_waksman demonstrating permutation checking
+   - Create example programs for plonky2_waksman demonstrating sorting operations
+   - Create example programs for each module
+   - Set up monitoring for CPU temperature and utilization during tests
+   - Create performance report for all modules
+   - Create workspace-level benchmarking scripts
+   - Create scripts/benchmark-starky.sh for STARK benchmarking
+   - Create scripts/benchmark-system-zero.sh for system_zero benchmarking
+   - Create scripts/benchmark-u32.sh for u32 benchmarking
+   - Create scripts/benchmark-waksman.sh for waksman benchmarking
+   - Create scripts/benchmark-util.sh for util benchmarking
+   - Document workspace structure and architecture
+   - Verify build system properly detects compiler using cc and which crates
+   - Test cross-platform build compatibility (Linux/Docker)
+   - Create troubleshooting guide for common build issues
+   - Implement build caching to speed up rebuilds
+   - Set up pre-commit hooks to validate code formatting
+   - Create performance tuning guide for CPU optimization
+   - Test plonky2 integration with ahash for compile-time-rng
+   - Test plonky2 integration with hashbrown for rayon parallelism
+   - Test plonky2 integration with itertools for data processing
+   - Test plonky2 integration with unroll crate for optimization
+   - Test plonky2_insertion integration with anyhow for error handling
+   - Test plonky2_u32 integration with anyhow for error handling
+   - Test plonky2_u32 integration with itertools for data processing
+   - Test plonky2_u32 integration with num crate for arithmetic operations
+   - Test plonky2_ecdsa integration with maybe_rayon for parallel execution
+   - Test plonky2_ecdsa integration with plonky2_u32 for u32 operations
+   - Test plonky2_evm integration with maybe_rayon for parallel execution
+   - Test plonky2_field integration with unroll crate for optimization
+   - Test starky integration with anyhow for no-std error handling
+   - Test starky integration with itertools for data processing
+   - Test starky integration with log crate for debug output
+   - Test starky integration with maybe_rayon for conditional parallelism
+   - Test starky integration with plonky2 for proving
+   - Test system_zero integration with anyhow for error handling
+   - Test system_zero integration with itertools for data processing
+   - Test system_zero integration with log crate for debugging
+   - Test system_zero integration with plonky2 and starky for proving
+   - Test system_zero integration with rand and rand_chacha for randomness
+   - Test system_zero integration with plonky2_util for utility functions
+   - Test plonky2_util integration with system_zero for shared utilities
+   - Test plonky2_util with rand 0.8.5 for random number generation
+   - Test plonky2_waksman integration with anyhow for error handling
+   - Test plonky2_waksman integration with array_tool for array operations
+   - Test plonky2_waksman integration with bimap for bidirectional mapping
+   - Test plonky2_waksman integration with itertools for data processing
+   - Test plonky2_waksman integration with plonky2 for circuit implementation
+   - Test plonky2_waksman integration with plonky2_field for field operations
+   - Test plonky2_waksman integration with plonky2_util for utility functions
+   - Test plonky2_waksman integration with rand 0.8.4 for testing
+   - Document feature flag combinations for optimal performance
+   - Create integration tests for plonky2 core
+   - Create integration tests for plonky2_insertion with plonky2 core
+   - Create integration tests for plonky2_u32 with plonky2 core
+   - Create integration tests for plonky2_ecdsa with plonky2_u32 dependency
+   - Create integration tests for plonky2_evm with ethereum-types and keccak-hash
+   - Create integration tests for plonky2_field with plonky2_util
+   - Create integration tests for starky with plonky2 and maybe_rayon
+   - Create integration tests for system_zero with plonky2, starky, and plonky2_util
+   - Create integration tests for maybe_rayon with modules that use parallel feature
+   - Create integration tests for plonky2_util with modules that depend on it
+   - Create integration tests for plonky2_waksman with plonky2, plonky2_field, and plonky2_util
+   - Benchmark plonky2 core operations
+   - Benchmark insertion operations
+   - Benchmark u32 operations
+   - Benchmark EVM operations
+   - Benchmark field operations
+   - Benchmark STARK operations
+   - Benchmark system_zero VM verification
+   - Benchmark waksman permutation checking
+   - Benchmark waksman sorting operations
+   - Benchmark maybe_rayon parallel vs non-parallel performance impact
+   - Benchmark plonky2_util operations
+   - Document jemalloc integration for non-MSVC targets
+   - Test EVM pest parser integration
+   - Create performance profiling for plonky2 FFT operations
+   - Create performance profiling for plonky2 merkle operations
+   - Create performance profiling for plonky2 polynomial operations
+   - Create performance profiling for insertion list operations
+   - Create performance profiling for u32 arithmetic operations
+   - Create performance profiling for EVM trie operations
+   - Create performance profiling for field operations
+   - Create performance profiling for STARK polynomial commitments
+   - Create performance profiling for STARK FRI protocol
+   - Create performance profiling for system_zero VM operations
+   - Create performance profiling for system_zero Ethereum transaction proving
+   - Create performance profiling for waksman permutation operations
+   - Create performance profiling for waksman sorting operations
+   - Create performance profiling for util operations
+   - Test field operations with various batch sizes for efficiency
+   - Test plonky2 operations with various data sizes for efficiency
+   - Test insertion operations with various list sizes for efficiency
+   - Test u32 operations with various batch sizes for efficiency
+   - Test STARK operations with various polynomial degrees for efficiency
+   - Test system_zero operations with various VM state sizes for efficiency
+   - Test waksman operations with various network sizes for efficiency
+   - Test util operations with various data sizes
+   - Create comprehensive test suite for plonky2 circuit implementation
+   - Create comprehensive test suite for insertion module circuit implementation
+   - Create comprehensive test suite for u32 module circuit implementation
+   - Create comprehensive test suite for STARK circuit implementation
+   - Create comprehensive test suite for system_zero VM verification
+   - Create comprehensive test suite for waksman circuit implementation
+   - Create comprehensive test suite for util module
+   - Document plonky2 architecture and optimization strategies
+   - Document insertion module architecture and optimization strategies
+   - Document u32 module architecture and optimization strategies
+   - Document starky architecture and optimization strategies
+   - Document system_zero architecture and optimization strategies
+   - Document waksman architecture and optimization strategies
+   - Document plonky2_util architecture
+   - Document maybe_rayon usage patterns and best practices for conditional parallelism
+   - Update all module dependencies to use maybe_rayon instead of direct rayon dependency where applicable
+   - Test plonky2 dev dependencies compatibility
+   - Test plonky2_u32 dev dependencies compatibility
+   - Test starky dev dependencies compatibility
+   - Test system_zero dev dependencies compatibility
+   - Test plonky2_util dev dependencies compatibility
+   - Test plonky2_waksman dev dependencies compatibility
+   - Verify jemallocator 0.5.0 works with memory management
+   - Test criterion 0.4.0 benchmarks
+   - Test env_logger 0.9.0 with debug output for both plonky2 and starky
+   - Test env_logger 0.10.0 with debug output for system_zero
+   - Test num_cpus 1.14.0 for thread allocation
+   - Test serde_cbor 0.11.2 serialization
+   - Test structopt 0.3.26 with command-line options
+   - Test tynm 0.1.6 type name generation
+   - Test rand 0.8.4 with getrandom feature for u32 module testing
+   - Test rand 0.8.5 with getrandom feature for util module testing
+   - Test array_tool 1.0.3 with waksman module
+   - Test bimap 0.6.1 with waksman module operations
+   - Verify starky feature flag combinations work correctly
+   - Test starky with parallel features: `cargo build -p starky --features "parallel"`
+   - Test starky with timing features: `cargo build -p starky --features "timing"`
+   - Test starky with all features: `cargo build -p starky --all-features`
+   - Verify system_zero feature flag combinations work correctly
+   - Test system_zero with all workspace features: `cargo build -p system_zero --workspace`
+   - Verify plonky2_u32 feature flag combinations work correctly
+   - Test plonky2_u32 without default features: `cargo build -p plonky2_u32 --no-default-features`
+   - Verify plonky2_util build and test: `cargo build -p plonky2_util && cargo test -p plonky2_util`
+   - Verify plonky2_waksman feature flag combinations work correctly
+   - Test plonky2_waksman without default features: `cargo build -p plonky2_waksman --no-default-features`
+   - Create starky-specific memory management strategies
+   - Optimize starky FRI protocol for memory access patterns
+   - Implement optimized Reed-Solomon encoding for starky
+   - Create system_zero-specific memory management strategies
+   - Optimize system_zero VM state representation for processing
+   - Implement optimized lookup tables for system_zero
+   - Create u32-specific memory management strategies
+   - Optimize u32 arithmetic operations for memory access
+   - Implement optimized batch u32 operations
+   - Create waksman-specific memory management strategies
+   - Optimize waksman AS-Waksman network construction for memory access
+   - Implement optimized permutation checking for waksman
+   - Implement optimized sorting algorithms for waksman
+   - Create util-specific memory management strategies
+   - Create performance comparison between different optimization levels
+   - Document starky-specific optimization techniques
+   - Document system_zero-specific optimization techniques
+   - Document u32-specific optimization techniques
+   - Document waksman-specific optimization techniques
+   - Document util-specific optimization techniques
+   - Test starky integration with all workspace modules
+   - Test system_zero integration with all workspace modules
+   - Test u32 integration with ECDSA and other modules
+   - Test waksman integration with all workspace modules
+   - Test util integration with all dependent modules
+   - Create end-to-end test for proving Ethereum transactions with system_zero
+   - Benchmark system_zero lookup_permuted_cols
+   - Optimize system_zero lookup permutation algorithms
+   - Test system_zero with different random number generators (rand vs rand_chacha)
+   - Test plonky2_util with rand 0.8.5 for utility functions requiring randomness
+   - Test plonky2_waksman with rand 0.8.4 for testing permutation generation
+   - Document system_zero architecture for Ethereum transaction proving
+   - Document waksman architecture for AS-Waksman networks
+   - Create tutorial for using system_zero to prove Ethereum transactions
+   - Create tutorial for using waksman to check permutations and perform sorting
+   - Test workspace-wide memory pooling and sharing strategies
+   - Document best practices for memory management across all modules
+   - Create unified error handling strategy across all modules
+   - Verify u32 module integration with ECDSA for signature operations
+   - Test u32 module no-std compatibility
+   - Create u32 module examples demonstrating benefits
+   - Document u32 module API and usage patterns
+   - Test cross-module data sharing between u32, ECDSA, and plonky2 core
+   - Optimize u32 algorithms for cryptographic operations
+   - Create u32-specific benchmarking suite for comparison
+   - Test u32 module with various feature combinations
+   - Document u32 module's role in the plonky2 ecosystem
+   - Create integration guide for using u32 module with other plonky2 components
+   - Verify waksman module integration with plonky2 for circuit implementation
+   - Test waksman module no-std compatibility
+   - Create waksman module examples demonstrating benefits
+   - Document waksman module API and usage patterns
+   - Test cross-module data sharing between waksman, field, and plonky2 core
+   - Optimize waksman algorithms for permutation and sorting operations
+   - Create waksman-specific benchmarking suite for comparison
+   - Test waksman module with various feature combinations
+   - Document waksman module's role in the plonky2 ecosystem
+   - Create integration guide for using waksman module with other plonky2 components
+   - Document plonky2_util module's role in the plonky2 ecosystem
+   - Create integration guide for using plonky2_util with other plonky2 components
+   - Test plonky2_util as a shared dependency across multiple modules
+   - Verify plonky2_util version compatibility with all dependent modules
+   - Create util module examples demonstrating utility functions
+   - Test util module integration with system_zero, waksman, and other dependent modules
+   - Implement AS-Waksman network visualization tools for debugging
+   - Create waksman-specific error handling for invalid permutations
+   - Test waksman module with edge cases (empty permutations, single element, large networks)
+   - Optimize waksman memory layout for switch configuration storage
+   - Implement waksman circuit gadgets for efficient proof generation
+   - Test waksman integration with plonky2's constraint system
+   - Create benchmarks comparing waksman vs naive permutation checking
+   - Document waksman theoretical background and circuit construction
+   - Test waksman module scalability with various network sizes
+   - Create integration tests for waksman with real-world permutation scenarios

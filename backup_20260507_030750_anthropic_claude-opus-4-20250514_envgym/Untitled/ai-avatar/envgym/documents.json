@@ -1,0 +1,21 @@
+[
+  "readme.md",
+  "environment.yaml",
+  "requirements_versions.txt",
+  "auth-example.json",
+  ".gitignore",
+  "fooocus_colab.ipynb",
+  "troubleshoot.md",
+  "update_log.md",
+  "modules/config.py",
+  "presets/default.json",
+  "presets/anime.json",
+  "presets/realistic.json",
+  "presets/lcm.json",
+  "presets/sai.json",
+  "models/configs/v1-inference.yaml",
+  "models/configs/v2-inference.yaml",
+  "models/configs/anything_v3.yaml",
+  "ldm_patched/modules/args_parser.py",
+  "ldm_patched/modules/options.py"
+]

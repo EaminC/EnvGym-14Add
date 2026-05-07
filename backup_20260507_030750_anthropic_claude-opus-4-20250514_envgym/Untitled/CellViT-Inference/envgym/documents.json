@@ -1,0 +1,14 @@
+[
+  "pyproject.toml",
+  "docker-compose.yaml",
+  "README.md",
+  "example_config.yaml",
+  ".pre-commit-config.yaml",
+  "build.sh",
+  "test.sh",
+  ".gitignore",
+  "docs/README-PyPI.md",
+  "docs/Makefile",
+  "docs/make.bat",
+  ".github/workflows/documentation.yml"
+]

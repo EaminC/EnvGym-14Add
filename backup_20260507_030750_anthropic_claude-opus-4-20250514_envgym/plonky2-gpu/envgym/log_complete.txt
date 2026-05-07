@@ -1,0 +1,350 @@
+=== Docker Execution Log - 20260502_052712 ===
+Dockerfile: envgym/envgym.dockerfile
+Image Name: envgym_test_1777699579
+
+=== Build Log ===
+Build Status: Success
+Build Output:
+
+
+Build Error:
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from envgym.dockerfile
+#1 transferring dockerfile: 4.71kB done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/ubuntu:20.04
+#2 DONE 0.1s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [ 1/26] FROM docker.io/library/ubuntu:20.04@sha256:8feb4d8ca5354def3d8fce243717141ce31e2c428701f6682bd2fafe15388214
+#4 DONE 0.0s
+
+#5 [internal] preparing inline document
+#5 CACHED
+
+#6 [internal] preparing inline document
+#6 CACHED
+
+#7 [internal] preparing inline document
+#7 CACHED
+
+#8 [ 3/26] RUN wget https://github.com/Kitware/CMake/releases/download/v3.28.1/cmake-3.28.1-linux-x86_64.sh     && chmod +x cmake-3.28.1-linux-x86_64.sh     && ./cmake-3.28.1-linux-x86_64.sh --skip-license --prefix=/usr/local     && rm cmake-3.28.1-linux-x86_64.sh
+#8 CACHED
+
+#9 [ 2/26] RUN apt-get update && apt-get install -y     build-essential     gcc     g++     git     curl     wget     pkg-config     libssl-dev     python3     python3-pip     valgrind     llvm     clang     lld     && rm -rf /var/lib/apt/lists/*
+#9 CACHED
+
+#10 [internal] preparing inline document
+#10 CACHED
+
+#11 [internal] preparing inline document
+#11 CACHED
+
+#12 [internal] preparing inline document
+#12 CACHED
+
+#13 [internal] preparing inline document
+#13 CACHED
+
+#14 [internal] preparing inline document
+#14 CACHED
+
+#15 [internal] preparing inline document
+#15 CACHED
+
+#16 [internal] preparing inline document
+#16 CACHED
+
+#17 [internal] preparing inline document
+#17 CACHED
+
+#18 [internal] preparing inline document
+#18 CACHED
+
+#19 [internal] preparing inline document
+#19 CACHED
+
+#20 [internal] preparing inline document
+#20 CACHED
+
+#21 [internal] preparing inline document
+#21 CACHED
+
+#22 [internal] preparing inline document
+#22 CACHED
+
+#23 [ 4/26] RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable     && rustup component add rust-src     && rustup component add rustfmt     && rustup component add clippy
+#23 CACHED
+
+#24 [ 5/26] WORKDIR /workspace
+#24 DONE 0.0s
+
+#25 [ 6/26] RUN git clone https://github.com/0xPolygonZero/plonky2.git /workspace
+#25 0.261 Cloning into '/workspace'...
+#25 DONE 1.7s
+
+#26 [ 7/26] RUN mkdir -p .cargo scripts docker benchmarks
+#26 DONE 0.4s
+
+#27 [ 8/26] COPY <<EOF .env
+#27 DONE 0.0s
+
+#28 [ 9/26] COPY <<EOF .cargo/config.toml
+#28 DONE 0.0s
+
+#29 [10/26] COPY <<EOF .gitignore
+#29 DONE 0.0s
+
+#30 [11/26] COPY <<EOF scripts/setup.sh
+#30 DONE 0.0s
+
+#31 [12/26] COPY <<EOF scripts/verify-deps.sh
+#31 DONE 0.0s
+
+#32 [13/26] COPY <<EOF scripts/benchmark-plonky2.sh
+#32 DONE 0.0s
+
+#33 [14/26] COPY <<EOF scripts/benchmark-evm.sh
+#33 DONE 0.0s
+
+#34 [15/26] COPY <<EOF scripts/benchmark-field.sh
+#34 DONE 0.0s
+
+#35 [16/26] COPY <<EOF scripts/benchmark-insertion.sh
+#35 DONE 0.0s
+
+#36 [17/26] COPY <<EOF scripts/benchmark-starky.sh
+#36 DONE 0.0s
+
+#37 [18/26] COPY <<EOF scripts/benchmark-system-zero.sh
+#37 DONE 0.0s
+
+#38 [19/26] COPY <<EOF scripts/benchmark-u32.sh
+#38 DONE 0.0s
+
+#39 [20/26] COPY <<EOF scripts/benchmark-util.sh
+#39 DONE 0.0s
+
+#40 [21/26] COPY <<EOF scripts/benchmark-waksman.sh
+#40 DONE 0.0s
+
+#41 [22/26] COPY <<EOF docker/docker-compose.yml
+#41 DONE 0.0s
+
+#42 [23/26] COPY <<EOF benchmarks/config.toml
+#42 DONE 0.0s
+
+#43 [24/26] RUN chmod +x scripts/*.sh
+#43 DONE 0.3s
+
+#44 [25/26] RUN if [ -f "Cargo.toml" ]; then         echo "Found workspace Cargo.toml" &&         cargo fetch || echo "cargo fetch failed, continuing";     else         echo "No Cargo.toml found at workspace root";     fi
+#44 0.412 Found workspace Cargo.toml
+#44 0.432 info: syncing channel updates for nightly-x86_64-unknown-linux-gnu
+#44 0.653 info: latest update on 2026-05-02 for version 1.97.0-nightly (67bcaa9c4 2026-05-01)
+#44 0.653 info: downloading 6 components
+#44 13.23 warning: unused config key `build.target-cpu` in `/workspace/.cargo/config.toml`
+#44 13.23     Updating crates.io index
+#44 13.68      Locking 117 packages to latest compatible versions
+#44 13.70       Adding criterion v0.5.1 (available: v0.8.2)
+#44 13.70       Adding env_logger v0.9.3 (available: v0.11.10)
+#44 13.70       Adding getrandom v0.2.17 (available: v0.4.2)
+#44 13.70       Adding hashbrown v0.14.5 (available: v0.17.0)
+#44 13.70       Adding itertools v0.11.0 (available: v0.14.0)
+#44 13.70       Adding keccak-hash v0.8.0 (available: v0.12.0)
+#44 13.71       Adding rand v0.8.6 (available: v0.10.1)
+#44 13.71       Adding rand_chacha v0.3.1 (available: v0.10.0)
+#44 13.71       Adding tynm v0.1.10 (available: v0.2.0)
+#44 13.77  Downloading crates ...
+#44 13.87   Downloaded serde_derive v1.0.228
+#44 13.88   Downloaded unicode-ident v1.0.24
+#44 13.89   Downloaded quote v1.0.45
+#44 13.90   Downloaded heck v0.3.3
+#44 13.90   Downloaded wasm-bindgen-macro v0.2.120
+#44 13.90   Downloaded version_check v0.9.5
+#44 13.90   Downloaded proc-macro-error-attr v1.0.4
+#44 13.90   Downloaded rand_chacha v0.3.1
+#44 13.91   Downloaded is-terminal v0.4.17
+#44 13.91   Downloaded ciborium-io v0.2.2
+#44 13.91   Downloaded clap_lex v1.1.0
+#44 13.91   Downloaded autocfg v1.5.0
+#44 13.91   Downloaded cfg-if v1.0.4
+#44 13.91   Downloaded wasi v0.11.1+wasi-snapshot-preview1
+#44 13.91   Downloaded slab v0.4.12
+#44 13.92   Downloaded oorandom v11.1.5
+#44 13.92   Downloaded num v0.4.3
+#44 13.92   Downloaded cast v0.3.0
+#44 13.92   Downloaded ciborium-ll v0.2.2
+#44 13.92   Downloaded futures-core v0.3.32
+#44 13.92   Downloaded same-file v1.0.6
+#44 13.92   Downloaded const-random v0.1.18
+#44 13.93   Downloaded futures-task v0.3.32
+#44 13.93   Downloaded winapi-util v0.1.11
+#44 13.93   Downloaded criterion-plot v0.5.0
+#44 13.93   Downloaded anes v0.1.6
+#44 13.93   Downloaded wasm-bindgen-shared v0.2.120
+#44 13.94   Downloaded anstyle v1.0.14
+#44 13.94   Downloaded lazy_static v1.5.0
+#44 13.94   Downloaded num-iter v0.1.45
+#44 13.94   Downloaded primitive-types v0.10.1
+#44 13.94   Downloaded windows-link v0.2.1
+#44 13.94   Downloaded itertools v0.10.5
+#44 13.95   Downloaded ciborium v0.2.2
+#44 13.95   Downloaded num_cpus v1.17.0
+#44 13.96   Downloaded itoa v1.0.18
+#44 13.96   Downloaded keccak-hash v0.8.0
+#44 13.96   Downloaded fixed-hash v0.7.0
+#44 13.96   Downloaded clap v4.6.1
+#44 13.97   Downloaded half v2.7.1
+#44 13.98   Downloaded hex v0.4.3
+#44 13.98   Downloaded jemallocator v0.5.4
+#44 13.98   Downloaded crunchy v0.2.4
+#44 13.98   Downloaded rand_core v0.6.4
+#44 13.98   Downloaded either v1.15.0
+#44 13.99   Downloaded tynm v0.1.10
+#44 13.99   Downloaded crossbeam-deque v0.8.6
+#44 13.99   Downloaded unroll v0.1.5
+#44 13.99   Downloaded static_assertions v1.1.0
+#44 13.99   Downloaded num-rational v0.4.2
+#44 13.99   Downloaded zmij v1.0.21
+#44 14.00   Downloaded ppv-lite86 v0.2.21
+#44 14.00   Downloaded rustversion v1.0.22
+#44 14.00   Downloaded bitflags v1.3.2
+#44 14.00   Downloaded const-random-macro v0.1.16
+#44 14.01   Downloaded web-time v1.1.0
+#44 14.01   Downloaded pin-project-lite v0.2.17
+#44 14.01   Downloaded aho-corasick v1.1.4
+#44 14.02   Downloaded structopt-derive v0.4.18
+#44 14.02   Downloaded textwrap v0.11.0
+#44 14.02   Downloaded num-integer v0.1.46
+#44 14.03   Downloaded shlex v1.3.0
+#44 14.03   Downloaded clap_builder v4.6.0
+#44 14.04   Downloaded proc-macro-error v1.0.4
+#44 14.04   Downloaded hermit-abi v0.5.2
+#44 14.04   Downloaded tiny-keccak v2.0.2
+#44 14.04   Downloaded byteorder v1.5.0
+#44 14.05   Downloaded find-msvc-tools v0.1.9
+#44 14.05   Downloaded regex-syntax v0.8.10
+#44 14.06   Downloaded tinytemplate v1.2.1
+#44 14.06   Downloaded uint v0.9.5
+#44 14.06   Downloaded crossbeam-utils v0.8.21
+#44 14.06   Downloaded crossbeam-epoch v0.9.18
+#44 14.07   Downloaded wasm-bindgen v0.2.120
+#44 14.07   Downloaded serde v1.0.228
+#44 14.07   Downloaded serde_cbor v0.11.2
+#44 14.08   Downloaded half v1.8.3
+#44 14.08   Downloaded num-complex v0.4.6
+#44 14.08   Downloaded getrandom v0.2.17
+#44 14.09   Downloaded proc-macro2 v1.0.106
+#44 14.09   Downloaded once_cell v1.21.4
+#44 14.09   Downloaded anyhow v1.0.102
+#44 14.10   Downloaded regex-automata v0.4.14
+#44 14.11   Downloaded structopt v0.3.26
+#44 14.12   Downloaded num-traits v0.2.19
+#44 14.13   Downloaded log v0.4.29
+#44 14.13   Downloaded ahash v0.8.12
+#44 14.13   Downloaded env_logger v0.9.3
+#44 14.14   Downloaded walkdir v2.5.0
+#44 14.14   Downloaded serde_core v1.0.228
+#44 14.14   Downloaded rayon-core v1.13.0
+#44 14.15   Downloaded rand v0.8.6
+#44 14.15   Downloaded minimal-lexical v0.2.1
+#44 14.15   Downloaded js-sys v0.3.97
+#44 14.16   Downloaded cc v1.2.61
+#44 14.16   Downloaded wasm-bindgen-macro-support v0.2.120
+#44 14.17   Downloaded num-bigint v0.4.6
+#44 14.17   Downloaded criterion v0.5.1
+#44 14.18   Downloaded zerocopy-derive v0.8.48
+#44 14.19   Downloaded nom v7.1.3
+#44 14.20   Downloaded memchr v2.8.0
+#44 14.20   Downloaded unicode-segmentation v1.13.2
+#44 14.21   Downloaded itertools v0.11.0
+#44 14.21   Downloaded hashbrown v0.14.5
+#44 14.22   Downloaded bumpalo v3.20.2
+#44 14.22   Downloaded serde_json v1.0.149
+#44 14.23   Downloaded regex v1.12.3
+#44 14.24   Downloaded futures-util v0.3.32
+#44 14.25   Downloaded rayon v1.12.0
+#44 14.27   Downloaded clap v2.34.0
+#44 14.27   Downloaded syn v2.0.117
+#44 14.29   Downloaded syn v1.0.109
+#44 14.30   Downloaded zerocopy v0.8.48
+#44 14.32   Downloaded unicode-width v0.1.14
+#44 14.33   Downloaded libc v0.2.186
+#44 14.38   Downloaded jemalloc-sys v0.5.4+5.3.0-patched
+#44 14.42   Downloaded windows-sys v0.61.2
+#44 DONE 18.9s
+
+#45 [26/26] RUN if [ -f "Cargo.toml" ]; then         echo "Building workspace..." &&         cargo build --workspace --release || echo "Build failed, continuing";     else         echo "Cannot build - no Cargo.toml found";     fi
+#45 0.288 Building workspace...
+#45 0.330 warning: unused config key `build.target-cpu` in `/workspace/.cargo/config.toml`
+#45 0.484    Compiling libc v0.2.186
+#45 0.484    Compiling crunchy v0.2.4
+#45 0.484    Compiling zerocopy v0.8.48
+#45 0.484    Compiling cfg-if v1.0.4
+#45 0.484    Compiling proc-macro2 v1.0.106
+#45 0.484    Compiling autocfg v1.5.0
+#45 0.484    Compiling unicode-ident v1.0.24
+#45 0.484    Compiling quote v1.0.45
+#45 0.484    Compiling crossbeam-utils v0.8.21
+#45 0.484    Compiling tiny-keccak v2.0.2
+#45 0.485    Compiling either v1.15.0
+#45 0.490    Compiling serde_core v1.0.228
+#45 0.494    Compiling rayon-core v1.13.0
+#45 0.496    Compiling static_assertions v1.1.0
+#45 0.502    Compiling serde v1.0.228
+#45 0.504    Compiling syn v1.0.109
+#45 0.507    Compiling once_cell v1.21.4
+#45 0.509    Compiling version_check v0.9.5
+#45 0.517 error: options `-C embed-bitcode=no` and `-C lto` are incompatible
+#45 0.517 
+#45 0.517    Compiling anyhow v1.0.102
+#45 0.519    Compiling byteorder v1.5.0
+#45 0.521    Compiling hex v0.4.3
+#45 0.524    Compiling plonky2_util v1.0.0 (/workspace/util)
+#45 0.524    Compiling web-time v1.1.0
+#45 0.525    Compiling log v0.4.29
+#45 0.527 error: could not compile `libc` (build script) due to 1 previous error
+#45 0.527 warning: build failed, waiting for other jobs to finish...
+#45 0.529 error: could not compile `proc-macro2` (build script) due to 1 previous error
+#45 0.529 error: could not compile `quote` (build script) due to 1 previous error
+#45 0.529 error: could not compile `autocfg` (lib) due to 1 previous error
+#45 0.531 error: could not compile `crunchy` (build script) due to 1 previous error
+#45 0.533 error: could not compile `zerocopy` (build script) due to 1 previous error
+#45 0.533 error: could not compile `crossbeam-utils` (build script) due to 1 previous error
+#45 0.533 error: could not compile `tiny-keccak` (build script) due to 1 previous error
+#45 0.533 error: could not compile `cfg-if` (lib) due to 1 previous error
+#45 0.534 error: could not compile `unicode-ident` (lib) due to 1 previous error
+#45 0.534 error: could not compile `serde_core` (build script) due to 1 previous error
+#45 0.534 error: could not compile `rayon-core` (build script) due to 1 previous error
+#45 0.536 error: could not compile `syn` (build script) due to 1 previous error
+#45 0.536 error: could not compile `serde` (build script) due to 1 previous error
+#45 0.537 error: could not compile `anyhow` (build script) due to 1 previous error
+#45 0.539 error: could not compile `tiny-keccak` (build script) due to 1 previous error
+#45 0.542 error: could not compile `version_check` (lib) due to 1 previous error
+#45 0.544 error: could not compile `once_cell` (lib) due to 1 previous error
+#45 0.754 Build failed, continuing
+#45 DONE 0.8s
+
+#46 exporting to image
+#46 exporting layers
+#46 exporting layers 29.0s done
+#46 writing image sha256:6fec2949fd58645c9daac650d3dafdc9da62a8a054aea52acf53bb6abe1fee16 done
+#46 naming to docker.io/library/envgym_test_1777699579 done
+#46 DONE 29.0s
+
+
+=== Runtime Log ===  
+Runtime Status: Success
+Runtime Output:
+
+
+Runtime Error:
+
+
+=== Execution End ===
+

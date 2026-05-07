@@ -1,0 +1,17 @@
+[
+  "README.md",
+  "setup/tao-docker-compose/README.md",
+  "setup/tao-docker-compose/docker-compose.yml",
+  "setup/tao-docker-compose/config.env",
+  "setup/tao-docker-compose/Dockerfile",
+  "setup/quickstart_launcher.sh",
+  "setup/tao-docker-compose/nginx.conf",
+  "setup/tao-docker-compose/s3-config.json",
+  "setup/tao-docker-compose/secrets.json",
+  "notebooks/tao_launcher_starter_kit/deps/requirements-pip.txt",
+  "setup/tao-docker-compose/run.sh",
+  "setup/tao-docker-compose/load-docker-images.sh",
+  "setup/tao-docker-compose/save-docker-images.sh",
+  "setup/tao-docker-compose/cleanup-seaweed-storage.sh",
+  "setup/tao-docker-compose/nginx_sites/default.conf"
+]

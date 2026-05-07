@@ -1,0 +1,29 @@
+=== Docker Execution Log - 20260502_033016 ===
+Dockerfile: envgym/envgym.dockerfile
+Image Name: envgym_test_1777692613
+
+=== Build Log ===
+Build Status: Failed
+Build Error:
+--------------------
+3 |     # Install system dependencies
+4 | >>> RUN apt-get update && apt-get install -y \
+5 | >>>     build-essential \
+6 | >>>     git \
+7 | >>>     wget \
+8 | >>>     libglib2.0-0 \
+9 | >>>     libsm6 \
+10 | >>>     libxext6 \
+11 | >>>     libxrender-dev \
+12 | >>>     libgomp1 \
+13 | >>>     libgl1-mesa-glx \
+14 | >>>     libgeos-dev \
+15 | >>>     libopencv-dev \
+16 | >>>     python3-opencv \
+
+=== Runtime Log ===  
+Runtime Status: Failed
+Runtime Error:
+
+
+=== Execution End ===

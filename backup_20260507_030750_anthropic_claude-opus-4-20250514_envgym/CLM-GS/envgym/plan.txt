@@ -1,0 +1,293 @@
+=== ADJUSTED ENVIRONMENT SETUP PLAN (CPU-ONLY) ===
+
+1. DOWNLOADS NEEDED:
+   - Anaconda/Miniconda (latest version)
+   - Git (with LFS support for dataset access)
+   - Python 3.10
+   - PyTorch 2.6.0 CPU version
+   - torchvision 0.21.0 CPU version
+   - torchaudio 2.6.0 CPU version
+   - Additional Python packages: tqdm, plyfile, psutil, numba, opencv-python, scipy, matplotlib, pandas, imageio, imageio-ffmpeg, requests, tabulate
+   - Black (Python formatter)
+   - Dataset files (for reference/testing only):
+     - Mip360 Dataset from https://jonbarron.info/mipnerf360/ (direct link: http://storage.googleapis.com/gresearch/refraw360/360_v2.zip)
+     - Rubble 4K Dataset from https://huggingface.co/datasets/HexuZhao/mega_nerf_rubble_colmap/tree/main (rubble-colmap.zip)
+     - MatrixCity BigCity Aerial Dataset from https://huggingface.co/datasets/BoDai/MatrixCity/tree/main/big_city
+
+2. FILES TO CREATE:
+   - `.env` or `environment_vars.sh` in project root:
+     ```
+     export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+     export OMP_NUM_THREADS=8
+     export MKL_NUM_THREADS=8
+     export NUMEXPR_NUM_THREADS=8
+     ```
+   
+   - `test_environment_cpu.py` in project root:
+     ```python
+     # Test script to verify CPU-only environment setup
+     import torch
+     import sys
+     
+     print(f"PyTorch version: {torch.__version__}")
+     print(f"CUDA available: {torch.cuda.is_available()}")
+     print(f"CPU threads: {torch.get_num_threads()}")
+     print(f"Python version: {sys.version}")
+     
+     # Test basic tensor operations
+     try:
+         cpu_tensor = torch.randn(1000, 1000)
+         result = torch.matmul(cpu_tensor, cpu_tensor.T)
+         print("✓ CPU tensor operations working")
+     except Exception as e:
+         print(f"✗ CPU tensor operations failed: {e}")
+     ```
+   
+   - `test_submodules_cpu.py` in project root:
+     ```python
+     # Test script to verify submodule functionality (CPU mode)
+     import os
+     import subprocess
+     
+     submodules = {
+         'cpu-adam': 'git@github.com:TarzanZhao/cpu-adam.git',
+         'fast-tsp': 'git@github.com:TarzanZhao/fast-tsp.git',
+         'simple-knn': 'https://gitlab.inria.fr/simple-knn.git',
+         'gsplat': 'https://github.com/nerfstudio-project/gsplat.git',
+         'clm_kernels': 'git@github.com:nyu-systems/clm_kernels.git'
+     }
+     
+     for name, url in submodules.items():
+         path = f'submodules/{name}'
+         if os.path.exists(path):
+             print(f"✓ {name} exists at {path}")
+             if name in ['gsplat', 'clm_kernels', 'simple-knn']:
+                 print(f"  ⚠️  {name} requires CUDA - will not be functional in CPU-only mode")
+         else:
+             print(f"✗ {name} missing at {path}")
+     ```
+   
+   - `datasets/` directory structure (same as original)
+   
+   - `.gitignore` (already exists, no modifications needed)
+   
+   - `test_cpu_limitations.py` in project root:
+     ```python
+     # Test script to identify CPU-only limitations
+     import torch
+     
+     print("=== CPU-ONLY ENVIRONMENT LIMITATIONS ===")
+     print("\n1. CUDA-dependent features NOT available:")
+     print("   - gsplat rendering kernels (requires CUDA)")
+     print("   - CLM offload mode (requires CUDA DMA)")
+     print("   - GPU acceleration for training")
+     print("   - simple-knn CUDA kernels")
+     print("   - Fast rendering operations")
+     
+     print("\n2. Available features in CPU mode:")
+     print("   - Dataset loading and preprocessing")
+     print("   - Basic tensor operations")
+     print("   - CPU-based Adam optimizer")
+     print("   - Model checkpointing")
+     print("   - Visualization utilities")
+     
+     print("\n3. Performance expectations:")
+     print("   - Training will be significantly slower")
+     print("   - Limited to small-scale experiments")
+     print("   - Memory usage will be higher")
+     ```
+   
+   - `test_cpu_memory.py` in project root:
+     ```python
+     # Test script to verify CPU memory capabilities
+     import psutil
+     import torch
+     
+     # Get system memory info
+     memory = psutil.virtual_memory()
+     print(f"Total RAM: {memory.total / (1024**3):.2f} GB")
+     print(f"Available RAM: {memory.available / (1024**3):.2f} GB")
+     print(f"Used RAM: {memory.used / (1024**3):.2f} GB ({memory.percent}%)")
+     
+     # Test large tensor allocation
+     try:
+         size_gb = 1
+         elements = int(size_gb * 1024**3 / 4)  # float32 = 4 bytes
+         tensor = torch.randn(elements)
+         print(f"\n✓ Successfully allocated {size_gb} GB tensor")
+         del tensor
+     except Exception as e:
+         print(f"\n✗ Failed to allocate {size_gb} GB tensor: {e}")
+     ```
+   
+   - `Dockerfile` for containerized setup:
+     ```dockerfile
+     FROM python:3.10-slim
+     
+     WORKDIR /app
+     
+     # Install system dependencies
+     RUN apt-get update && apt-get install -y \
+         git \
+         git-lfs \
+         build-essential \
+         wget \
+         && rm -rf /var/lib/apt/lists/*
+     
+     # Install Python dependencies
+     COPY requirements_cpu.txt .
+     RUN pip install --no-cache-dir -r requirements_cpu.txt
+     
+     # Copy project files
+     COPY . .
+     
+     # Set environment variables
+     ENV OMP_NUM_THREADS=8
+     ENV MKL_NUM_THREADS=8
+     ENV NUMEXPR_NUM_THREADS=8
+     
+     CMD ["python", "test_environment_cpu.py"]
+     ```
+   
+   - `requirements_cpu.txt`:
+     ```
+     torch==2.6.0
+     torchvision==0.21.0
+     torchaudio==2.6.0
+     tqdm
+     plyfile
+     psutil
+     numba
+     opencv-python
+     scipy
+     matplotlib
+     pandas
+     imageio
+     imageio-ffmpeg
+     requests
+     tabulate
+     black
+     ```
+
+3. NECESSARY TEST CASES IN THE CODEBASE (CPU-COMPATIBLE):
+   - `test_cpu_memory.py`: Test CPU memory allocation and limits
+   - `test_dataset_loading_cpu.py`: Test dataset loading without GPU acceleration
+   - `test_cpu_adam_optimizer.py`: Test CPU-based Adam optimizer functionality
+   - `test_checkpoint_cpu.py`: Test model checkpointing in CPU mode
+   - `test_image_processing_cpu.py`: Test image loading and preprocessing
+   - `test_ply_io.py`: Test PLY file reading/writing
+   - `test_transforms_cpu.py`: Test coordinate transformations on CPU
+   - `test_gaussian_params_cpu.py`: Test Gaussian parameter manipulation
+   - `test_cpu_performance.py`: Benchmark CPU operations
+   - `test_multithreading.py`: Test multi-threaded CPU operations
+
+4. COMPLETE TODO LIST (ADJUSTED FOR CPU-ONLY):
+   1. **System Prerequisites Check**
+      - Check CPU architecture: `uname -m` (verify x86_64)
+      - Check available CPU cores: `nproc`
+      - Verify available CPU RAM: `free -h`
+      - Ensure at least 8GB free RAM for basic operations
+      - Ensure at least 100GB free disk space for datasets
+      - Check Python version compatibility
+
+   2. **Setup Git Access**
+      - Install Git: `apt-get update && apt-get install -y git git-lfs`
+      - Configure Git LFS: `git lfs install`
+      - Note: SSH access not required for public repositories
+
+   3. **Clone Repository**
+      - `git clone https://github.com/nyu-systems/CLM-GS.git`
+      - Note: Some submodules may not be functional without CUDA
+
+   4. **Setup Python Environment**
+      - Install Python 3.10 if not present
+      - Create virtual environment: `python3.10 -m venv clm_gs_cpu`
+      - Activate: `source clm_gs_cpu/bin/activate`
+      - Verify Python version: `python --version`
+
+   5. **Install PyTorch CPU Version**
+      - `pip install torch==2.6.0 torchvision==0.21.0 torchaudio==2.6.0 --index-url https://download.pytorch.org/whl/cpu`
+      - Verify installation: `python -c "import torch; print(torch.__version__)"`
+      - Confirm CPU-only: `python -c "import torch; print('CUDA:', torch.cuda.is_available())"`
+
+   6. **Install Additional Dependencies**
+      - `pip install tqdm plyfile psutil numba opencv-python scipy matplotlib pandas imageio imageio-ffmpeg requests tabulate`
+      - Install formatter: `pip install black`
+      - Verify installations: `pip list`
+
+   7. **Handle CUDA-Dependent Submodules**
+      - Note: gsplat, clm_kernels, and simple-knn require CUDA
+      - Install cpu-adam if it has CPU fallback: `pip install submodules/cpu-adam`
+      - Skip CUDA-only submodules or use CPU alternatives if available
+
+   8. **Setup Environment Variables**
+      - Create environment_vars.sh with CPU-specific settings
+      - Source file: `source environment_vars.sh`
+      - Set thread counts for optimal CPU performance
+
+   9. **Test CPU Environment**
+      - Run: `python test_environment_cpu.py`
+      - Run: `python test_cpu_memory.py`
+      - Run: `python test_cpu_limitations.py`
+
+   10. **Download Sample Dataset (Small)**
+       - For testing, download only one small scene from Mip360
+       - `mkdir -p datasets/mip360`
+       - Download bicycle scene only for CPU testing
+
+   11. **Create Docker Environment (Optional)**
+       - Build Docker image: `docker build -t clm-gs-cpu .`
+       - Run container: `docker run -it -v $(pwd):/app clm-gs-cpu`
+       - This ensures consistent environment across systems
+
+   12. **Test Basic Operations**
+       - Test dataset loading functions
+       - Test PLY file I/O operations
+       - Test image preprocessing
+       - Test CPU-based tensor operations
+
+   13. **Identify Runnable Components**
+       - Dataset preprocessing scripts
+       - Visualization tools
+       - Model analysis utilities
+       - Checkpoint conversion tools
+
+   14. **Document CPU-Only Limitations**
+       - Create README_CPU.md documenting:
+         - Which features are not available
+         - Expected performance limitations
+         - Recommended use cases for CPU-only mode
+         - Alternative workflows for CPU environments
+
+   15. **Setup Development Environment**
+       - Configure IDE for Python development
+       - Set up debugging for CPU-only execution
+       - Configure code formatting with Black
+
+   16. **Test Data Pipeline Components**
+       - Test image loading and caching
+       - Test coordinate transformations
+       - Test camera parameter handling
+       - Verify dataset format compatibility
+
+   17. **Implement CPU Fallbacks**
+       - Create mock implementations for CUDA-only functions
+       - Implement CPU-based alternatives where possible
+       - Add appropriate warnings for missing GPU features
+
+   18. **Performance Optimization for CPU**
+       - Configure optimal thread counts
+       - Enable CPU-specific optimizations in PyTorch
+       - Use efficient data structures for CPU operations
+
+   19. **Memory Management**
+       - Implement memory-efficient data loading
+       - Use batch processing appropriate for CPU RAM
+       - Monitor memory usage during operations
+
+   20. **Final Verification**
+       - Document all working features in CPU mode
+       - Create test suite for CPU-compatible operations
+       - Provide clear guidance on CPU-only usage
+       - Set realistic expectations for performance
+       - Ensure error messages clearly indicate when GPU is required

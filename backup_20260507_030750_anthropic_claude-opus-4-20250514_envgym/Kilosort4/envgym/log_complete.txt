@@ -1,0 +1,86 @@
+=== Docker Execution Log - 20260502_030106 ===
+Dockerfile: envgym/envgym.dockerfile
+Image Name: envgym_test_1777690864
+
+=== Build Log ===
+Build Status: Failed
+Build Output:
+
+
+Build Error:
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from envgym.dockerfile
+#1 transferring dockerfile: 2.04kB done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/ubuntu:22.04
+#2 DONE 0.4s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [ 1/14] FROM docker.io/library/ubuntu:22.04@sha256:962f6cadeae0ea6284001009daa4cc9a8c37e75d1f5191cf0eb83fe565b63dd7
+#4 DONE 0.0s
+
+#5 [ 2/14] RUN apt-get update && apt-get install -y     build-essential     git     wget     curl     xvfb     libgl1-mesa-glx     libglib2.0-0     libsm6     libxext6     libxrender-dev     libgomp1     libglu1-mesa     libxi6     libxkbcommon-x11-0     libxcb-icccm4     libxcb-image0     libxcb-keysyms1     libxcb-randr0     libxcb-render-util0     libxcb-xinerama0     libxcb-xfixes0     pandoc     && rm -rf /var/lib/apt/lists/*
+#5 CACHED
+
+#6 [ 3/14] RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh &&     bash miniconda.sh -b -p /opt/conda &&     rm miniconda.sh
+#6 CACHED
+
+#7 [internal] load build context
+#7 transferring context: 803.94kB 0.1s done
+#7 DONE 0.1s
+
+#8 [ 4/14] RUN /opt/conda/bin/conda create -n py310 python=3.10 pip -y
+#8 1.432 
+#8 1.432 CondaToSNonInteractiveError: Terms of Service have not been accepted for the following channels. Please accept or remove them before proceeding:
+#8 1.432     - https://repo.anaconda.com/pkgs/main
+#8 1.432     - https://repo.anaconda.com/pkgs/r
+#8 1.432 
+#8 1.432 To accept these channels' Terms of Service, run the following commands:
+#8 1.432     conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main
+#8 1.432     conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r
+#8 1.432 
+#8 1.432 For information on safely removing channels from your conda configuration,
+#8 1.432 please see the official documentation:
+#8 1.432 
+#8 1.432     https://www.anaconda.com/docs/tools/working-with-conda/channels
+#8 1.432 
+#8 ERROR: process "/bin/sh -c /opt/conda/bin/conda create -n py310 python=3.10 pip -y" did not complete successfully: exit code: 1
+------
+ > [ 4/14] RUN /opt/conda/bin/conda create -n py310 python=3.10 pip -y:
+1.432 
+1.432 To accept these channels' Terms of Service, run the following commands:
+1.432     conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main
+1.432     conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r
+1.432 
+1.432 For information on safely removing channels from your conda configuration,
+1.432 please see the official documentation:
+1.432 
+1.432     https://www.anaconda.com/docs/tools/working-with-conda/channels
+1.432 
+------
+envgym.dockerfile:37
+--------------------
+  35 |     ENV PATH="/opt/conda/bin:$PATH"
+  36 |     
+  37 | >>> RUN /opt/conda/bin/conda create -n py310 python=3.10 pip -y
+  38 |     
+  39 |     RUN echo "conda activate py310" >> ~/.bashrc
+--------------------
+ERROR: failed to solve: process "/bin/sh -c /opt/conda/bin/conda create -n py310 python=3.10 pip -y" did not complete successfully: exit code: 1
+
+
+=== Runtime Log ===  
+Runtime Status: Failed
+Runtime Output:
+
+
+Runtime Error:
+
+
+=== Execution End ===
+

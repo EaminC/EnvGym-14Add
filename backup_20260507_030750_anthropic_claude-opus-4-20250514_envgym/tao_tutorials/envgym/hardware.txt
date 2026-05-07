@@ -1,0 +1,6 @@
+- Working Directory: /home/cc/EnvGym/data/20260501_233214_anthropic_claude-opus-4-20250514/tao_tutorials
+- Architecture: x86_64, --platform=linux/amd64
+- Base Image: ubuntu:20.04, debian:bullseye, alpine:latest, python:3.x, node:lts
+- GPU: No NVIDIA GPU detected, CPU-only base images recommended
+- Instruction Notes: No GPU-specific instructions needed, standard CPU optimizations apply
+- Docker Version: 28.1.1, BuildKit enabled by default, no --gpus flag support needed

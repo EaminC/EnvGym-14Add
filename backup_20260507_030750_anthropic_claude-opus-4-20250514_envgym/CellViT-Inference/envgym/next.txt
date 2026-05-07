@@ -1,0 +1,20 @@
+current progress
+
+The project has successfully set up a CPU-only Docker environment for CellViT-Inference. The Dockerfile has been created with Ubuntu 22.04 base, Python 3.10, all required system dependencies (libvips, openslide, opencv, etc.), PyTorch CPU-only version (2.2.2), and all Python dependencies. The Docker build and runtime execution completed successfully. The environment is configured for CPU-only operation without GPU support, matching the adjusted plan requirements.
+
+next step
+
+1. Create the project directory structure inside the container by adding RUN commands to the Dockerfile:
+   - Add directory creation for config, scripts, tests, docker, input-data, output-data, notebooks, docs folders
+   - Create placeholder .gitkeep files in empty directories
+   - Set up proper permissions for cache and output directories
+
+2. Copy configuration files and scripts:
+   - Add COPY commands for .gitignore, .pre-commit-config.yaml, example_config.yaml
+   - Copy build.sh, test.sh scripts and make them executable
+   - Copy documentation files (Makefile, make.bat) to docs directory
+
+3. Install pre-commit hooks and verify the development environment:
+   - Add RUN command to install pre-commit hooks
+   - Create pytest.ini and .coveragerc configuration files
+   - Set up requirements files (requirements-dev.txt, requirements-test.txt, requirements-docs.txt)

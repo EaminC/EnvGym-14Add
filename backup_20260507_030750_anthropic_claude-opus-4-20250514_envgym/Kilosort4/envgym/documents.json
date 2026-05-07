@@ -1,0 +1,10 @@
+[
+  "setup.py",
+  "requirements.txt",
+  ".readthedocs.yml",
+  "pytest.ini",
+  "tox.ini",
+  ".gitignore",
+  ".github/workflows/test_and_deploy.yml",
+  "docs/requirements.txt"
+]

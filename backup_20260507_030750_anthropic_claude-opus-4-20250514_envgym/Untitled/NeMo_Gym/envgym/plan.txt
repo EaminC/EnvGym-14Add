@@ -1,0 +1,158 @@
+=== ENVIRONMENT SETUP PLAN (ADJUSTED) ===
+
+1. DOWNLOADS NEEDED:
+   - Python 3.12 or higher (required by pyproject.toml)
+   - Git (for cloning repository)
+   - UV package manager >=0.9.30 (via curl -LsSf https://astral.sh/uv/install.sh | sh)
+   - NeMo Gym repository (via git clone https://github.com/NVIDIA-NeMo/Gym.git)
+   - Ray[default] (automatically installed as dependency - CPU version)
+   - OpenAI Python SDK <=2.7.2 (automatically installed as dependency)
+   - FastAPI, Uvicorn, UVLoop (server infrastructure dependencies)
+   - Hydra-core, OmegaConf (configuration management)
+   - MLflow-skinny (model registry interaction)
+   - All NeMo Gym dependencies (via uv sync --extra dev --group docs)
+   - Optional: Pre-commit hooks, testing tools (pytest, mypy, ruff, coverage)
+
+2. FILES TO CREATE:
+   - env.yaml (API configuration file)
+     - Contains: policy_base_url, policy_api_key, policy_model_name
+     - Location: /home/cc/EnvGym/data/20260501_233214_anthropic_claude-opus-4-20250514/NeMo_Gym
+   - weather_query.jsonl (example dataset)
+     - Contains: JSON lines with responses_create_params
+     - Location: /home/cc/EnvGym/data/20260501_233214_anthropic_claude-opus-4-20250514/NeMo_Gym
+   - .env (optional, for additional environment variables)
+     - Contains: Additional API keys, environment-specific settings
+     - Location: /home/cc/EnvGym/data/20260501_233214_anthropic_claude-opus-4-20250514/NeMo_Gym
+   - .gitignore (if not exists)
+     - Contains: env.yaml, .env, *.jsonl output files, .venv/, cache/, results/, *.egg, build/, dist/
+     - Location: /home/cc/EnvGym/data/20260501_233214_anthropic_claude-opus-4-20250514/NeMo_Gym
+   - pre-commit-config.yaml (optional, for development)
+     - Contains: Pre-commit hooks configuration for code quality
+     - Location: /home/cc/EnvGym/data/20260501_233214_anthropic_claude-opus-4-20250514/NeMo_Gym
+
+3. NECESSARY TEST CASES IN THE CODEBASE:
+   - Server connectivity test (verify ng_run servers start correctly on CPU)
+   - API key validation test (verify OpenAI API key is valid)
+   - Simple agent interaction test (verify responses_api_agents/simple_agent/client.py works)
+   - Rollout collection test (verify ng_collect_rollouts generates output)
+   - Environment verification test (verify specific environments load correctly)
+   - Multi-terminal process test (verify server-client communication)
+   - Error handling test (invalid API key, network failures)
+   - Resource cleanup test (verify servers stop cleanly)
+   - Benchmark test (verify ng_list_benchmarks and ng_prepare_benchmark work)
+   - Dataset management test (verify upload/download to GitLab/HuggingFace)
+   - Configuration dump test (verify ng_dump_config outputs correctly)
+   - Version check test (verify ng_version displays correct version)
+   - Status monitoring test (verify ng_status shows server status)
+   - CPU performance test (verify reasonable performance without GPU acceleration)
+
+4. COMPLETE TODO LIST:
+   - Install system prerequisites
+     * Update package lists: sudo apt update (for Ubuntu 20.04)
+     * Install Python 3.12+ if needed: sudo apt install python3.12 python3.12-venv python3.12-dev
+     * Verify Python 3.12+ is installed: python3.12 --version
+     * Verify Git is installed: git --version
+     * Install build essentials: sudo apt install build-essential curl
+     * Ensure minimum 8GB RAM and 10GB disk space available in /home/cc/EnvGym/data/
+   
+   - Navigate to working directory
+     * Change to working directory: cd /home/cc/EnvGym/data/20260501_233214_anthropic_claude-opus-4-20250514
+     * Verify directory exists: pwd
+   
+   - Clone and setup repository
+     * Clone repository using HTTPS (avoid SSH issues): git clone https://github.com/NVIDIA-NeMo/Gym.git
+     * Change to project directory: cd NeMo_Gym
+     * Create .gitignore if not exists with env.yaml, .env, *.jsonl, .venv/, cache/, results/, *.egg, build/, dist/
+   
+   - Install UV package manager
+     * Run: curl -LsSf https://astral.sh/uv/install.sh | sh
+     * Add UV to PATH: export PATH="$HOME/.local/bin:$PATH"
+     * Add to .bashrc: echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+     * Source bashrc: source ~/.bashrc
+     * Verify UV installation and version: uv --version (ensure >=0.9.30)
+   
+   - Create Python virtual environment
+     * Create venv with Python 3.12: uv venv --python 3.12
+     * Activate venv: source .venv/bin/activate
+     * Verify Python version in venv: python --version
+     * Set UV to use system certificates: export UV_NATIVE_TLS=true
+   
+   - Install NeMo Gym dependencies
+     * Install core dependencies: uv sync
+     * Install with dev tools: uv sync --extra dev
+     * Install documentation tools: uv sync --group docs
+     * Verify installation: python -c "import nemo_gym; print(nemo_gym.__version__)"
+     * List installed packages: ng_pip_list
+     * Note: Installation will use CPU-only versions of ML libraries
+   
+   - Configure API credentials
+     * Obtain OpenAI API key from https://platform.openai.com/api-keys
+     * Create env.yaml with API configuration in /home/cc/EnvGym/data/20260501_233214_anthropic_claude-opus-4-20250514/NeMo_Gym/
+     * Verify file created: cat env.yaml
+     * Test API key validity: python -c "import openai; openai.api_key='your-key'; print('Valid')"
+   
+   - Test CLI tools availability
+     * Verify ng_help works: ng_help
+     * Check version: ng_version
+     * List available benchmarks: ng_list_benchmarks
+     * Check configuration: ng_dump_config
+   
+   - Test server startup (CPU mode)
+     * Set Ray to use CPU only: export RAY_DISABLE_DOCKER_CPU_WARNING=1
+     * Start servers in terminal 1: ng_run "+config_paths=[resources_servers/example_single_tool_call/configs/example_single_tool_call.yaml,responses_api_models/openai_model/configs/openai_model.yaml]"
+     * Wait for "Server ready" messages (may take longer on CPU)
+     * Check server status in terminal 2: ng_status
+     * Keep terminal 1 running
+   
+   - Test agent interaction
+     * Open terminal 2, navigate to project: cd /home/cc/EnvGym/data/20260501_233214_anthropic_claude-opus-4-20250514/NeMo_Gym
+     * Activate venv: source .venv/bin/activate
+     * Run simple agent: python responses_api_agents/simple_agent/client.py
+     * Verify agent responds correctly
+     * Check for errors in terminal 1
+   
+   - Test rollout collection
+     * Create test dataset: echo '{"responses_create_params":{"input":[{"role":"developer","content":"You are a helpful assistant."},{"role":"user","content":"What is the weather in Seattle?"}]}}' > weather_query.jsonl
+     * Run rollout collection: ng_collect_rollouts +agent_name=example_single_tool_call_simple_agent +input_jsonl_fpath=weather_query.jsonl +output_jsonl_fpath=weather_rollouts.jsonl
+     * Verify output file created: ls -la weather_rollouts.jsonl
+     * Validate JSON output: cat weather_rollouts.jsonl | python -m json.tool
+   
+   - Setup development tools (optional)
+     * Install pre-commit: pre-commit install
+     * Run linting: ruff check .
+     * Run formatting: ruff format .
+     * Run type checking: mypy nemo_gym
+     * Run tests: pytest tests/ -v
+     * Generate coverage report: coverage run -m pytest && coverage report
+   
+   - Test advanced features (CPU optimized)
+     * Set smaller batch sizes for CPU: export BATCH_SIZE=1
+     * Test benchmark preparation: ng_prepare_benchmark benchmark_name=example_benchmark
+     * Test prompt materialization: ng_materialize_prompts +config=example_config
+     * Test reward profiling: ng_reward_profile +config=example_config
+     * Test E2E rollout collection: ng_e2e_collect_rollouts +config=example_config
+   
+   - Cleanup and verification
+     * Stop servers in terminal 1: Ctrl+C
+     * Verify all processes stopped: ps aux | grep ng_run
+     * Remove test files: rm weather_query.jsonl weather_rollouts.jsonl
+     * Clean cache if needed: rm -rf cache/
+     * Check disk usage: df -h /home/cc/EnvGym/data/
+   
+   - Setup additional environments (optional)
+     * Choose CPU-friendly environments from available list
+     * Review environment README in resources_servers/[environment_name]/
+     * Install environment-specific dependencies if needed
+     * Test environment with example data in data/example.jsonl
+     * Run environment tests: ng_test +server_type=[environment_name]
+   
+   - Configure for production use (CPU optimized)
+     * Set up proper logging directory in /home/cc/EnvGym/data/20260501_233214_anthropic_claude-opus-4-20250514/NeMo_Gym/logs/
+     * Configure Ray for CPU-only operation: ray.init(num_gpus=0)
+     * Set CPU thread limits: export OMP_NUM_THREADS=4
+     * Create systemd service files for auto-start on Ubuntu 20.04
+     * Set up backup for generated rollout data
+     * Configure MLflow for model registry access
+     * Set up WandB for metrics tracking (CPU metrics only)
+     * Configure dataset upload/download for GitLab/HuggingFace
+     * Monitor CPU and memory usage during runs: htop or top

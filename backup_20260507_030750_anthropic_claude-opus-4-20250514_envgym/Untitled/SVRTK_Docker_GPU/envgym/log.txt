@@ -1,0 +1,29 @@
+=== Docker Execution Log - 20260502_063905 ===
+Dockerfile: envgym/envgym.dockerfile
+Image Name: envgym_test_1777703943
+
+=== Build Log ===
+Build Status: Failed
+Build Error:
+--------------------
+79 |     # Configure MIRTK
+80 | >>> RUN cd MIRTK && \
+81 | >>>     mkdir -p build && \
+82 | >>>     cd build && \
+83 | >>>     cmake .. \
+84 | >>>         -DCMAKE_BUILD_TYPE=Release \
+85 | >>>         -DCMAKE_INSTALL_PREFIX=/usr/local \
+86 | >>>         -DWITH_TBB=ON \
+87 | >>>         -DBUILD_TESTING=OFF \
+88 | >>>         -DBUILD_DOCUMENTATION=OFF \
+89 | >>>         -DBUILD_EXAMPLES=OFF \
+90 | >>>         -DCMAKE_CXX_STANDARD=14 \
+91 | >>>         -DCMAKE_VERBOSE_MAKEFILE=ON \
+92 | >>>         -DWITH_VTK=OFF \
+
+=== Runtime Log ===  
+Runtime Status: Failed
+Runtime Error:
+
+
+=== Execution End ===

@@ -1,0 +1,15 @@
+{
+  "timestamp": "20260502_025055",
+  "dockerfile_path": "envgym/envgym.dockerfile",
+  "image_name": "envgym_test_1777690254",
+  "build": {
+    "success": false,
+    "stdout": "",
+    "stderr": "#0 building with \"default\" instance using docker driver\n\n#1 [internal] load build definition from envgym.dockerfile\n#1 transferring dockerfile: 6.63kB done\n#1 DONE 0.0s\nenvgym.dockerfile:97\n--------------------\n  95 |     \n  96 |     RUN cat > pyproject.toml << 'EOF'\n  97 | >>> [build-system]\n  98 |     requires = [\"setuptools>=45\", \"wheel\", \"setuptools_scm[toml]>=6.2\"]\n  99 |     build-backend = \"setuptools.build_meta\"\n--------------------\nERROR: failed to solve: dockerfile parse error on line 97: unknown instruction: [build-system]\n"
+  },
+  "run": {
+    "success": false,
+    "stdout": "",
+    "stderr": ""
+  }
+}

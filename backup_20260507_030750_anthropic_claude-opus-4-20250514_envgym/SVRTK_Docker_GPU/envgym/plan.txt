@@ -1,0 +1,351 @@
+=== ADJUSTED ENVIRONMENT SETUP PLAN (CPU-ONLY) ===
+
+1. DOWNLOADS NEEDED:
+   - Git (latest version)
+   - wget (latest version)
+   - curl (latest version)
+   - Docker CE (Community Edition, latest version)
+   - ~~NVIDIA Container Toolkit (nvidia-docker2)~~ **[REMOVED - No GPU]**
+   - ~~CUDA v11.1~~ **[REMOVED - No GPU]**
+   - ~~cuDNN 8~~ **[REMOVED - No GPU]**
+   - ~~NVIDIA GPU drivers~~ **[REMOVED - No GPU]**
+   - PowerShell (latest version for Windows)
+   - OpenSSH Server (for Ubuntu host)
+   - OpenSSH Client (for Windows VM)
+   - SSH key generation tools (ssh-keygen)
+   - SVRTK/svrtk-docker-gpu repository (main repository)
+   - Segmentation_FetalMRI repository (submodule from https://github.com/SVRTK/Segmentation_FetalMRI.git, dev branch)
+   - MIRTK repository (submodule from https://github.com/SVRTK/MIRTK.git)
+   - SVRTK repository (submodule from https://github.com/SVRTK/SVRTK)
+   - Pre-trained neural network weights (~500MB):
+     - checkpoints-brain-loc-2-labels/latest.ckpt
+     - checkpoints-brain-loc-2-labels-cropped/latest.ckpt
+     - checkpoints-brain-reo-5-labels/latest.ckpt
+     - checkpoints-brain-reo-5-labels-raw-stacks/latest.ckpt
+   - Reference templates for reorientation (from Segmentation_FetalMRI submodule)
+   - Docker base image: **pytorch/pytorch:1.9.0-cpu** **[CHANGED - CPU-only version]**
+   - Pre-built Docker image: **fetalsvrtk/svrtk:pride-svr-docker-cpu-0.2.0** **[CHANGED - CPU version]**
+   - dcm2niix (included in Docker image)
+   - DICOMDIR creation tools (included in Docker image)
+   - Python packages for CNN processing (included in Docker image)
+   - Brain reference atlas templates (brain-ref-atlas-2021)
+
+2. FILES TO CREATE:
+   - `/home/cc/EnvGym/data/20260501_233214_anthropic_claude-opus-4-20250514/SVRTK_Docker_GPU/recon/` directory **[UPDATED PATH]**
+   - `/home/cc/EnvGym/data/20260501_233214_anthropic_claude-opus-4-20250514/SVRTK_Docker_GPU/recon/pride/` directory **[UPDATED PATH]**
+   - `/home/cc/EnvGym/data/20260501_233214_anthropic_claude-opus-4-20250514/SVRTK_Docker_GPU/recon/pride/SVR/` directory **[UPDATED PATH]**
+   - `/home/cc/EnvGym/data/20260501_233214_anthropic_claude-opus-4-20250514/SVRTK_Docker_GPU/recon/pride/TempOutputSeries/` directory **[UPDATED PATH]**
+   - `/home/cc/EnvGym/data/20260501_233214_anthropic_claude-opus-4-20250514/SVRTK_Docker_GPU/recon/pride/TempOutputSeries/DICOM/` directory **[UPDATED PATH]**
+   - `/home/cc/EnvGym/data/20260501_233214_anthropic_claude-opus-4-20250514/SVRTK_Docker_GPU/recon/pride/TempInputSeries/` directory **[UPDATED PATH]**
+   - `/home/cc/EnvGym/data/20260501_233214_anthropic_claude-opus-4-20250514/SVRTK_Docker_GPU/recon/pride/TempInputSeries/DICOM/` directory **[UPDATED PATH]**
+   - `/home/cc/EnvGym/data/20260501_233214_anthropic_claude-opus-4-20250514/SVRTK_Docker_GPU/recon/pride/logs/` directory **[UPDATED PATH]**
+   - `/home/cc/EnvGym/data/20260501_233214_anthropic_claude-opus-4-20250514/SVRTK_Docker_GPU/recon/svr_processing_files/` directory **[UPDATED PATH]**
+   - All subdirectories under svr_processing_files with updated base path
+   - `/home/cc/EnvGym/data/20260501_233214_anthropic_claude-opus-4-20250514/SVRTK_Docker_GPU/MIRTK/` directory **[UPDATED PATH]**
+   - `/home/cc/EnvGym/data/20260501_233214_anthropic_claude-opus-4-20250514/SVRTK_Docker_GPU/SVRTK/` directory **[UPDATED PATH]**
+   - `/home/cc/EnvGym/data/20260501_233214_anthropic_claude-opus-4-20250514/SVRTK_Docker_GPU/Segmentation_FetalMRI/` directory **[UPDATED PATH]**
+   - All Segmentation_FetalMRI subdirectories with updated base path
+   - `/home/cc/EnvGym/data/20260501_233214_anthropic_claude-opus-4-20250514/SVRTK_Docker_GPU/scripts/` directory **[UPDATED PATH]**
+   - All script files with updated base path
+   - `.gitmodules` file (from repository)
+   - `.gitignore` file (from repository)
+   - `/home/cc/EnvGym/data/20260501_233214_anthropic_claude-opus-4-20250514/SVRTK_Docker_GPU/recon/pride/SVR/StartSVR.bat` **[CPU-only version]**
+   - ~~`/recon/pride/SVR/StartSVR_GPU.bat`~~ **[REMOVED - No GPU]**
+   - `/home/cc/pridesvr03-vm/` directory (VM shared directory on host) **[UPDATED PATH]**
+   - All VM-related directories with updated base path
+   - Test NIFTI files in updated recon directory
+   - Test DICOM files in updated pride directory structure
+   - `.dockerignore` file
+   - `docker-compose.yml` for easier container management (optional)
+   - `Dockerfile.cpu` for CPU-only build **[NEW - CPU-specific Dockerfile]**
+   - All output and intermediate files with updated base paths
+
+3. NECESSARY TEST CASES IN THE CODEBASE:
+   - Test Git submodule initialization and updates
+   - Test correct submodule branches (Segmentation_FetalMRI on dev branch)
+   - Test submodule directory structure integrity
+   - Test .gitignore functionality (verify .idea directory is ignored)
+   - Test Docker container basic functionality (MIRTK command availability)
+   - Test dcm2niix installation and functionality
+   - Test MIRTK/SVRTK build completion from submodules
+   - Test Segmentation_FetalMRI module integration
+   - Test PyTorch installation **without CUDA support** **[CHANGED]**
+   - Test Python dependencies from requirements.txt
+   - Test CPU-based reconstruction with sample NIFTI files
+   - ~~Test GPU-accelerated reconstruction~~ **[REMOVED - No GPU]**
+   - ~~Test NVIDIA GPU detection~~ **[REMOVED - No GPU]**
+   - ~~Test nvidia-docker2 runtime~~ **[REMOVED - No GPU]**
+   - ~~Test --gpus all flag~~ **[REMOVED - No GPU]**
+   - Test volume mounting between host and container
+   - Test output file generation (SVR-output.nii.gz)
+   - Test multi-stack input processing
+   - Test segmentation model loading and inference **in CPU mode only** **[CHANGED]**
+   - Test reorientation template usage from submodule
+   - Test script permissions and executability
+   - Test error handling for missing input files
+   - Test memory usage with minimum hardware requirements **(verify 16GB+ RAM available)** **[EMPHASIZED]**
+   - ~~Test GPU memory usage~~ **[REMOVED - No GPU]**
+   - Test reconstruction quality validation
+   - Test DICOM to NIFTI conversion with dcm2niix
+   - Test NIFTI to DICOM conversion with svr_nii2pridedcm.py
+   - Test DICOMDIR creation with svr_make_dicomdir.bash
+   - Test Windows batch script execution (StartSVR.bat for CPU only) **[CHANGED]**
+   - ~~Test Windows batch script execution (StartSVR_GPU.bat)~~ **[REMOVED - No GPU]**
+   - Test Linux bash script execution (StartSVR.bash)
+   - Test Docker integration from batch scripts **without GPU flags** **[CHANGED]**
+   - Test PowerShell script execution (reconDirSave.bat, reconDirClean.bat)
+   - Test Bash script execution (reconDirSave.bash, reconDirClean.bash)
+   - Test PRIDE TempOutputSeries directory cleanup
+   - Test log file generation in updated logs directory
+   - Test path conversions with new working directory
+   - Test Linux home directory path resolution with $USER variable
+   - Test cross-platform file permissions
+   - Test scp_recon_dir.bash for network file transfer (KCL specific)
+   - Test hostname-based conditional execution
+   - ~~Test GPU acceleration performance~~ **[REMOVED - No GPU]**
+   - ~~Test parallel GPU processing~~ **[REMOVED - No GPU]**
+   - ~~Test GPU error handling~~ **[REMOVED - No GPU]**
+   - Test automated stack selection based on similarity metrics
+   - Test package splitting functionality for severe motion cases
+   - Test CNN-based global brain localization **in CPU mode** **[CHANGED]**
+   - Test cropped refinement processing
+   - Test landmark-based reorientation (4 labels)
+   - Test brain center alignment for severe motion cases
+   - Test average mask and volume generation
+   - Test SVR reconstruction with default thickness parameter
+   - Test reconstruction resolution parameter (0.85mm)
+   - Test error.txt file generation on failures
+   - Test processing directory cleanup between runs
+   - Test CNN mode parameter **(-1 for CPU only)** **[CHANGED]**
+   - Test motion correction mode parameter (-1 for minor, 1 for severe)
+   - Test slice thickness detection from log_slice_thickness.txt
+   - Test fallback to default thickness (2.5mm)
+   - Test all MIRTK commands
+   - Test Python CNN execution with PYTHONIOENCODING=utf-8
+   - Test reference template files existence
+   - Test final output square FOV padding
+   - Test intermediate file generation and cleanup
+   - Test multiple .nii file detection and processing
+   - Test single stack error handling
+   - Test connected component extraction
+   - Test dilation iterations for mask processing
+   - Test structural reconstruction with 3 iterations
+   - Test BSpline interpolation for final reorientation
+   - Test Docker container permission changes
+   - Test uid/gid mapping between host and container
+   - Test directory permission setting (1775 mode)
+   - Test complete Linux-based PRIDE workflow **CPU-only** **[CHANGED]**
+   - Test log redirection to appropriate log files
+   - Test sequential execution of all PRIDE workflow steps
+   - Test TempOutputSeries cleanup
+   - Test DICOMDIR removal
+   - Test reconDirSave.bash functionality
+   - Test reconDirClean.bash functionality
+   - Test network copy to pnraw01 (if applicable)
+   - Test SSH connectivity between Windows VM and Ubuntu host
+   - Test SSH key-based authentication
+   - Test SSH command execution from Windows batch script
+   - Test StartSVR_WinVM.bat execution from Windows VM
+   - Test file copy via SSH
+   - Test remote StartSVR.bash execution via SSH
+   - Test VM directory cleanup via SSH
+   - Test variable substitution in StartSVR_WinVM.bat
+   - Test SSH error handling and timeout scenarios
+   - Test concurrent SSH sessions
+   - Test SSH connection stability during long-running SVR processes
+   - Test pridesvr03-vm directory structure on host
+   - Test file transfer integrity
+   - Test SSH batch command execution
+   - Test SSH path resolution
+   - Test logging and error reporting
+   - Test data integrity
+   - Test SSH connection with different user permissions
+   - Test SSH key permissions
+   - Test Windows OpenSSH client compatibility
+   - Test SSH config file settings
+   - Test batch script ECHO output
+   - Test cleanup of DICOM and DICOMDIR files
+   - **Test CPU utilization during reconstruction** **[NEW]**
+   - **Test memory usage patterns during CNN inference** **[NEW]**
+   - **Test reconstruction time expectations for CPU-only mode** **[NEW]**
+
+4. COMPLETE TODO LIST:
+   - Verify system requirements (CPU cores ≥6, RAM ≥16GB, disk space ≥30GB) **[GPU requirement removed]**
+   - For Linux users: Ensure Ubuntu 20.04 or compatible distribution
+   - Ensure PowerShell is installed and updated on Windows
+   - ~~Install NVIDIA GPU drivers~~ **[REMOVED - No GPU]**
+   - ~~Verify GPU is accessible~~ **[REMOVED - No GPU]**
+   - Install Git: `sudo apt-get update && sudo apt-get install git`
+   - Install wget and curl: `sudo apt-get install wget curl`
+   - Install OpenSSH Server on Ubuntu host:
+     ```
+     sudo apt-get install openssh-server
+     sudo systemctl enable ssh
+     sudo systemctl start ssh
+     ```
+   - Configure SSH server to allow key-based authentication
+   - Install Docker CE:
+     ```
+     sudo apt-get remove docker docker-engine docker.io containerd runc
+     sudo apt-get update
+     sudo apt-get install ca-certificates curl gnupg lsb-release
+     sudo mkdir -p /etc/apt/keyrings
+     curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+     echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+     sudo apt-get update
+     sudo apt-get install docker-ce docker-ce-cli containerd.io docker-compose-plugin
+     ```
+   - Add user to docker group: `sudo usermod -aG docker $USER && newgrp docker`
+   - Verify Docker installation: `docker --version`
+   - ~~Install NVIDIA Container Toolkit~~ **[REMOVED - No GPU]**
+   - ~~Test GPU access in Docker~~ **[REMOVED - No GPU]**
+   - ~~Install CUDA toolkit~~ **[REMOVED - No GPU]**
+   - ~~Install cuDNN~~ **[REMOVED - No GPU]**
+   - Create VM shared directory structure on Ubuntu host:
+     ```
+     mkdir -p ~/pridesvr03-vm/TempInputSeries/DICOM
+     mkdir -p ~/pridesvr03-vm/TempOutputSeries
+     chmod -R 755 ~/pridesvr03-vm
+     ```
+   - Generate SSH keys on Ubuntu host
+   - Set correct SSH key permissions
+   - Add host's public key to authorized_keys
+   - For Windows VM users: Install OpenSSH Client
+   - For Windows VM users: Create .ssh directory
+   - Copy private key from Ubuntu host to Windows VM
+   - Set Windows SSH key permissions
+   - Create SSH config file on Windows VM
+   - Test SSH connection from Windows VM to Ubuntu host
+   - Clone repository to working directory:
+     ```
+     cd /home/cc/EnvGym/data/20260501_233214_anthropic_claude-opus-4-20250514
+     git clone --recurse-submodules https://github.com/SVRTK/svrtk-docker-gpu.git SVRTK_Docker_GPU
+     ```
+   - Navigate to project directory: `cd /home/cc/EnvGym/data/20260501_233214_anthropic_claude-opus-4-20250514/SVRTK_Docker_GPU`
+   - Verify .gitmodules file exists
+   - Verify .gitignore file exists
+   - Verify all submodules are properly initialized
+   - If submodules are not initialized, run:
+     ```
+     git submodule update --init --recursive
+     ```
+   - Ensure Segmentation_FetalMRI is on dev branch
+   - Verify submodule directories exist
+   - Verify reference templates exist
+   - Create required directories with full paths:
+     ```
+     mkdir -p /home/cc/EnvGym/data/20260501_233214_anthropic_claude-opus-4-20250514/SVRTK_Docker_GPU/recon
+     mkdir -p /home/cc/EnvGym/data/20260501_233214_anthropic_claude-opus-4-20250514/SVRTK_Docker_GPU/recon/pride/SVR
+     mkdir -p /home/cc/EnvGym/data/20260501_233214_anthropic_claude-opus-4-20250514/SVRTK_Docker_GPU/recon/pride/TempOutputSeries/DICOM
+     mkdir -p /home/cc/EnvGym/data/20260501_233214_anthropic_claude-opus-4-20250514/SVRTK_Docker_GPU/recon/pride/TempInputSeries/DICOM
+     mkdir -p /home/cc/EnvGym/data/20260501_233214_anthropic_claude-opus-4-20250514/SVRTK_Docker_GPU/recon/pride/logs
+     mkdir -p /home/cc/EnvGym/data/20260501_233214_anthropic_claude-opus-4-20250514/SVRTK_Docker_GPU/Segmentation_FetalMRI/trained-models/checkpoints-brain-loc-labels
+     mkdir -p /home/cc/EnvGym/data/20260501_233214_anthropic_claude-opus-4-20250514/SVRTK_Docker_GPU/Segmentation_FetalMRI/trained-models/checkpoints-brain-loc-labels-cropped
+     mkdir -p /home/cc/EnvGym/data/20260501_233214_anthropic_claude-opus-4-20250514/SVRTK_Docker_GPU/Segmentation_FetalMRI/trained-models/checkpoints-brain-reorientation
+     mkdir -p /home/cc/EnvGym/data/20260501_233214_anthropic_claude-opus-4-20250514/SVRTK_Docker_GPU/Segmentation_FetalMRI/trained-models/checkpoints-brain-reorientation-stacks
+     ```
+   - Copy StartSVR_WinVM.bat to appropriate location on Windows VM
+   - Update StartSVR_WinVM.bat variables
+   - Download pre-trained weights to correct paths
+   - Verify downloads
+   - Verify reference templates exist
+   - Verify brain atlas files exist
+   - Verify scripts exist and are executable
+   - Make bash scripts executable
+   - Create reconDirSave.bash script with updated paths
+   - Create reconDirClean.bash script with updated paths
+   - Create scp_recon_dir.bash for network transfer
+   - Create StartSVR.bat file for CPU-only processing
+   - ~~Create StartSVR_GPU.bat~~ **[REMOVED - No GPU]**
+   - Create reconDirSave.bat and reconDirClean.bat PowerShell scripts
+   - **Create CPU-specific Dockerfile:**
+     ```
+     cat > Dockerfile.cpu << 'EOF'
+     FROM pytorch/pytorch:1.9.0-cpu
+     # Add CPU-specific build instructions
+     EOF
+     ```
+   - Pull pre-built Docker image: `docker pull fetalsvrtk/svrtk:pride-svr-docker-cpu-0.2.0` **[CHANGED to CPU version]**
+   - Alternative: Build Docker image from CPU Dockerfile:
+     ```
+     docker build -f Dockerfile.cpu -t svrtk-cpu:latest .
+     ```
+   - Test Docker container basic functionality
+   - Inside container, verify installations:
+     - MIRTK: `mirtk`
+     - dcm2niix: `dcm2niix -h`
+     - PyTorch **without CUDA**: `python -c "import torch; print(torch.cuda.is_available())"` **[Should return False]**
+     - Exit container: `exit`
+   - ~~Test GPU availability~~ **[REMOVED - No GPU]**
+   - Place test NIFTI files in recon directory
+   - Create optional log_slice_thickness.txt
+   - Place test DICOM files in PRIDE directory
+   - Test CPU reconstruction with minor motion:
+     ```
+     docker run -v "/home/cc/EnvGym/data/20260501_233214_anthropic_claude-opus-4-20250514/SVRTK_Docker_GPU/recon":/home/recon fetalsvrtk/svrtk:pride-svr-docker-cpu-0.2.0 /home/scripts/docker-recon-brain-auto.bash /home/recon -1 -1
+     ```
+   - Test CPU reconstruction with severe motion:
+     ```
+     docker run -v "/home/cc/EnvGym/data/20260501_233214_anthropic_claude-opus-4-20250514/SVRTK_Docker_GPU/recon":/home/recon fetalsvrtk/svrtk:pride-svr-docker-cpu-0.2.0 /home/scripts/docker-recon-brain-auto.bash /home/recon -1 1
+     ```
+   - ~~Test GPU reconstruction~~ **[REMOVED - No GPU]**
+   - Test StartSVR.bash script execution with updated paths
+   - Test StartSVR_WinVM.bat execution from Windows VM
+   - ~~Monitor GPU usage~~ **[REMOVED - No GPU]**
+   - **Monitor CPU and memory usage during reconstruction:** `htop` or `top`
+   - Verify output files with full paths
+   - Verify processing directory creation
+   - Test error handling
+   - Test DICOM to NIFTI conversion with updated paths
+   - Test NIFTI to DICOM conversion with updated paths
+   - Test DICOMDIR creation with updated paths
+   - Test StartSVR.bat (CPU-only) execution
+   - ~~Test StartSVR_GPU.bat~~ **[REMOVED - No GPU]**
+   - Verify log files are created
+   - Test container permission changes with correct uid/gid
+   - Verify file ownership after permission changes
+   - Test TempOutputSeries cleanup with updated paths
+   - Test VM TempInputSeries cleanup via SSH
+   - Test complete PRIDE workflow **CPU-only** **[CHANGED]**
+   - Test complete VM-to-Host-to-VM workflow
+   - Verify DICOMDIR file creation
+   - Test SSH command chaining
+   - Test concurrent VM connections
+   - Document network configuration
+   - **Document expected CPU-only reconstruction times** **[NEW]**
+   - Test reconstruction quality
+   - Test file permissions
+   - Clean up test outputs with updated paths
+   - Create docker-compose.yml for easier management
+   - Document any issues encountered
+   - Create backup of trained model weights
+   - Set up Git hooks (optional)
+   - ~~Configure Windows Defender exclusions~~ **[Not applicable for Linux host]**
+   - Test complete Linux-based PRIDE workflow
+   - Verify $USER variable expansion
+   - Test backup and cleanup scripts
+   - Document recommended stack count
+   - Test reconstruction with varying slice thickness
+   - **Monitor CPU core utilization** **[NEW]**
+   - Test package splitting functionality
+   - Verify CNN model checkpoints
+   - **Create documentation for CPU-only performance expectations** **[NEW]**
+   - **Test memory limitations with large datasets** **[NEW]**
+   - Verify all log redirections
+   - Test sequential execution reliability
+   - Document backup and cleanup strategies
+   - Create VM workflow documentation
+   - Test SSH timeout handling
+   - Verify ECHO statements
+   - Document firewall rules
+   - Test batch script error handling
+   - Verify directory permissions
+   - Create backup procedures
+   - Test recovery procedures
+   - Document SSH key rotation
+   - Test performance impact of SSH transfers
+   - Create monitoring scripts
+   - Document troubleshooting steps
+   - **Verify sufficient RAM for CPU-based CNN processing** **[NEW]**
+   - **Test swap space usage during peak memory consumption** **[NEW]**
+   - **Document CPU-only limitations and workarounds** **[NEW]**
